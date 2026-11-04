@@ -31,12 +31,23 @@
       "dest": "api/index.py"
     },
     {
+      "src": "/open-peeps-sheet.png",
+      "dest": "/open-peeps-sheet.png"
+    },
+    {
+      "src": "/open-peeps-cdn.png",
+      "dest": "/open-peeps-cdn.png"
+    },
+    {
       "src": "/faculty_photos/(.*)",
       "dest": "/faculty_photos/$1"
     },
     {
       "src": "/assets/(.*)",
       "dest": "/assets/$1"
+    },
+    {
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
