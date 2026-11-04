@@ -437,9 +437,9 @@ export const ClassroomSeatingPage: React.FC = () => {
       </div>
 
       {/* Notice Banner */}
-      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-900 text-xs flex items-center justify-between">
+      <div className="p-3 bg-zinc-100 border border-zinc-300 rounded-lg text-zinc-900 text-xs flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+          <CheckCircle2 className="w-4 h-4 text-black shrink-0" />
           <span>
             <strong>Classroom Mode Rule:</strong> Same-batch peer adjacency is allowed by default for regular classroom sessions. Click any seat to move/swap students. Click the user icon to mark absence.
           </span>

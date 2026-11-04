@@ -138,12 +138,12 @@ export const ExamSeatingPage: React.FC = () => {
   });
 
   const batchColors: Record<string, { bg: string; border: string; text: string; badge: string }> = {
-    'AIML-S3A': { bg: 'bg-blue-50', border: 'border-blue-300', text: 'text-blue-900', badge: 'bg-blue-600 text-white' },
-    'CSE-GEN-S3B': { bg: 'bg-indigo-50', border: 'border-indigo-300', text: 'text-indigo-900', badge: 'bg-indigo-600 text-white' },
-    'AIDE-S3A': { bg: 'bg-emerald-50', border: 'border-emerald-300', text: 'text-emerald-900', badge: 'bg-emerald-600 text-white' },
-    'CSBS-S5A': { bg: 'bg-purple-50', border: 'border-purple-300', text: 'text-purple-900', badge: 'bg-purple-600 text-white' },
-    'CTIS-S5A': { bg: 'bg-amber-50', border: 'border-amber-300', text: 'text-amber-900', badge: 'bg-amber-600 text-white' },
-    'CyberSecurity-S5A': { bg: 'bg-rose-50', border: 'border-rose-300', text: 'text-rose-900', badge: 'bg-rose-600 text-white' },
+    'AIML-S3A': { bg: 'bg-zinc-950', border: 'border-zinc-950', text: 'text-white', badge: 'bg-white text-black font-bold' },
+    'CSE-GEN-S3B': { bg: 'bg-zinc-100', border: 'border-zinc-300', text: 'text-zinc-950', badge: 'bg-black text-white font-bold' },
+    'AIDE-S3A': { bg: 'bg-zinc-200', border: 'border-zinc-400', text: 'text-zinc-950', badge: 'bg-zinc-800 text-white font-bold' },
+    'CSBS-S5A': { bg: 'bg-zinc-800', border: 'border-zinc-800', text: 'text-white', badge: 'bg-zinc-200 text-black font-bold' },
+    'CTIS-S5A': { bg: 'bg-zinc-50', border: 'border-zinc-300', text: 'text-zinc-900', badge: 'bg-zinc-700 text-white font-bold' },
+    'CyberSecurity-S5A': { bg: 'bg-zinc-900', border: 'border-zinc-900', text: 'text-white', badge: 'bg-zinc-100 text-black font-bold' },
   };
 
   // Initial checkerboard allocation generator
@@ -942,12 +942,12 @@ export const ExamSeatingPage: React.FC = () => {
 
       {/* Banner Notifications */}
       {statusMessage && (
-        <div className="p-3 bg-blue-50 border border-blue-200 text-blue-800 text-xs rounded-lg flex items-center justify-between animate-fade-in">
+        <div className="p-3 bg-zinc-100 border border-zinc-300 text-zinc-900 text-xs rounded-lg flex items-center justify-between animate-fade-in">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-black shrink-0" />
             <span>{statusMessage}</span>
           </div>
-          <button onClick={() => setStatusMessage(null)} className="text-blue-500 hover:text-blue-700">
+          <button onClick={() => setStatusMessage(null)} className="text-zinc-600 hover:text-black">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>

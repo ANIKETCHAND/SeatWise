@@ -260,42 +260,42 @@ export const MathAnalysisPage: React.FC = () => {
 
         {/* Live Mathematical Proof Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-          <div className="p-3 bg-blue-50/60 rounded-lg border border-blue-200">
-            <span className="text-[10px] uppercase font-bold text-blue-700">Pigeonhole Capacity</span>
-            <p className="text-base font-bold text-slate-800 mt-0.5">
+          <div className="p-3 bg-zinc-100/80 rounded-lg border border-zinc-300">
+            <span className="text-[10px] uppercase font-mono font-bold text-zinc-600">Pigeonhole Capacity</span>
+            <p className="text-base font-bold text-zinc-950 mt-0.5">
               |S| = {totalStudents} ≤ |T| = {usableSeats}
             </p>
-            <p className="text-[10px] text-slate-500 mt-0.5">
+            <p className="text-[10px] text-zinc-500 mt-0.5">
               {pigeonholeSatisfied ? '✓ Capacity sufficient' : '✗ Violates |S| ≤ |T|'}
             </p>
           </div>
 
-          <div className="p-3 bg-indigo-50/60 rounded-lg border border-indigo-200">
-            <span className="text-[10px] uppercase font-bold text-indigo-700">Checkerboard Partition</span>
-            <p className="text-base font-bold text-slate-800 mt-0.5">
+          <div className="p-3 bg-zinc-100/80 rounded-lg border border-zinc-300">
+            <span className="text-[10px] uppercase font-mono font-bold text-zinc-600">Checkerboard Partition</span>
+            <p className="text-base font-bold text-zinc-950 mt-0.5">
               P₀ = {part0Count} | P₁ = {part1Count}
             </p>
-            <p className="text-[10px] text-slate-500 mt-0.5">
+            <p className="text-[10px] text-zinc-500 mt-0.5">
               color(r, c) = (r + c) mod 2
             </p>
           </div>
 
-          <div className="p-3 bg-emerald-50/60 rounded-lg border border-emerald-200">
-            <span className="text-[10px] uppercase font-bold text-emerald-700">Independence Bound α(G)</span>
-            <p className="text-base font-bold text-slate-800 mt-0.5">
+          <div className="p-3 bg-zinc-100/80 rounded-lg border border-zinc-300">
+            <span className="text-[10px] uppercase font-mono font-bold text-zinc-600">Independence Bound α(G)</span>
+            <p className="text-base font-bold text-zinc-950 mt-0.5">
               α = {largerPartition} seats
             </p>
-            <p className="text-[10px] text-slate-500 mt-0.5">
+            <p className="text-[10px] text-zinc-500 mt-0.5">
               Max single class without adjacency
             </p>
           </div>
 
-          <div className="p-3 bg-purple-50/60 rounded-lg border border-purple-200">
-            <span className="text-[10px] uppercase font-bold text-purple-700">Bijective Verification</span>
-            <p className="text-base font-bold text-slate-800 mt-0.5">
+          <div className="p-3 bg-zinc-100/80 rounded-lg border border-zinc-300">
+            <span className="text-[10px] uppercase font-mono font-bold text-zinc-600">Bijective Verification</span>
+            <p className="text-base font-bold text-zinc-950 mt-0.5">
               {totalStudents === usableSeats ? 'Bijective (Full Occupancy)' : 'Injective (Sub-capacity)'}
             </p>
-            <p className="text-[10px] text-slate-500 mt-0.5">
+            <p className="text-[10px] text-zinc-500 mt-0.5">
               f: S → T injective guaranteed
             </p>
           </div>

@@ -149,25 +149,25 @@ export const UniversityPage: React.FC = () => {
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+        <div className="bg-white rounded-xl p-4 border border-zinc-200 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-lg bg-zinc-100 text-black border border-zinc-200 flex items-center justify-center font-bold">
             <Building2 className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase">Degree Programs</p>
-            <p className="text-2xl font-bold text-slate-800">{TOTAL_PROGRAMS_COUNT}</p>
-            <p className="text-[11px] text-slate-400">Undergraduate & Masters</p>
+            <p className="text-xs font-semibold text-zinc-500 uppercase">Degree Programs</p>
+            <p className="text-2xl font-black text-zinc-950">{TOTAL_PROGRAMS_COUNT}</p>
+            <p className="text-[11px] text-zinc-400">Undergraduate & Masters</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+        <div className="bg-white rounded-xl p-4 border border-zinc-200 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-lg bg-zinc-100 text-black border border-zinc-200 flex items-center justify-center font-bold">
             <Layers className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase">Class Batches / Sections</p>
-            <p className="text-2xl font-bold text-slate-800">{TOTAL_BATCHES_COUNT}</p>
-            <p className="text-[11px] text-slate-400">Across 8 Academic Semesters</p>
+            <p className="text-xs font-semibold text-zinc-500 uppercase">Class Batches / Sections</p>
+            <p className="text-2xl font-black text-zinc-950">{TOTAL_BATCHES_COUNT}</p>
+            <p className="text-[11px] text-zinc-400">Across 8 Academic Semesters</p>
           </div>
         </div>
 
