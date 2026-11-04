@@ -14,10 +14,12 @@ import {
 import { INITIAL_PROGRAMS, PERIOD_TIMINGS } from '../data/universityData';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
 import jainTimetableLookup from '../data/jain_timetable_lookup.json';
 
 export const TimetablePage: React.FC = () => {
   const { isAdmin } = useAuth();
+  const { showNotification } = useNotification();
   const [selectedProgram, setSelectedProgram] = useState('AIML');
   const [selectedSemester, setSelectedSemester] = useState<number>(3);
   const [selectedSection, setSelectedSection] = useState('A');
@@ -105,6 +107,7 @@ export const TimetablePage: React.FC = () => {
     try {
       const preview = await api.previewTimetable(file);
       setPreviewData(preview);
+      showNotification('info', `Preview generated: ${preview.stats?.entries || 'timetable'} sessions loaded.`);
     } catch {
       // In dev fallback, simulate the verified Jain timetable parsing structure
       setPreviewData({
@@ -121,6 +124,7 @@ export const TimetablePage: React.FC = () => {
         ],
         errors: [],
       });
+      showNotification('warning', 'Live preview unavailable, using simulated catalog.');
     } finally {
       setIsUploading(false);
     }
@@ -136,17 +140,19 @@ export const TimetablePage: React.FC = () => {
         const res = await api.confirmTimetableImport(formData);
         const count = res.imported?.entries || 3569;
         setImportStatus(`Successfully imported ${count} timetable sessions without duplicates!`);
+        showNotification('success', `Successfully imported ${count} timetable sessions!`);
         setTimeout(() => {
           setImportStatus(null);
           setPreviewData(null);
           setUploadFile(null);
         }, 4000);
       } catch (err: any) {
-        setImportStatus(`Import completed: ${err.message || 'Timetable parsed and synchronized.'}`);
-        setTimeout(() => setImportStatus(null), 4000);
+        setImportStatus(null);
+        showNotification('error', `Import failed: ${err.message || 'Error synchronizing timetable data'}`);
       }
     } else {
       setImportStatus('Timetable workbook preview verified (3,569 sessions across 94 batches). Ready for database commit.');
+      showNotification('info', 'Timetable verified. Ready for database commit.');
       setTimeout(() => setImportStatus(null), 4000);
     }
   };

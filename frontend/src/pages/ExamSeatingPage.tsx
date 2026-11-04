@@ -30,6 +30,10 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import { SeatingPolicy } from '../types';
+import { useNotification } from '../context/NotificationContext';
+import { PolicyConfigurator } from '../components/seating/PolicyConfigurator';
+import { SeatingLegend } from '../components/seating/SeatingLegend';
+import { checkAllocationConflicts } from '../utils/seatingMath';
 
 interface DeskCell {
   seat_label: string;
@@ -54,6 +58,7 @@ interface ExamOption {
 }
 
 export const ExamSeatingPage: React.FC = () => {
+  const { showNotification } = useNotification();
   const [searchParams] = useSearchParams();
   const examIdFromQuery = searchParams.get('exam_id');
   const planIdFromQuery = searchParams.get('plan_id');
@@ -277,60 +282,19 @@ export const ExamSeatingPage: React.FC = () => {
   const { conflictKeys, conflictPairs } = useMemo(() => {
     const conflicts = new Set<string>();
     const pairs: { a: string; b: string; batch: string }[] = [];
-    const rows = currentHallConfig.rows;
-    const cols = currentHallConfig.cols;
+    const violations = checkAllocationConflicts(
+      currentGrid,
+      currentHallConfig.rows,
+      currentHallConfig.cols,
+      policy
+    );
 
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const k1 = `${r}-${c}`;
-        const c1 = currentGrid[k1];
-        if (!c1 || c1.is_blocked || !c1.batch || !c1.student_name) continue;
+    violations.forEach((v) => {
+      if (v.keyA) conflicts.add(v.keyA);
+      if (v.keyB) conflicts.add(v.keyB);
+      pairs.push({ a: v.seatA, b: v.seatB, batch: v.batch });
+    });
 
-        // Horizontal neighbor
-        if (policy.block_same_batch_horizontal && c + 1 < cols) {
-          const k2 = `${r}-${c + 1}`;
-          const c2 = currentGrid[k2];
-          if (c2 && !c2.is_blocked && c2.student_name && c2.batch === c1.batch) {
-            conflicts.add(k1);
-            conflicts.add(k2);
-            pairs.push({ a: c1.seat_label, b: c2.seat_label, batch: c1.batch });
-          }
-        }
-
-        // Vertical neighbor
-        if (policy.block_same_batch_vertical && r + 1 < rows) {
-          const k2 = `${r + 1}-${c}`;
-          const c2 = currentGrid[k2];
-          if (c2 && !c2.is_blocked && c2.student_name && c2.batch === c1.batch) {
-            conflicts.add(k1);
-            conflicts.add(k2);
-            pairs.push({ a: c1.seat_label, b: c2.seat_label, batch: c1.batch });
-          }
-        }
-
-        // Diagonal neighbors
-        if (policy.block_same_batch_diagonal) {
-          if (r + 1 < rows && c + 1 < cols) {
-            const k2 = `${r + 1}-${c + 1}`;
-            const c2 = currentGrid[k2];
-            if (c2 && !c2.is_blocked && c2.student_name && c2.batch === c1.batch) {
-              conflicts.add(k1);
-              conflicts.add(k2);
-              pairs.push({ a: c1.seat_label, b: c2.seat_label, batch: c1.batch });
-            }
-          }
-          if (r + 1 < rows && c - 1 >= 0) {
-            const k2 = `${r + 1}-${c - 1}`;
-            const c2 = currentGrid[k2];
-            if (c2 && !c2.is_blocked && c2.student_name && c2.batch === c1.batch) {
-              conflicts.add(k1);
-              conflicts.add(k2);
-              pairs.push({ a: c1.seat_label, b: c2.seat_label, batch: c1.batch });
-            }
-          }
-        }
-      }
-    }
     return { conflictKeys: conflicts, conflictPairs: pairs };
   }, [currentGrid, currentHallConfig, policy]);
 
@@ -404,7 +368,9 @@ export const ExamSeatingPage: React.FC = () => {
         }
         setAllocationGrid((prev) => ({ ...prev, [activeHall]: newGrid }));
         setValidationStatus('valid');
-        setStatusMessage(`Optimal seating mathematically generated via ${res.solver || 'Google OR-Tools CP-SAT'}! 0 conflicts found.`);
+        const msg = `Optimal seating mathematically generated via ${res.solver || 'Google OR-Tools CP-SAT'}! 0 conflicts found.`;
+        setStatusMessage(msg);
+        showNotification('success', msg);
         setTimeout(() => setStatusMessage(null), 5000);
       }
     } catch {
@@ -413,7 +379,9 @@ export const ExamSeatingPage: React.FC = () => {
         [activeHall]: generateInitialAssignments(activeHall),
       }));
       setValidationStatus('valid');
-      setStatusMessage('Optimal seating arrangement generated and mathematically validated! 0 conflicts found.');
+      const msg = 'Optimal seating arrangement generated and mathematically validated! 0 conflicts found.';
+      setStatusMessage(msg);
+      showNotification('info', msg);
       setTimeout(() => setStatusMessage(null), 5000);
     } finally {
       setIsGenerating(false);
@@ -463,7 +431,9 @@ export const ExamSeatingPage: React.FC = () => {
       setAllocationGrid((prev) => ({ ...prev, [activeHall]: updatedHallGrid }));
       setValidationStatus('valid');
       setIsGenerating(false);
-      setStatusMessage('Remaining unlocked seats re-allocated without altering locked assignments.');
+      const msg = 'Remaining unlocked seats re-allocated without altering locked assignments.';
+      setStatusMessage(msg);
+      showNotification('success', msg);
       setTimeout(() => setStatusMessage(null), 4000);
     }, 400);
   };
@@ -477,13 +447,19 @@ export const ExamSeatingPage: React.FC = () => {
       setIsValidating(false);
       if (conflictKeys.size > 0) {
         setValidationStatus('invalid');
-        setStatusMessage(`Validation Failed: ${conflictKeys.size} seats have batch adjacency conflicts.`);
+        const msg = `Validation Failed: ${conflictKeys.size} seats have batch adjacency conflicts.`;
+        setStatusMessage(msg);
+        showNotification('error', msg);
       } else if (allocatedStudentsCount > availableSeatsCount) {
         setValidationStatus('invalid');
-        setStatusMessage('Validation Failed: Pigeonhole principle violation (|Students| > |Available Seats|).');
+        const msg = 'Validation Failed: Pigeonhole principle violation (|Students| > |Available Seats|).';
+        setStatusMessage(msg);
+        showNotification('error', msg);
       } else {
         setValidationStatus('valid');
-        setStatusMessage('Mathematical Validation Passed: f: S → T is injective, 0 adjacency conflicts, 0 blocked desk violations.');
+        const msg = 'Mathematical Validation Passed: f: S → T is injective, 0 adjacency conflicts, 0 blocked desk violations.';
+        setStatusMessage(msg);
+        showNotification('success', msg);
       }
       setTimeout(() => setStatusMessage(null), 5000);
     }, 400);
@@ -502,6 +478,7 @@ export const ExamSeatingPage: React.FC = () => {
       }
       if (seat?.is_blocked) {
         setStatusMessage('Cannot move student to a blocked desk.');
+        showNotification('warning', 'Cannot move student to a blocked desk.');
         setTimeout(() => setStatusMessage(null), 3000);
         return;
       }
@@ -540,7 +517,9 @@ export const ExamSeatingPage: React.FC = () => {
       setMoveSourceKey(null);
       setSelectedSeatKey(null);
       setValidationStatus('needs_validation');
-      setStatusMessage(`Candidate moved to desk ${targetLabel}.`);
+      const moveMsg = `Candidate moved to desk ${targetLabel}.`;
+      setStatusMessage(moveMsg);
+      showNotification('info', moveMsg);
       setTimeout(() => setStatusMessage(null), 3000);
       return;
     }
@@ -556,6 +535,7 @@ export const ExamSeatingPage: React.FC = () => {
       const s2 = currentGrid[key];
       if (!s1 || !s2 || s1.is_blocked || s2.is_blocked) {
         setStatusMessage('Cannot swap with a blocked desk.');
+        showNotification('warning', 'Cannot swap with a blocked desk.');
         setTimeout(() => setStatusMessage(null), 3000);
         return;
       }
@@ -592,7 +572,9 @@ export const ExamSeatingPage: React.FC = () => {
       setSwapSourceKey(null);
       setSelectedSeatKey(null);
       setValidationStatus('needs_validation');
-      setStatusMessage(`Swapped candidate ${s1.roll_number || s1.seat_label} with ${s2.roll_number || s2.seat_label}.`);
+      const swapMsg = `Swapped candidate ${s1.roll_number || s1.seat_label} with ${s2.roll_number || s2.seat_label}.`;
+      setStatusMessage(swapMsg);
+      showNotification('info', swapMsg);
       setTimeout(() => setStatusMessage(null), 4000);
       return;
     }
@@ -608,7 +590,8 @@ export const ExamSeatingPage: React.FC = () => {
         };
         setAllocationGrid((prev) => ({ ...prev, [activeHall]: updatedGrid }));
         if (savedPlanId) {
-          api.updateExamAttendance(savedPlanId, { student_id: seat.roll_number || seat.student_id, status: nextAtt }).catch(() => {});
+          api.updateExamAttendance(savedPlanId, { student_id: seat.roll_number || seat.student_id, status: nextAtt })
+            .catch((err) => console.error('Failed to sync seat attendance', err));
         }
       }
       return;
@@ -627,7 +610,9 @@ export const ExamSeatingPage: React.FC = () => {
       [key]: { ...seat, is_locked: !seat.is_locked },
     };
     setAllocationGrid((prev) => ({ ...prev, [activeHall]: updated }));
-    setStatusMessage(seat.is_locked ? `Seat ${seat.seat_label} unlocked.` : `Seat ${seat.seat_label} locked.`);
+    const msg = seat.is_locked ? `Seat ${seat.seat_label} unlocked.` : `Seat ${seat.seat_label} locked.`;
+    setStatusMessage(msg);
+    showNotification('info', msg);
     setTimeout(() => setStatusMessage(null), 3000);
   };
 
@@ -648,7 +633,9 @@ export const ExamSeatingPage: React.FC = () => {
     setAllocationGrid((prev) => ({ ...prev, [activeHall]: updated }));
     setValidationStatus('needs_validation');
     setSelectedSeatKey(null);
-    setStatusMessage(isNowBlocked ? `Desk ${seat.seat_label} blocked.` : `Desk ${seat.seat_label} unblocked.`);
+    const msg = isNowBlocked ? `Desk ${seat.seat_label} blocked.` : `Desk ${seat.seat_label} unblocked.`;
+    setStatusMessage(msg);
+    showNotification('info', msg);
     setTimeout(() => setStatusMessage(null), 3000);
   };
 
@@ -687,7 +674,9 @@ export const ExamSeatingPage: React.FC = () => {
     setAllocationGrid((prev) => ({ ...prev, [activeHall]: updated }));
     setValidationStatus('needs_validation');
     setSelectedSeatKey(null);
-    setStatusMessage(`Candidate unassigned from desk ${seat.seat_label}.`);
+    const msg = `Candidate unassigned from desk ${seat.seat_label}.`;
+    setStatusMessage(msg);
+    showNotification('info', msg);
     setTimeout(() => setStatusMessage(null), 3000);
   };
 
@@ -698,7 +687,16 @@ export const ExamSeatingPage: React.FC = () => {
     });
     setAllocationGrid((prev) => ({ ...prev, [activeHall]: updatedGrid }));
     if (savedPlanId) {
-      api.updateExamAttendance(savedPlanId, { absences: [] }).catch(() => {});
+      api.updateExamAttendance(savedPlanId, { absences: [] })
+        .then(() => {
+          showNotification('success', 'All candidates marked present and synchronized.');
+        })
+        .catch((err) => {
+          console.error('Failed to sync batch attendance', err);
+          showNotification('warning', 'Marked present locally; remote sync encountered an issue.');
+        });
+    } else {
+      showNotification('success', 'All candidates marked as present.');
     }
     setStatusMessage('All candidates marked as present.');
     setTimeout(() => setStatusMessage(null), 3000);
@@ -733,7 +731,7 @@ export const ExamSeatingPage: React.FC = () => {
 
   const handlePublish = () => {
     if (validationStatus === 'invalid' || conflictKeys.size > 0) {
-      alert('Cannot publish an invalid seating plan. Please resolve adjacency conflicts or run validation first.');
+      showNotification('error', 'Cannot publish an invalid seating plan. Please resolve adjacency conflicts or run validation first.');
       return;
     }
 
@@ -761,7 +759,13 @@ export const ExamSeatingPage: React.FC = () => {
         assignments,
       }).then((res) => {
         if (res && res.plan_id) setSavedPlanId(res.plan_id);
-      }).catch(() => {});
+        showNotification('success', 'Examination Seating Plan published and synced.');
+      }).catch((err) => {
+        console.error('Failed to save exam seating plan', err);
+        showNotification('warning', 'Published locally; remote sync encountered an error.');
+      });
+    } else {
+      showNotification('success', 'Examination Seating Plan published.');
     }
 
     setStatusMessage('Examination Seating Plan published. Student seat locators and attendance charts are live.');
@@ -992,65 +996,14 @@ export const ExamSeatingPage: React.FC = () => {
       {/* Top 3 Configuration & Policy Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Policy Configuration Card */}
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
-          <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-            <Settings className="w-4 h-4 text-primary-600" />
-            Seating Policy Constraints
-          </h2>
-          <div className="space-y-2 text-xs">
-            <label className="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-slate-100/70 cursor-pointer">
-              <span className="text-slate-700 font-medium">Prevent Horizontal Adjacency</span>
-              <input
-                type="checkbox"
-                checked={policy.block_same_batch_horizontal}
-                onChange={(e) => {
-                  setPolicy({ ...policy, block_same_batch_horizontal: e.target.checked });
-                  setValidationStatus('needs_validation');
-                }}
-                className="rounded text-primary-600 focus:ring-primary-500"
-              />
-            </label>
-            <label className="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-slate-100/70 cursor-pointer">
-              <span className="text-slate-700 font-medium">Prevent Vertical Adjacency</span>
-              <input
-                type="checkbox"
-                checked={policy.block_same_batch_vertical}
-                onChange={(e) => {
-                  setPolicy({ ...policy, block_same_batch_vertical: e.target.checked });
-                  setValidationStatus('needs_validation');
-                }}
-                className="rounded text-primary-600 focus:ring-primary-500"
-              />
-            </label>
-            <label className="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-slate-100/70 cursor-pointer">
-              <div>
-                <span className="text-slate-700 font-medium">Prevent Diagonal Adjacency</span>
-                <p className="text-[10px] text-slate-400">Strict non-adjacency enforcement</p>
-              </div>
-              <input
-                type="checkbox"
-                checked={policy.block_same_batch_diagonal}
-                onChange={(e) => {
-                  setPolicy({ ...policy, block_same_batch_diagonal: e.target.checked });
-                  setValidationStatus('needs_validation');
-                }}
-                className="rounded text-primary-600 focus:ring-primary-500"
-              />
-            </label>
-            <label className="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-slate-100/70 cursor-pointer">
-              <span className="text-slate-700 font-medium">Allow Mixed Batch Seating</span>
-              <input
-                type="checkbox"
-                checked={policy.allow_mixed_batches}
-                onChange={(e) => {
-                  setPolicy({ ...policy, allow_mixed_batches: e.target.checked });
-                  setValidationStatus('needs_validation');
-                }}
-                className="rounded text-primary-600 focus:ring-primary-500"
-              />
-            </label>
-          </div>
-        </div>
+        <PolicyConfigurator
+          compact
+          policy={policy}
+          onChange={(newPolicy) => {
+            setPolicy(newPolicy);
+            setValidationStatus('needs_validation');
+          }}
+        />
 
         {/* Participating Batches & Candidates */}
         <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
@@ -1204,20 +1157,14 @@ export const ExamSeatingPage: React.FC = () => {
             )}
 
             {/* Batch Color Legend */}
-            <div className="flex items-center gap-3 text-xs pl-2 border-l border-slate-200">
-              <div className="flex items-center gap-1">
-                <span className="w-3 h-3 rounded bg-blue-100 border border-blue-400" />
-                <span className="text-[11px] font-semibold text-slate-700">AIML</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="w-3 h-3 rounded bg-indigo-100 border border-indigo-400" />
-                <span className="text-[11px] font-semibold text-slate-700">CSE-GEN</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-400" />
-                <span className="text-[11px] font-semibold text-slate-700">AIDE</span>
-              </div>
-            </div>
+            <SeatingLegend
+              compact
+              batches={[
+                { name: 'AIML', color: 'bg-blue-100 border border-blue-400' },
+                { name: 'CSE-GEN', color: 'bg-indigo-100 border border-indigo-400' },
+                { name: 'AIDE', color: 'bg-emerald-100 border border-emerald-400' },
+              ]}
+            />
           </div>
         </div>
 

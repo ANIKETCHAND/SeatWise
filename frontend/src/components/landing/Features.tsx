@@ -49,16 +49,16 @@ const FEATURES = [
 
 export const LandingFeatures: React.FC = () => {
   return (
-    <section id="features" className="py-24 bg-slate-900 border-t border-slate-800/80 relative">
+    <section id="features" className="py-24 bg-zinc-50 border-t border-zinc-200 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-bold text-blue-400 uppercase tracking-widest font-mono">
+          <span className="text-xs font-bold text-zinc-900 uppercase tracking-widest font-mono">
             Core Capabilities
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-zinc-950 tracking-tight">
             Everything You Need to Manage Examination Seating
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+          <p className="text-zinc-600 text-sm sm:text-base leading-relaxed">
             Eliminate manual spreadsheets, prevent seat allocation conflicts, and guarantee
             academic integrity with algorithmically backed seating generation.
           </p>
@@ -70,16 +70,16 @@ export const LandingFeatures: React.FC = () => {
             return (
               <div
                 key={idx}
-                className="bg-slate-800/50 hover:bg-slate-800/80 border border-slate-700/60 hover:border-blue-500/40 rounded-2xl p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5 group flex flex-col justify-between"
+                className="bg-white hover:bg-zinc-50 border border-zinc-200/90 hover:border-zinc-900/60 rounded-2xl p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-950/5 group flex flex-col justify-between shadow-sm"
               >
                 <div className="space-y-4">
-                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-400/20 flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                  <div className="w-12 h-12 rounded-xl bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-900 group-hover:bg-black group-hover:text-white group-hover:border-black transition-all">
                     <Icon className="w-6 h-6" />
                   </div>
-                  <h3 className="text-lg font-bold text-white tracking-tight">
+                  <h3 className="text-lg font-bold text-zinc-950 tracking-tight">
                     {feature.title}
                   </h3>
-                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                  <p className="text-zinc-600 text-xs sm:text-sm leading-relaxed">
                     {feature.description}
                   </p>
                 </div>

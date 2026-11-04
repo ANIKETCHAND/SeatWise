@@ -20,6 +20,8 @@ import {
   Filter,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
+import { Modal } from '../components/common/Modal';
 import { api } from '../services/api';
 
 export interface ExamRecord {
@@ -79,6 +81,7 @@ const AVAILABLE_HALLS = ['LH-101', 'LH-102', 'EXAM-HALL-MAIN', 'LH-201'];
 
 export const ExamManagementPage: React.FC = () => {
   const { role } = useAuth();
+  const { showNotification } = useNotification();
   const isStaff = role === 'admin' || role === 'exam_staff';
 
   const [exams, setExams] = useState<ExamRecord[]>(INITIAL_EXAMS);
@@ -90,7 +93,6 @@ export const ExamManagementPage: React.FC = () => {
   // Modals
   const [showModal, setShowModal] = useState(false);
   const [editingExamId, setEditingExamId] = useState<string | null>(null);
-  const [notification, setNotification] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Form State
@@ -257,13 +259,19 @@ export const ExamManagementPage: React.FC = () => {
         return ex;
       });
       setExams(updatedList);
+      setShowModal(false);
       api.updateExam(editingExamId, {
         name: formData.name,
         exam_date: formData.exam_date,
         session: formData.session === 'afternoon' ? 'AN' : 'FN',
         status: formData.status,
-      }).catch(() => {});
-      setNotification(`Examination "${formData.name}" successfully updated.`);
+      })
+        .then(() => {
+          showNotification('success', `Examination "${formData.name}" successfully updated.`);
+        })
+        .catch((err: any) => {
+          showNotification('warning', `Updated locally (${err.message || 'Database sync failed'})`);
+        });
     } else {
       // Create mode
       const created: ExamRecord = {
@@ -279,18 +287,21 @@ export const ExamManagementPage: React.FC = () => {
         status: 'draft',
       };
       setExams([created, ...exams]);
+      setShowModal(false);
       api.createExam({
         name: created.name,
         exam_date: created.exam_date,
         session: created.session === 'afternoon' ? 'AN' : 'FN',
         subject_name: formData.subject_name,
         subject_code: formData.subject_code,
-      }).catch(() => {});
-      setNotification(`Examination "${created.name}" created. You can now configure seating plan.`);
+      })
+        .then(() => {
+          showNotification('success', `Examination "${created.name}" created. You can now configure seating plan.`);
+        })
+        .catch((err: any) => {
+          showNotification('warning', `Created locally (${err.message || 'Database sync failed'})`);
+        });
     }
-
-    setShowModal(false);
-    setTimeout(() => setNotification(null), 4000);
   };
 
   // Safe Archive Exam
@@ -299,9 +310,13 @@ export const ExamManagementPage: React.FC = () => {
     if (!confirmArchive) return;
 
     setExams(exams.map((ex) => (ex.id === examId ? { ...ex, status: 'archived' } : ex)));
-    api.archiveExam(examId).catch(() => {});
-    setNotification(`Examination "${examName}" archived safely.`);
-    setTimeout(() => setNotification(null), 4000);
+    api.archiveExam(examId)
+      .then(() => {
+        showNotification('success', `Examination "${examName}" archived safely.`);
+      })
+      .catch((err: any) => {
+        showNotification('warning', `Archived locally (${err.message || 'Database sync failed'})`);
+      });
   };
 
   // Safe Delete Exam
@@ -320,9 +335,13 @@ export const ExamManagementPage: React.FC = () => {
     if (!confirmDel) return;
 
     setExams(exams.filter((ex) => ex.id !== examId));
-    api.deleteExam(examId).catch(() => {});
-    setNotification(`Examination "${examName}" deleted.`);
-    setTimeout(() => setNotification(null), 4000);
+    api.deleteExam(examId)
+      .then(() => {
+        showNotification('success', `Examination "${examName}" deleted.`);
+      })
+      .catch((err: any) => {
+        showNotification('warning', `Deleted locally (${err.message || 'Database sync failed'})`);
+      });
   };
 
   // Filtered examinations list
@@ -365,19 +384,6 @@ export const ExamManagementPage: React.FC = () => {
           </button>
         )}
       </div>
-
-      {/* Notifications */}
-      {notification && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-lg flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{notification}</span>
-          </div>
-          <button onClick={() => setNotification(null)} className="text-emerald-700">
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
 
       {/* Filters Toolbar */}
       <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
@@ -517,22 +523,13 @@ export const ExamManagementPage: React.FC = () => {
       </div>
 
       {/* Create / Edit Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 border border-slate-200">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-sm font-bold text-slate-800">
-                  {editingExamId ? 'Edit Examination' : 'Create Examination Session'}
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Configure session timing, subject, participating academic batches, and exam halls.
-                </p>
-              </div>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={editingExamId ? 'Edit Examination' : 'Create Examination Session'}
+        description="Configure session timing, subject, participating academic batches, and exam halls."
+        maxWidth="lg"
+      >
 
             {errorMessage && (
               <div className="mb-3 p-2.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-lg flex items-center gap-2">
@@ -694,9 +691,7 @@ export const ExamManagementPage: React.FC = () => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 };

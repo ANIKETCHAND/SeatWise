@@ -16,6 +16,8 @@ import {
   HelpCircle,
 } from 'lucide-react';
 import { api } from '../services/api';
+import { useNotification } from '../context/NotificationContext';
+import { exportTableToCsv } from '../utils/exportHelpers';
 
 const DEFAULT_LOCATORS = [
   { roll: '23JU0101', name: 'Aarav Sharma', exam: 'Mid-Term Examinations Nov 2026', hall: 'LH-101', seat: 'A1', batch: 'AIML-S3A', session: 'Morning', status: 'allocated' },
@@ -40,6 +42,7 @@ const DEFAULT_EMPTY_SEATS = [
 ];
 
 export const ReportsPage: React.FC = () => {
+  const { showNotification } = useNotification();
   const [reportType, setReportType] = useState<
     'hall_seating' | 'locator' | 'batch_wise' | 'attendance' | 'empty_seats' | 'unallocated' | 'validation'
   >('hall_seating');
@@ -107,31 +110,51 @@ export const ReportsPage: React.FC = () => {
   const unallocatedList = filteredLocators.filter((s) => s.status === 'unallocated');
 
   const downloadCsv = (filename: string) => {
-    let headers: string[] = [];
-    let rows: (string | number)[][] = [];
+    let headerConfigs: Array<{ key: string; label: string }> = [];
+    let rows: Record<string, any>[] = [];
 
     if (reportType === 'empty_seats') {
-      headers = ['Hall Name', 'Row', 'Column', 'Seat Label', 'Desk Status'];
-      rows = DEFAULT_EMPTY_SEATS.map((e) => [e.hall, e.row, e.col, e.seat, e.status]);
+      headerConfigs = [
+        { key: 'hall', label: 'Hall Name' },
+        { key: 'row', label: 'Row' },
+        { key: 'col', label: 'Column' },
+        { key: 'seat', label: 'Seat Label' },
+        { key: 'status', label: 'Desk Status' },
+      ];
+      rows = DEFAULT_EMPTY_SEATS;
     } else if (reportType === 'unallocated') {
-      headers = ['Roll Number', 'Candidate Name', 'Batch', 'Examination', 'Status'];
-      rows = unallocatedList.map((s) => [s.roll, `"${s.name}"`, s.batch, `"${s.exam}"`, 'Unallocated']);
+      headerConfigs = [
+        { key: 'roll', label: 'Roll Number' },
+        { key: 'name', label: 'Candidate Name' },
+        { key: 'batch', label: 'Batch' },
+        { key: 'exam', label: 'Examination' },
+        { key: 'status', label: 'Status' },
+      ];
+      rows = unallocatedList.map((s) => ({ ...s, status: 'Unallocated' }));
     } else if (reportType === 'batch_wise') {
-      headers = ['Batch', 'Roll Number', 'Candidate Name', 'Hall', 'Seat Label'];
-      rows = allocatedList.map((s) => [s.batch, s.roll, `"${s.name}"`, s.hall, s.seat]);
+      headerConfigs = [
+        { key: 'batch', label: 'Batch' },
+        { key: 'roll', label: 'Roll Number' },
+        { key: 'name', label: 'Candidate Name' },
+        { key: 'hall', label: 'Hall' },
+        { key: 'seat', label: 'Seat Label' },
+      ];
+      rows = allocatedList;
     } else {
-      headers = ['Roll Number', 'Candidate Name', 'Examination', 'Session', 'Hall Name', 'Seat Label', 'Batch'];
-      rows = filteredLocators.map((s) => [s.roll, `"${s.name}"`, `"${s.exam}"`, s.session, s.hall, s.seat, s.batch]);
+      headerConfigs = [
+        { key: 'roll', label: 'Roll Number' },
+        { key: 'name', label: 'Candidate Name' },
+        { key: 'exam', label: 'Examination' },
+        { key: 'session', label: 'Session' },
+        { key: 'hall', label: 'Hall Name' },
+        { key: 'seat', label: 'Seat Label' },
+        { key: 'batch', label: 'Batch' },
+      ];
+      rows = filteredLocators;
     }
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `${filename}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportTableToCsv(rows, headerConfigs, `${filename}.csv`);
+    showNotification('success', `Exported ${filename}.csv successfully.`);
   };
 
   return (

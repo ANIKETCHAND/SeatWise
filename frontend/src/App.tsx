@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
+import { SeatingProvider } from './context/SeatingContext';
 import { AppLayout } from './components/layout/AppLayout';
 
 import { DashboardPage } from './pages/DashboardPage';
@@ -22,32 +24,36 @@ import { LandingPage } from './pages/LandingPage';
 export const App: React.FC = () => {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public Landing Page */}
-          <Route path="/" element={<LandingPage />} />
+      <NotificationProvider>
+        <SeatingProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Public Landing Page */}
+              <Route path="/" element={<LandingPage />} />
 
-          {/* Authenticated Application Layout */}
-          <Route element={<AppLayout />}>
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="examinations" element={<ExamManagementPage />} />
-            <Route path="seating-planner" element={<ExamSeatingPage />} />
-            <Route path="exam-seating" element={<ExamSeatingPage />} />
-            <Route path="rooms" element={<RoomsPage />} />
-            <Route path="students" element={<StudentPage />} />
-            <Route path="university" element={<UniversityPage />} />
-            <Route path="timetable" element={<TimetablePage />} />
-            <Route path="reports" element={<ReportsPage />} />
-            <Route path="seat-lookup" element={<StudentSeatLookupPage />} />
-            <Route path="math-analysis" element={<MathAnalysisPage />} />
-            <Route path="history" element={<HistoryPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="faculty" element={<FacultyPage />} />
-            <Route path="classroom-seating" element={<ClassroomSeatingPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+              {/* Authenticated Application Layout */}
+              <Route element={<AppLayout />}>
+                <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="examinations" element={<ExamManagementPage />} />
+                <Route path="seating-planner" element={<ExamSeatingPage />} />
+                <Route path="exam-seating" element={<ExamSeatingPage />} />
+                <Route path="rooms" element={<RoomsPage />} />
+                <Route path="students" element={<StudentPage />} />
+                <Route path="university" element={<UniversityPage />} />
+                <Route path="timetable" element={<TimetablePage />} />
+                <Route path="reports" element={<ReportsPage />} />
+                <Route path="seat-lookup" element={<StudentSeatLookupPage />} />
+                <Route path="math-analysis" element={<MathAnalysisPage />} />
+                <Route path="history" element={<HistoryPage />} />
+                <Route path="settings" element={<SettingsPage />} />
+                <Route path="faculty" element={<FacultyPage />} />
+                <Route path="classroom-seating" element={<ClassroomSeatingPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </SeatingProvider>
+      </NotificationProvider>
     </AuthProvider>
   );
 };

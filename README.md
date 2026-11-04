@@ -1,27 +1,25 @@
-# SeatWise
-## Smart Classroom & Examination Seating Management System for Jain University
+# SeatWise — Smart Classroom & Examination Seating Management System
 
-SeatWise is an enterprise-grade full-stack web application designed for **Jain University** to mathematically generate, validate, and manage conflict-free seating arrangements for both **daily academic classroom sessions** and **large-scale university examinations**.
+**SeatWise** is an enterprise-grade full-stack web application designed for **Jain (Deemed-to-be University)**, Faculty of Engineering and Technology (FET), to mathematically generate, validate, and manage conflict-free seating arrangements for both **daily academic classroom sessions** and **large-scale university examinations**.
 
 ---
 
-## 1. Key System Capabilities
+## 1. System Capabilities
 
 ### Mode A: Regular Classroom Seating
 - **Dynamic Timetable Linking**: Resolves real subjects, faculty, and room allocations across Monday–Saturday for 7 daily periods (P1–P7).
-- **Classroom Non-Adjacency Policy**: Same-batch adjacency is allowed by default for regular teaching, but can be configured.
-- **Interactive Drag-and-Swap Seating Grid**: Visual classroom board, instructor podium, desk states, and live student swaps.
-- **Attendance Marking**: Real-time present/absent toggling directly on the visual desk grid.
-- **Exporting**: Instant PDF Classroom Seating Charts and CSV rosters.
+- **Interactive Visual Seating Grid**: Visual classroom board, teacher podium, desk states, and live student swaps.
+- **Attendance Tracking**: Real-time present/absent toggling directly on the visual desk grid.
+- **Export Formats**: Instant PDF Classroom Seating Charts and CSV rosters.
 
 ### Mode B: Examination Seating
-- **Multi-Cohort & Multi-Hall Scaling**: Simultaneously distributes students across multiple approved examination halls.
-- **Strict Non-Adjacency Constraints**: Prevents same-batch students from sitting horizontally, vertically, or optionally diagonally adjacent.
-- **Mathematical Optimization Engine**: Uses **Google OR-Tools CP-SAT** constraint programming with exact bipartite checkerboard solvers.
-- **Student Seat Locator**: Instant roll-number search for examinees to locate their hall, row, column, and desk number.
-- **Notice Board Generator**: Printable PDF notices formatted for university bulletin boards and invigilator attendance sheets.
+- **Multi-Cohort & Multi-Hall Scaling**: Simultaneously distributes examinees across multiple approved examination halls.
+- **Strict Anti-Cheating Constraints**: Prevents same-batch examinees from sitting horizontally, vertically, or diagonally adjacent.
+- **Mathematical Optimization Engine**: Uses **Google OR-Tools CP-SAT** constraint programming alongside exact bipartite checkerboard solvers.
+- **Student Seat Locator**: Instant roll-number search for examinees to locate hall, row, column, and desk number.
+- **Notice Board Generator**: Printable PDF notices formatted for university bulletin boards and invigilator rosters.
 
-### Mathematical Analysis Engine
+### Mathematical Analysis & Optimization Engine
 - **Dedicated Interactive Mathematics Page**: Visualizes the theoretical principles powering SeatWise:
   1. Set Theory & Injective Mapping ($f: S \to T$)
   2. Dirichlet's Pigeonhole Principle ($|S| \le |T|$)
@@ -32,44 +30,64 @@ SeatWise is an enterprise-grade full-stack web application designed for **Jain U
 
 ---
 
-## 2. Technology Stack
+## 2. Architecture & Clean Folder Structure
 
-- **Backend**: Python 3.11+ / 3.14, FastAPI, Pydantic v2, Google OR-Tools (CP-SAT 9.15), ReportLab (PDF generator), OpenPyXL (Excel parser).
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Lucide React, Recharts (dynamic university analytics).
-- **Database & Auth**: Supabase PostgreSQL with Row Level Security (RLS) policies, transactional PL/pgSQL RPC routines, and Supabase Auth JWT verification.
+SeatWise follows Clean Architecture principles with decoupled business logic, centralized state management, typed environment isolation, and scalable API structures:
+
+```
+SeatWise/
+├── backend/app/
+│   ├── algorithms/          # Bipartite 2-coloring, alpha independence, CP-SAT solver
+│   ├── database/            # Supabase client, migrations & PostgreSQL DDL
+│   ├── routes/              # FastAPI modular REST controllers
+│   ├── schemas/             # Pydantic v2 schemas and validation models
+│   ├── services/            # Domain services (dashboard, seating, math, timetable)
+│   ├── utils/               # Errors, exception handlers, UUID v5 helper
+│   ├── auth.py              # JWT authentication & RBAC dependencies
+│   ├── config.py            # Centralized Pydantic Settings configuration
+│   └── main.py              # Application entrypoint & static SPA mounting
+├── frontend/src/
+│   ├── config/              # Centralized typed environment & constants
+│   ├── context/             # React Context stores (Auth, Notification, Seating)
+│   ├── hooks/               # Custom hooks (useDashboardStats, useSeatingPlanner, etc.)
+│   ├── components/
+│   │   ├── common/          # ErrorBoundary, ToastContainer, StatCard, StatusBadge, Modal
+│   │   ├── seating/         # DeskGrid, PolicyConfigurator, SeatingLegend
+│   │   ├── layout/          # AppLayout, Navbar, Sidebar
+│   │   └── landing/         # Marketing landing sections
+│   ├── services/
+│   │   ├── api/             # Modular domain API client modules
+│   │   └── api.ts           # Unified API client facade
+│   ├── types/               # TypeScript interfaces & domain types
+│   └── utils/               # Formatting, validation, seating math, export helpers
+├── database/migrations/     # 5 SQL migrations (schema, RLS, seeds, RPCs)
+├── docs/                    # Architecture, API guide, and quality audit reports
+└── tests/                   # 78 automated pytest tests
+```
 
 ---
 
-## 3. Initial University Structure & Provenance
+## 3. Technology Stack
 
-Generated directly from `project_data/jain_timetable_data.xlsx` (snapshot 2026-09-14):
-- **15 Programs**: AI-DevOPS, AIDE, AIML, Blockchain, CPS, CSBS, CSE-AI, CSE-GEN, CTIS, CTMA, CyberSecurity, DS, IOT, MTech, SE.
-- **94 Academic Batches**: Covers Semesters 1, 3, 5, and 7 across sections A through G with assigned class teachers.
-- **7 Daily Periods**:
-  - P1: 8:45 AM – 9:45 AM
-  - P2: 9:45 AM – 10:45 AM
-  - P3: 11:00 AM – 12:00 PM
-  - P4: 12:00 PM – 1:00 PM
-  - P5: 1:00 PM – 1:50 PM
-  - P6: 1:50 PM – 2:50 PM
-  - P7: 2:50 PM – 3:50 PM
+- **Backend**: Python 3.12 / 3.14, FastAPI, Pydantic v2, Google OR-Tools (CP-SAT), ReportLab (PDF generator), OpenPyXL (Excel parser).
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Lucide React, Recharts.
+- **Database & Auth**: Supabase PostgreSQL 15 with Row Level Security (RLS) policies, transactional PL/pgSQL RPC routines, and Supabase Auth JWT verification.
+- **Deployment**: Vercel Fullstack Serverless + Local port 8080/8000.
 
 ---
 
 ## 4. Getting Started
 
-### Backend Setup
+### 4.1 Backend Setup
 ```bash
 cd backend
 python -m pip install -r requirements.txt
-# Copy environment template
 cp ../.env.example .env
-# Run FastAPI server
 uvicorn app.main:app --reload --port 8000
 ```
 API Documentation will be live at `http://127.0.0.1:8000/docs`.
 
-### Frontend Setup
+### 4.2 Frontend Setup
 ```bash
 cd frontend
 npm install
@@ -80,19 +98,38 @@ Access the application at `http://localhost:5173`.
 
 ---
 
-## 5. Automated Test Suite & Quality Report
+## 5. Automated Test Suite
 
-SeatWise comes with 53 comprehensive automated test suites covering algorithm bounds, edge cases, API endpoints, timetable ingestion, and asset compilation:
+SeatWise contains 78 comprehensive automated tests covering algorithms, API endpoints, migrations, and frontend integrity:
 
 ```bash
-python -m pytest tests/ -v
+py -3.14 -m pytest tests/ -v
 ```
 
-All 53 test suites pass (100% pass rate in ~2.5s):
-- **32 Mathematical & Algorithm unit tests** (4x6 10/8, 12/12, 13/11 bound, 3x3 5/4, 6/3 bound, 2x2, 1x1, blocked desks, diagonal restrictions, brute-force comparisons)
-- **19 Backend API & Integration tests** (FastAPI health endpoints, RBAC, math capacity/checkerboard/solve endpoints, Excel timetable parser on 94 batches, error handling 401/403/422/503, route aliases)
-- **2 Frontend build and asset verification tests** (production bundle compilation, 13 core navigation pages)
+### Verification Record:
+- **32 Mathematical & Algorithm tests** (`tests/algorithms/test_engine.py`):
+  - 4x6 grid (10/8, 12/12, 13/11 bound)
+  - 3x3 grid (5/4, 6/3 bound)
+  - Blocked desks, diagonal constraints, brute-force equivalence
+- **37 Backend API & Integration tests** (`tests/backend/test_api.py`):
+  - Auth, RBAC role permissions (admin, faculty, student)
+  - Math capacity, checkerboard, adjacency, solve endpoints
+  - Timetable parser for all 94 batches and 3,500+ sessions
+  - Route aliases, save plan payloads, and attendance updates
+- **5 Database Migration tests** (`tests/database/test_migrations.py`):
+  - 20 required tables and views
+  - RLS policies and transactional RPC functions
+- **4 Frontend Build & Contract tests** (`tests/frontend/test_build.py`):
+  - Asset compilation (`frontend/dist/index.html`, JS/CSS bundles)
+  - 13 required navigation pages
+  - 39 API client methods contract verification
+  - Page contract balance checks
 
-For the complete Section 21 specification report, including database verification, mathematical validation proofs, security test results, and deployment readiness, see:
-- [docs/TESTING_AND_QUALITY_REPORT.md](docs/TESTING_AND_QUALITY_REPORT.md)
+---
 
+## 6. Architectural Documentation
+
+For deep technical insights, refer to:
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — System decomposition, CP-SAT mathematical model, and state flow.
+- [docs/API_GUIDE.md](docs/API_GUIDE.md) — Complete REST API reference, request/response schemas, and error codes.
+- [docs/TESTING_AND_QUALITY_REPORT.md](docs/TESTING_AND_QUALITY_REPORT.md) — Complete quality audit and verification records.

@@ -30,16 +30,16 @@ const STEPS = [
 
 export const LandingHowItWorks: React.FC = () => {
   return (
-    <section id="how-it-works" className="py-24 bg-slate-950 border-t border-slate-800/80">
+    <section id="how-it-works" className="py-24 bg-white border-t border-zinc-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-bold text-blue-400 uppercase tracking-widest font-mono">
+          <span className="text-xs font-bold text-zinc-900 uppercase tracking-widest font-mono">
             Workflow
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-zinc-950 tracking-tight">
             From Examination Setup to Final Seating Plan
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+          <p className="text-zinc-600 text-sm sm:text-base leading-relaxed">
             A structured four-step process built to handle multi-hall examination logistics seamlessly.
           </p>
         </div>
@@ -50,19 +50,19 @@ export const LandingHowItWorks: React.FC = () => {
             return (
               <div
                 key={idx}
-                className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between relative group hover:border-slate-700 transition-all"
+                className="bg-zinc-50/80 hover:bg-white border border-zinc-200 hover:border-zinc-400 rounded-2xl p-6 flex flex-col justify-between relative group transition-all shadow-sm hover:shadow-md"
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">
-                    <span className="text-2xl font-black font-mono text-blue-500/80 group-hover:text-blue-400 transition-colors">
+                    <span className="text-2xl font-black font-mono text-zinc-400 group-hover:text-black transition-colors">
                       {step.number}
                     </span>
-                    <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-zinc-200/80 border border-zinc-300/80 flex items-center justify-center text-zinc-800 group-hover:bg-black group-hover:text-white group-hover:border-black transition-all">
                       <Icon className="w-5 h-5" />
                     </div>
                   </div>
-                  <h3 className="text-base font-bold text-white mb-2">{step.title}</h3>
-                  <p className="text-slate-400 text-xs leading-relaxed">{step.desc}</p>
+                  <h3 className="text-base font-bold text-zinc-950 mb-2">{step.title}</h3>
+                  <p className="text-zinc-600 text-xs leading-relaxed">{step.desc}</p>
                 </div>
               </div>
             );

@@ -10,7 +10,7 @@ import { LandingFooter } from '../components/landing/Footer';
 
 export const LandingPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-white text-zinc-900 font-sans selection:bg-zinc-900 selection:text-white">
       <LandingNavbar />
       <main>
         <LandingHero />

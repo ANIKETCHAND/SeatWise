@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { INITIAL_PROGRAMS, PERIOD_TIMINGS } from '../data/universityData';
 import { api } from '../services/api';
+import { useNotification } from '../context/NotificationContext';
+import { exportTableToCsv } from '../utils/exportHelpers';
 
 interface AssignedSeat {
   seat_label: string;
@@ -30,6 +32,7 @@ interface AssignedSeat {
 }
 
 export const ClassroomSeatingPage: React.FC = () => {
+  const { showNotification } = useNotification();
   const [searchParams] = useSearchParams();
   const planIdFromQuery = searchParams.get('plan_id');
 
@@ -235,30 +238,33 @@ export const ClassroomSeatingPage: React.FC = () => {
         setSavedPlanId(res.plan_id);
       }
       setFeedback(`Classroom seating plan for ${resolvedSession.room} (${period}) saved to database.`);
-    } catch {
+      showNotification('success', `Classroom plan saved for ${resolvedSession.room} (${period}).`);
+    } catch (err: any) {
       setFeedback(`Classroom seating plan for ${resolvedSession.room} (${period}) archived.`);
+      showNotification('warning', `Plan saved locally (${err?.message || 'Database sync failed'})`);
     }
     setTimeout(() => setFeedback(null), 4000);
   };
 
   const exportCsv = () => {
-    const headers = ['Roll Number', 'Student Name', 'Seat Label', 'Row', 'Column', 'Attendance Status'];
-    const rows = Object.values(assignments).map((a) => [
-      a.student_roll,
-      `"${a.student_name}"`,
-      a.seat_label,
-      a.row,
-      a.col,
-      a.is_absent ? 'Absent' : 'Present',
-    ]);
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `classroom_seating_${program}_s${semester}${section}_${period}_${date}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const headers = [
+      { key: 'student_roll', label: 'Roll Number' },
+      { key: 'student_name', label: 'Student Name' },
+      { key: 'seat_label', label: 'Seat Label' },
+      { key: 'row', label: 'Row' },
+      { key: 'col', label: 'Column' },
+      { key: 'attendance_status', label: 'Attendance Status' },
+    ];
+    const data = Object.values(assignments).map((a) => ({
+      ...a,
+      attendance_status: a.is_absent ? 'Absent' : 'Present',
+    }));
+    exportTableToCsv(
+      data,
+      headers,
+      `classroom_seating_${program}_s${semester}${section}_${period}_${date}.csv`
+    );
+    showNotification('success', 'Classroom seating roster exported to CSV successfully.');
   };
 
   const absentCount = Object.values(assignments).filter((s) => s.is_absent).length;

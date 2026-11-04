@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Room } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
 import { api } from '../services/api';
 
 const INITIAL_ROOMS: Room[] = [
@@ -26,6 +27,7 @@ const INITIAL_ROOMS: Room[] = [
 
 export const RoomsPage: React.FC = () => {
   const { isAdmin } = useAuth();
+  const { showNotification } = useNotification();
   const [rooms, setRooms] = useState<Room[]>(INITIAL_ROOMS);
   const [activeTab, setActiveTab] = useState<'all' | 'exam' | 'classroom' | 'lab'>('all');
   const [selectedRoom, setSelectedRoom] = useState<Room>(INITIAL_ROOMS[0]);
@@ -121,9 +123,16 @@ export const RoomsPage: React.FC = () => {
       rows: editorRows,
       columns: editorCols,
       blocked: Array.from(blockedSeats),
-    }).catch(() => {});
+    })
+      .then(() => {
+        setEditorFeedback(`Room layout for ${selectedRoom.room_number} saved. Usable seats: ${usable}/${total}.`);
+        showNotification('success', `Room layout for ${selectedRoom.room_number} saved.`);
+      })
+      .catch((err: any) => {
+        setEditorFeedback(`Room layout for ${selectedRoom.room_number} updated locally.`);
+        showNotification('warning', `Layout updated locally (${err.message || 'Database sync failed'})`);
+      });
 
-    setEditorFeedback(`Room layout for ${selectedRoom.room_number} saved. Usable seats: ${usable}/${total}.`);
     setTimeout(() => setEditorFeedback(null), 4000);
   };
 

@@ -1,16 +1,15 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   GraduationCap,
   Users,
   DoorClosed,
-  CalendarDays,
   FileCheck2,
   Armchair,
   ArrowRight,
-  TrendingUp,
   Activity,
   CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import {
   BarChart,
@@ -23,76 +22,19 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { api } from '../services/api';
+import { useDashboardStats } from '../hooks/useDashboardStats';
+import { StatCard } from '../components/common/StatCard';
+import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { EmptyState } from '../components/common/EmptyState';
+import { StatusBadge } from '../components/common/StatusBadge';
 import { INITIAL_PROGRAMS, TOTAL_BATCHES_COUNT, TOTAL_PROGRAMS_COUNT } from '../data/universityData';
 
 export const DashboardPage: React.FC = () => {
-  const [stats, setStats] = useState<any>({
-    total_examinations: 0,
-    total_students: 0,
-    total_exam_halls: 0,
-    seating_plans_generated: 0,
-    upcoming_exams: 0,
-    occupied_seats: 0,
-    available_seats: 0,
-    unallocated_students: 0,
-    hall_utilization: 0,
-    programs: TOTAL_PROGRAMS_COUNT,
-    batches: TOTAL_BATCHES_COUNT,
-    students: 0,
-    rooms: 0,
-    exam_halls: 0,
-    timetable_entries: 0,
-  });
-  const [upcomingExams, setUpcomingExams] = useState<any[]>([]);
-  const [recentPlans, setRecentPlans] = useState<any[]>([]);
-  const [isConnected, setIsConnected] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [chartsData, setChartsData] = useState<any>({
-    students_by_program: [],
-    students_by_semester: [],
-    hall_utilization: [],
-    plans_by_status: [],
-  });
-
-  useEffect(() => {
-    api.getDashboardStats()
-      .then((data) => {
-        if (data) {
-          setIsConnected(data.is_connected !== false);
-          if (data.counts) {
-            setStats({
-              total_examinations: data.counts.total_examinations ?? data.counts.examinations ?? (data.upcoming_exams?.length || 0),
-              total_students: data.counts.total_students ?? data.counts.students ?? 0,
-              total_exam_halls: data.counts.total_exam_halls ?? data.counts.exam_halls ?? 0,
-              seating_plans_generated: data.counts.seating_plans_generated ?? (data.recent_plans?.length || 0),
-              upcoming_exams: data.upcoming_exams?.length ?? 0,
-              occupied_seats: data.counts.occupied_seats ?? 0,
-              available_seats: data.counts.available_seats ?? 0,
-              unallocated_students: data.counts.unallocated_students ?? 0,
-              hall_utilization: data.counts.hall_utilization ?? 0,
-              programs: data.counts.programs ?? 0,
-              batches: data.counts.batches ?? 0,
-              students: data.counts.students ?? 0,
-              rooms: data.counts.classrooms ?? 0,
-              exam_halls: data.counts.exam_halls ?? 0,
-              timetable_entries: data.counts.timetable_entries ?? 0,
-            });
-          }
-          if (data.upcoming_exams) setUpcomingExams(data.upcoming_exams);
-          if (data.recent_plans) setRecentPlans(data.recent_plans);
-          if (data.charts) setChartsData(data.charts);
-        }
-      })
-      .catch(() => {
-        setIsConnected(false);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  const { stats, upcomingExams, recentPlans, chartsData, loading, error, refetch } = useDashboardStats();
 
   const programChartData = useMemo(() => {
     if (chartsData.students_by_program && chartsData.students_by_program.length > 0) {
-      return chartsData.students_by_program.map((p: any) => ({
+      return chartsData.students_by_program.map((p) => ({
         name: p.program,
         batches: p.count,
       }));
@@ -106,7 +48,7 @@ export const DashboardPage: React.FC = () => {
   const pieData = useMemo(() => {
     if (chartsData.students_by_program && chartsData.students_by_program.length > 0) {
       const palette = ['#3b82f6', '#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
-      return chartsData.students_by_program.slice(0, 5).map((p: any, idx: number) => ({
+      return chartsData.students_by_program.slice(0, 5).map((p, idx) => ({
         name: p.program,
         value: p.count,
         color: palette[idx % palette.length],
@@ -122,13 +64,57 @@ export const DashboardPage: React.FC = () => {
   }, [chartsData]);
 
   const quickStats = [
-    { label: 'Total Examinations', value: stats.total_examinations, sub: `${stats.upcoming_exams} upcoming sessions`, icon: FileCheck2, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Total Enrolled Students', value: stats.total_students, sub: `${stats.unallocated_students} pending allocation`, icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { label: 'Examination Halls', value: stats.total_exam_halls, sub: `${stats.hall_utilization}% overall utilization`, icon: DoorClosed, color: 'text-purple-600', bg: 'bg-purple-50' },
-    { label: 'Plans Generated', value: stats.seating_plans_generated, sub: 'Validated seating schedules', icon: Activity, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Occupied Desk Seats', value: stats.occupied_seats, sub: `${stats.available_seats} available exam desks`, icon: Armchair, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { label: 'Academic Batches', value: stats.batches || TOTAL_BATCHES_COUNT, sub: `${stats.programs || TOTAL_PROGRAMS_COUNT} degree programs`, icon: GraduationCap, color: 'text-rose-600', bg: 'bg-rose-50' },
+    {
+      title: 'Total Examinations',
+      value: stats.total_examinations,
+      subtitle: `${stats.upcoming_exams} upcoming sessions`,
+      icon: FileCheck2,
+      iconColor: 'text-blue-600 bg-blue-50 border-blue-100',
+    },
+    {
+      title: 'Total Enrolled Students',
+      value: stats.total_students,
+      subtitle: `${stats.unallocated_students} pending allocation`,
+      icon: Users,
+      iconColor: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+    },
+    {
+      title: 'Examination Halls',
+      value: stats.total_exam_halls,
+      subtitle: `${stats.hall_utilization}% overall utilization`,
+      icon: DoorClosed,
+      iconColor: 'text-purple-600 bg-purple-50 border-purple-100',
+    },
+    {
+      title: 'Plans Generated',
+      value: stats.seating_plans_generated,
+      subtitle: 'Validated seating schedules',
+      icon: Activity,
+      iconColor: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+    },
+    {
+      title: 'Occupied Desk Seats',
+      value: stats.occupied_seats,
+      subtitle: `${stats.available_seats} available exam desks`,
+      icon: Armchair,
+      iconColor: 'text-amber-600 bg-amber-50 border-amber-100',
+    },
+    {
+      title: 'Academic Batches',
+      value: stats.batches || TOTAL_BATCHES_COUNT,
+      subtitle: `${stats.programs || TOTAL_PROGRAMS_COUNT} degree programs`,
+      icon: GraduationCap,
+      iconColor: 'text-rose-600 bg-rose-50 border-rose-100',
+    },
   ];
+
+  if (loading && stats.total_students === 0) {
+    return (
+      <div className="min-h-[500px] flex items-center justify-center">
+        <LoadingSpinner size="lg" label="Loading SeatWise Dashboard Metrics..." />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -166,30 +152,33 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
+      {error && (
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>Using offline default metrics: {error}</span>
+          </div>
+          <button
+            onClick={() => refetch()}
+            className="px-3 py-1 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 transition"
+          >
+            Retry Sync
+          </button>
+        </div>
+      )}
+
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {quickStats.map((kpi, idx) => {
-          const Icon = kpi.icon;
-          return (
-            <div
-              key={idx}
-              className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs hover:border-slate-300 transition-all"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                  {kpi.label}
-                </span>
-                <div className={`p-2 rounded-lg ${kpi.bg}`}>
-                  <Icon className={`w-4 h-4 ${kpi.color}`} />
-                </div>
-              </div>
-              <div className="text-2xl font-bold text-slate-800 tracking-tight">
-                {kpi.value.toLocaleString()}
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1 font-medium">{kpi.sub}</p>
-            </div>
-          );
-        })}
+        {quickStats.map((kpi, idx) => (
+          <StatCard
+            key={idx}
+            title={kpi.title}
+            value={kpi.value.toLocaleString()}
+            subtitle={kpi.subtitle}
+            icon={kpi.icon}
+            iconColor={kpi.iconColor}
+          />
+        ))}
       </div>
 
       {/* Analytics & Charts */}
@@ -296,17 +285,15 @@ export const DashboardPage: React.FC = () => {
                       {exam.exam_date} • Session: {exam.session}
                     </p>
                   </div>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${exam.status === 'allocated' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                    {exam.status || 'Draft'}
-                  </span>
+                  <StatusBadge status={exam.status || 'draft'} />
                 </div>
               ))
             ) : (
-              <div className="p-6 text-center border border-dashed border-slate-200 rounded-lg text-slate-400 text-xs">
-                <FileCheck2 className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                <p className="font-semibold text-slate-600">No scheduled examinations found</p>
-                <p className="mt-1 text-[11px]">Use Examination Management to create upcoming exam sessions.</p>
-              </div>
+              <EmptyState
+                icon={FileCheck2}
+                title="No scheduled examinations found"
+                description="Use Examination Management to create upcoming exam sessions."
+              />
             )}
           </div>
         </div>
@@ -328,7 +315,9 @@ export const DashboardPage: React.FC = () => {
                 <div key={i} className="p-3.5 rounded-lg border border-slate-200/70 bg-slate-50/50 flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-800">{plan.kind === 'examination' ? (plan.examinations?.name || 'Exam Seating Plan') : 'Classroom Seating'}</span>
+                      <span className="text-xs font-bold text-slate-800">
+                        {plan.kind === 'examination' ? (plan.examinations?.name || 'Exam Seating Plan') : 'Classroom Seating'}
+                      </span>
                       <span className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-200 text-slate-700 rounded">
                         {plan.id ? plan.id.slice(0, 8) : 'PLAN'}
                       </span>
@@ -344,11 +333,11 @@ export const DashboardPage: React.FC = () => {
                 </div>
               ))
             ) : (
-              <div className="p-6 text-center border border-dashed border-slate-200 rounded-lg text-slate-400 text-xs">
-                <Armchair className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                <p className="font-semibold text-slate-600">No seating plans generated yet</p>
-                <p className="mt-1 text-[11px]">Generate seating via Classroom Seating (Mode A) or Exam Seating (Mode B).</p>
-              </div>
+              <EmptyState
+                icon={Armchair}
+                title="No seating plans generated yet"
+                description="Generate seating via Classroom Seating (Mode A) or Exam Seating (Mode B)."
+              />
             )}
           </div>
         </div>
@@ -356,3 +345,5 @@ export const DashboardPage: React.FC = () => {
     </div>
   );
 };
+
+export default DashboardPage;

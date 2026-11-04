@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { Faculty } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
+import { Modal } from '../components/common/Modal';
 import { api } from '../services/api';
 import cseFacultyData from '../data/cse_faculty_data.json';
 
@@ -27,6 +29,7 @@ const INITIAL_FACULTY: Faculty[] = (cseFacultyData as any[]).map((f) => ({
 
 export const FacultyPage: React.FC = () => {
   const { isAdmin } = useAuth();
+  const { showNotification } = useNotification();
   const [facultyList, setFacultyList] = useState<Faculty[]>(INITIAL_FACULTY);
   const [search, setSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -36,7 +39,6 @@ export const FacultyPage: React.FC = () => {
     department: 'Computer Science and Engineering',
     assigned_subjects: '',
   });
-  const [notification, setNotification] = useState<string | null>(null);
 
   useEffect(() => {
     api.getFaculty()
@@ -69,15 +71,20 @@ export const FacultyPage: React.FC = () => {
       is_active: true,
     };
     setFacultyList([created, ...facultyList]);
+    setShowAddModal(false);
+    setNewFaculty({ full_name: '', email: '', department: 'Computer Science and Engineering', assigned_subjects: '' });
+
     api.createFaculty({
       full_name: created.full_name,
       email: created.email,
       department: created.department,
-    }).catch(() => {});
-    setShowAddModal(false);
-    setNewFaculty({ full_name: '', email: '', department: 'Computer Science and Engineering', assigned_subjects: '' });
-    setNotification(`Faculty member ${created.full_name} registered successfully.`);
-    setTimeout(() => setNotification(null), 3000);
+    })
+      .then(() => {
+        showNotification('success', `Faculty member ${created.full_name} registered successfully.`);
+      })
+      .catch((err: any) => {
+        showNotification('warning', `Local faculty created (${err.message || 'Database sync failed'})`);
+      });
   };
 
   return (
@@ -104,13 +111,6 @@ export const FacultyPage: React.FC = () => {
           </button>
         )}
       </div>
-
-      {notification && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-lg flex items-center gap-2">
-          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-          {notification}
-        </div>
-      )}
 
       {/* Search Toolbar */}
       <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center justify-between">
@@ -201,7 +201,7 @@ export const FacultyPage: React.FC = () => {
                 <button
                   onClick={() => {
                     setFacultyList(facultyList.filter((item) => item.id !== f.id));
-                    setNotification(`Faculty ${f.full_name} record updated.`);
+                    showNotification('info', `Faculty ${f.full_name} deactivated.`);
                   }}
                   className="text-slate-500 hover:text-rose-600 font-medium"
                 >
@@ -215,69 +215,69 @@ export const FacultyPage: React.FC = () => {
       </div>
 
       {/* Add Faculty Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-slate-200 animate-scale-up">
-            <h3 className="text-sm font-bold text-slate-800 mb-1">Add Faculty Member</h3>
-            <p className="text-xs text-slate-500 mb-4">Register an instructor into the university department.</p>
-            <form onSubmit={handleAdd} className="space-y-3">
-              <div>
-                <label className="text-xs font-semibold text-slate-700">Full Name *</label>
-                <input
-                  required
-                  placeholder="Dr. Sunita Rao"
-                  value={newFaculty.full_name}
-                  onChange={(e) => setNewFaculty({ ...newFaculty, full_name: e.target.value })}
-                  className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-slate-700">Email Address</label>
-                <input
-                  type="email"
-                  placeholder="sunita.rao@jainuniversity.ac.in"
-                  value={newFaculty.email}
-                  onChange={(e) => setNewFaculty({ ...newFaculty, email: e.target.value })}
-                  className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-slate-700">Department *</label>
-                <input
-                  required
-                  value={newFaculty.department}
-                  onChange={(e) => setNewFaculty({ ...newFaculty, department: e.target.value })}
-                  className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-slate-700">Assigned Subjects (comma-separated)</label>
-                <input
-                  placeholder="Cloud Computing, Virtualization, DevOps Lab"
-                  value={newFaculty.assigned_subjects}
-                  onChange={(e) => setNewFaculty({ ...newFaculty, assigned_subjects: e.target.value })}
-                  className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-1.5 text-xs bg-primary-600 hover:bg-primary-500 text-white font-medium rounded-lg shadow-xs"
-                >
-                  Save Faculty
-                </button>
-              </div>
-            </form>
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title="Add Faculty Member"
+        description="Register an instructor into the university department."
+        maxWidth="md"
+      >
+        <form onSubmit={handleAdd} className="space-y-3">
+          <div>
+            <label className="text-xs font-semibold text-slate-700">Full Name *</label>
+            <input
+              required
+              placeholder="Dr. Sunita Rao"
+              value={newFaculty.full_name}
+              onChange={(e) => setNewFaculty({ ...newFaculty, full_name: e.target.value })}
+              className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
+            />
           </div>
-        </div>
-      )}
+          <div>
+            <label className="text-xs font-semibold text-slate-700">Email Address</label>
+            <input
+              type="email"
+              placeholder="sunita.rao@jainuniversity.ac.in"
+              value={newFaculty.email}
+              onChange={(e) => setNewFaculty({ ...newFaculty, email: e.target.value })}
+              className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-slate-700">Department *</label>
+            <input
+              required
+              value={newFaculty.department}
+              onChange={(e) => setNewFaculty({ ...newFaculty, department: e.target.value })}
+              className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-slate-700">Assigned Subjects (comma-separated)</label>
+            <input
+              placeholder="Cloud Computing, Virtualization, DevOps Lab"
+              value={newFaculty.assigned_subjects}
+              onChange={(e) => setNewFaculty({ ...newFaculty, assigned_subjects: e.target.value })}
+              className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-3">
+            <button
+              type="button"
+              onClick={() => setShowAddModal(false)}
+              className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-1.5 text-xs bg-primary-600 hover:bg-primary-500 text-white font-medium rounded-lg shadow-xs"
+            >
+              Save Faculty
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

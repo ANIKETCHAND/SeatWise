@@ -15,6 +15,9 @@ import {
 import { INITIAL_PROGRAMS } from '../data/universityData';
 import { Student } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
+import { Modal } from '../components/common/Modal';
+import { exportTableToCsv } from '../utils/exportHelpers';
 import { api } from '../services/api';
 
 // Verified sample roster clearly labeled per Section 8 specification
@@ -35,6 +38,7 @@ const SAMPLE_STUDENTS: Student[] = [
 
 export const StudentPage: React.FC = () => {
   const { role } = useAuth();
+  const { showNotification } = useNotification();
   const isStaff = role === 'admin' || role === 'exam_staff';
 
   const [students, setStudents] = useState<Student[]>(SAMPLE_STUDENTS);
@@ -44,7 +48,6 @@ export const StudentPage: React.FC = () => {
   const [filterSection, setFilterSection] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   useEffect(() => {
     api.getStudents()
@@ -84,8 +87,7 @@ export const StudentPage: React.FC = () => {
   const handleAddStudent = (e: React.FormEvent) => {
     e.preventDefault();
     if (students.some((s) => s.roll_number.toUpperCase() === newStudent.roll_number.toUpperCase())) {
-      setNotification({ type: 'error', message: `Duplicate roll number: ${newStudent.roll_number} already exists!` });
-      setTimeout(() => setNotification(null), 4000);
+      showNotification('error', `Duplicate roll number: ${newStudent.roll_number} already exists!`);
       return;
     }
 
@@ -103,6 +105,9 @@ export const StudentPage: React.FC = () => {
     };
 
     setStudents([student, ...students]);
+    setShowAddModal(false);
+    setNewStudent({ roll_number: '', full_name: '', program_code: 'AIML', semester: 3, section: 'A', email: '', phone: '' });
+
     api.createStudent({
       roll_number: student.roll_number,
       full_name: student.full_name,
@@ -111,33 +116,32 @@ export const StudentPage: React.FC = () => {
       section: student.section,
       email: student.email,
       phone: student.phone,
-    }).catch(() => {});
-    setShowAddModal(false);
-    setNewStudent({ roll_number: '', full_name: '', program_code: 'AIML', semester: 3, section: 'A', email: '', phone: '' });
-    setNotification({ type: 'success', message: `Student ${student.full_name} (${student.roll_number}) enrolled successfully.` });
-    setTimeout(() => setNotification(null), 4000);
+    })
+      .then(() => {
+        showNotification('success', `Student ${student.full_name} (${student.roll_number}) enrolled successfully.`);
+      })
+      .catch((err: any) => {
+        showNotification('warning', `Student enrolled locally (${err.message || 'Database sync failed'})`);
+      });
   };
 
   const exportCsv = () => {
-    const headers = ['Roll Number', 'Full Name', 'Program', 'Semester', 'Section', 'Email', 'Phone', 'Status'];
-    const rows = filteredStudents.map((s) => [
-      s.roll_number,
-      `"${s.full_name}"`,
-      s.program_code,
-      s.semester,
-      s.section,
-      s.email,
-      s.phone,
-      s.enrollment_status,
-    ]);
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `jain_students_roster_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const headers = [
+      { key: 'roll_number', label: 'Roll Number' },
+      { key: 'full_name', label: 'Full Name' },
+      { key: 'program_code', label: 'Program' },
+      { key: 'semester', label: 'Semester' },
+      { key: 'section', label: 'Section' },
+      { key: 'email', label: 'Email' },
+      { key: 'phone', label: 'Phone' },
+      { key: 'enrollment_status', label: 'Status' },
+    ];
+    exportTableToCsv(
+      filteredStudents,
+      headers,
+      `jain_students_roster_${new Date().toISOString().split('T')[0]}.csv`
+    );
+    showNotification('success', 'Student roster exported to CSV successfully.');
   };
 
   return (
@@ -180,23 +184,6 @@ export const StudentPage: React.FC = () => {
           )}
         </div>
       </div>
-
-      {notification && (
-        <div
-          className={`p-3 text-xs rounded-lg flex items-center gap-2 border ${
-            notification.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-              : 'bg-rose-50 text-rose-800 border-rose-200'
-          }`}
-        >
-          {notification.type === 'success' ? (
-            <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-          ) : (
-            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-          )}
-          {notification.message}
-        </div>
-      )}
 
       {/* Filter & Search Bar */}
       <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
@@ -315,8 +302,7 @@ export const StudentPage: React.FC = () => {
                       <button
                         onClick={() => {
                           setStudents(students.filter((item) => item.id !== s.id));
-                          setNotification({ type: 'success', message: `Student ${s.roll_number} deactivated.` });
-                          setTimeout(() => setNotification(null), 3000);
+                          showNotification('info', `Student ${s.roll_number} deactivated.`);
                         }}
                         className="text-xs text-rose-600 hover:text-rose-800 font-medium"
                       >
@@ -337,106 +323,106 @@ export const StudentPage: React.FC = () => {
       </div>
 
       {/* Add Student Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-slate-200 animate-scale-up">
-            <h3 className="text-sm font-bold text-slate-800 mb-1">Add Student Record</h3>
-            <p className="text-xs text-slate-500 mb-4">Enroll a student into a university program section.</p>
-            <form onSubmit={handleAddStudent} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-slate-700">Roll Number *</label>
-                  <input
-                    required
-                    placeholder="23JU0199"
-                    value={newStudent.roll_number}
-                    onChange={(e) => setNewStudent({ ...newStudent, roll_number: e.target.value })}
-                    className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 font-mono uppercase"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-700">Full Name *</label>
-                  <input
-                    required
-                    placeholder="Aditya Sharma"
-                    value={newStudent.full_name}
-                    onChange={(e) => setNewStudent({ ...newStudent, full_name: e.target.value })}
-                    className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-slate-700">Program *</label>
-                  <select
-                    value={newStudent.program_code}
-                    onChange={(e) => setNewStudent({ ...newStudent, program_code: e.target.value })}
-                    className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 bg-white"
-                  >
-                    {INITIAL_PROGRAMS.map((p) => (
-                      <option key={p.code} value={p.code}>
-                        {p.code}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-700">Semester *</label>
-                  <select
-                    value={newStudent.semester}
-                    onChange={(e) => setNewStudent({ ...newStudent, semester: Number(e.target.value) })}
-                    className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 bg-white"
-                  >
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
-                      <option key={s} value={s}>
-                        Sem {s}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-700">Section *</label>
-                  <input
-                    required
-                    maxLength={2}
-                    value={newStudent.section}
-                    onChange={(e) => setNewStudent({ ...newStudent, section: e.target.value.toUpperCase() })}
-                    className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 font-mono uppercase text-center"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-slate-700">Email Address</label>
-                <input
-                  type="email"
-                  placeholder="name@jainuniversity.ac.in"
-                  value={newStudent.email}
-                  onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
-                  className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-1.5 text-xs bg-primary-600 hover:bg-primary-500 text-white font-medium rounded-lg shadow-xs"
-                >
-                  Save Student
-                </button>
-              </div>
-            </form>
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title="Add Student Record"
+        description="Enroll a student into a university program section."
+        maxWidth="md"
+      >
+        <form onSubmit={handleAddStudent} className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold text-slate-700">Roll Number *</label>
+              <input
+                required
+                placeholder="23JU0199"
+                value={newStudent.roll_number}
+                onChange={(e) => setNewStudent({ ...newStudent, roll_number: e.target.value })}
+                className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 font-mono uppercase"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-700">Full Name *</label>
+              <input
+                required
+                placeholder="Aditya Sharma"
+                value={newStudent.full_name}
+                onChange={(e) => setNewStudent({ ...newStudent, full_name: e.target.value })}
+                className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
+              />
+            </div>
           </div>
-        </div>
-      )}
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs font-semibold text-slate-700">Program *</label>
+              <select
+                value={newStudent.program_code}
+                onChange={(e) => setNewStudent({ ...newStudent, program_code: e.target.value })}
+                className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 bg-white"
+              >
+                {INITIAL_PROGRAMS.map((p) => (
+                  <option key={p.code} value={p.code}>
+                    {p.code}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-700">Semester *</label>
+              <select
+                value={newStudent.semester}
+                onChange={(e) => setNewStudent({ ...newStudent, semester: Number(e.target.value) })}
+                className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 bg-white"
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
+                  <option key={s} value={s}>
+                    Sem {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-700">Section *</label>
+              <input
+                required
+                maxLength={2}
+                value={newStudent.section}
+                onChange={(e) => setNewStudent({ ...newStudent, section: e.target.value.toUpperCase() })}
+                className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 font-mono uppercase text-center"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-slate-700">Email Address</label>
+            <input
+              type="email"
+              placeholder="name@jainuniversity.ac.in"
+              value={newStudent.email}
+              onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
+              className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-3">
+            <button
+              type="button"
+              onClick={() => setShowAddModal(false)}
+              className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-1.5 text-xs bg-primary-600 hover:bg-primary-500 text-white font-medium rounded-lg shadow-xs"
+            >
+              Save Student
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };
