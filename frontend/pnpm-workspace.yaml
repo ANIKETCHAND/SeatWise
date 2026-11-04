@@ -1,4 +1,0 @@
-allowBuilds:
-  esbuild: set this to true or false
-minimumReleaseAgeExclude:
-  - gsap@3.15.1
