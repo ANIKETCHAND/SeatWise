@@ -1,0 +1,1692 @@
+[
+  {
+    "id": "FAC-CSE-001",
+    "full_name": "Anu",
+    "email": "anu@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Anu-19.jpg",
+    "filename": "Anu-19.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-002",
+    "full_name": "ArsheyM",
+    "email": "arsheym@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/ArsheyM.jpg",
+    "filename": "ArsheyM.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-003",
+    "full_name": "Bharath B",
+    "email": "bharath.b@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Bharath B.jpg",
+    "filename": "Bharath B.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-004",
+    "full_name": "Chandra C",
+    "email": "chandra.c@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Chandra C.jpg",
+    "filename": "Chandra C.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-005",
+    "full_name": "Dr. Devaraj Verma C",
+    "email": "dr.devaraj.verma.c@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Devaraj Verma C.jpg",
+    "filename": "Dr Devaraj Verma C.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-006",
+    "full_name": "Dr. Garima Sinha",
+    "email": "dr.garima.sinha@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Garima Sinha JPG.jpg",
+    "filename": "Dr Garima Sinha JPG.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-007",
+    "full_name": "Dr. Gowthul Alam",
+    "email": "dr.gowthul.alam@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Gowthul Alam.jpg",
+    "filename": "Dr Gowthul Alam.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-008",
+    "full_name": "Dr. Harinee S",
+    "email": "dr.harinee.s@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Harinee S.jpg",
+    "filename": "Dr Harinee S.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-009",
+    "full_name": "Dr. J Somasekar",
+    "email": "dr.j.somasekar@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr J Somasekar.jpg",
+    "filename": "Dr J Somasekar.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-010",
+    "full_name": "Dr.Janarthanan Sekar",
+    "email": "dr.janarthanan.sekar@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Janarthanan Sekar_CSE_SE_New - Dr.Janarthanan Sekar.jpg",
+    "filename": "Dr Janarthanan Sekar_CSE_SE_New - Dr.Janarthanan Sekar.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-011",
+    "full_name": "Dr. John Basha",
+    "email": "dr.john.basha@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr John Basha.jpg",
+    "filename": "Dr John Basha.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-012",
+    "full_name": "Dr. Jonnalagadda Ramesh Babu",
+    "email": "dr.jonnalagadda.ramesh.babu@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Jonnalagadda Ramesh Babu.jpg",
+    "filename": "Dr Jonnalagadda Ramesh Babu.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-013",
+    "full_name": "Dr. Kumaresan",
+    "email": "dr.kumaresan@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Kumaresan.jpg",
+    "filename": "Dr Kumaresan.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-014",
+    "full_name": "Dr. Mahesh TR",
+    "email": "dr.mahesh.tr@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Mahesh TR.jpg",
+    "filename": "Dr Mahesh TR.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-015",
+    "full_name": "Dr. Nakka Raja Praveen Kumar",
+    "email": "dr.nakka.raja.praveen.kumar@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Nakka Raja Praveen Kumar.jpg",
+    "filename": "Dr Nakka Raja Praveen Kumar.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-016",
+    "full_name": "Dr. Nishant Tripathi",
+    "email": "dr.nishant.tripathi@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Nishant Tripathi.jpg",
+    "filename": "Dr Nishant Tripathi.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-017",
+    "full_name": "Dr. Priya Satish",
+    "email": "dr.priya.satish@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Priya Satish.jpg",
+    "filename": "Dr Priya Satish.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-018",
+    "full_name": "Dr. R. Vijayanand",
+    "email": "dr.r.vijayanand@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr R. Vijayanand.jpg",
+    "filename": "Dr R. Vijayanand.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-019",
+    "full_name": "Dr. Rajanikanta Mohanty",
+    "email": "dr.rajanikanta.mohanty@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Rajanikanta Mohanty.jpg",
+    "filename": "Dr Rajanikanta Mohanty.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-020",
+    "full_name": "Dr. Renuka Devi S",
+    "email": "dr.renuka.devi.s@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Renukadevi S - Dr. Renuka Devi S.jpg",
+    "filename": "Dr Renukadevi S - Dr. Renuka Devi S.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-021",
+    "full_name": "Dr. Anthoniraj",
+    "email": "dr.anthoniraj@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr S ANTHONIRAJ - Dr. Anthoniraj.jpg",
+    "filename": "Dr S ANTHONIRAJ - Dr. Anthoniraj.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-022",
+    "full_name": "Dr. Santhosh S",
+    "email": "dr.santhosh.s@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Santhosh S.jpg",
+    "filename": "Dr Santhosh S.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-023",
+    "full_name": "Dr. Sonal Sharma",
+    "email": "dr.sonal.sharma@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Sonal Sharma.jpg",
+    "filename": "Dr Sonal Sharma.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-024",
+    "full_name": "Dr. Sowmya M S",
+    "email": "dr.sowmya.m.s@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Sowmya M S.jpg",
+    "filename": "Dr Sowmya M S.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-025",
+    "full_name": "Dr. Tamilvelan M",
+    "email": "dr.tamilvelan.m@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Tamilvelan M.jpg",
+    "filename": "Dr Tamilvelan M.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-026",
+    "full_name": "Dr. Vimala T",
+    "email": "dr.vimala.t@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr Vimala T.jpg",
+    "filename": "Dr Vimala T.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-027",
+    "full_name": "Dr. Preeti Gupta",
+    "email": "dr.preeti.gupta@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr-Preeti-Gupta-.jpg",
+    "filename": "Dr-Preeti-Gupta-.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-028",
+    "full_name": "Dr. Anita Chaturvedi",
+    "email": "dr.anita.chaturvedi@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Anita Chaturvedi.jpg",
+    "filename": "Dr. Anita Chaturvedi.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-029",
+    "full_name": "Dr. Archana Sasi",
+    "email": "dr.archana.sasi@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Archana Sasi.jpg",
+    "filename": "Dr. Archana Sasi.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-030",
+    "full_name": "Chayapathi A R",
+    "email": "chayapathi.a.r@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Dr. Chayapathi - Chayapathi A R.jpg",
+    "filename": "Dr. Chayapathi - Chayapathi A R.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-031",
+    "full_name": "Dr. G. Narendra Babu",
+    "email": "dr.g.narendra.babu@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. G. Narendra Babu.jpg",
+    "filename": "Dr. G. Narendra Babu.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-032",
+    "full_name": "Dr. Gabriela Sabatini. F",
+    "email": "dr.gabriela.sabatini.f@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Gabriela Sabatini. F.jpg",
+    "filename": "Dr. Gabriela Sabatini. F.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-033",
+    "full_name": "Dr. Isha Ganguli",
+    "email": "dr.isha.ganguli@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Isha Ganguli.jpg",
+    "filename": "Dr. Isha Ganguli.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-034",
+    "full_name": "Dr. K Manivannan",
+    "email": "dr.k.manivannan@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. K Manivannan.jpg",
+    "filename": "Dr. K Manivannan.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-035",
+    "full_name": "Dr. K. Janaki",
+    "email": "dr.k.janaki@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. K. Janaki.jpg",
+    "filename": "Dr. K. Janaki.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-036",
+    "full_name": "Dr. M Thangaraj",
+    "email": "dr.m.thangaraj@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. M Thangaraj.jpg",
+    "filename": "Dr. M Thangaraj.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-037",
+    "full_name": "Dr. Manikandan Parasuraman",
+    "email": "dr.manikandan.parasuraman@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Manikandan Parasuraman.jpg",
+    "filename": "Dr. Manikandan Parasuraman.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-038",
+    "full_name": "Dr. Moin Hasan",
+    "email": "dr.moin.hasan@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Moin Hasan.jpg",
+    "filename": "Dr. Moin Hasan.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-039",
+    "full_name": "Dr. N Satheesh",
+    "email": "dr.n.satheesh@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. N Satheesh_.jpg",
+    "filename": "Dr. N Satheesh_.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-040",
+    "full_name": "Dr. Pratham Majumder",
+    "email": "dr.pratham.majumder@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Pratham Majumder.jpg",
+    "filename": "Dr. Pratham Majumder.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-041",
+    "full_name": "Dr. Priyadharshini A",
+    "email": "dr.priyadharshini.a@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Priyadharshini A.jpg",
+    "filename": "Dr. Priyadharshini A.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-042",
+    "full_name": "Dr. Rajesh Appusamy",
+    "email": "dr.rajesh.appusamy@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Rajesh Appusamy.jpg",
+    "filename": "Dr. Rajesh Appusamy.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-043",
+    "full_name": "Dr. Ravi Kumar Y B",
+    "email": "dr.ravi.kumar.y.b@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Ravi Kumar Y B.jpg",
+    "filename": "Dr. Ravi Kumar Y B.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-044",
+    "full_name": "Dr. Renukadevi P",
+    "email": "dr.renukadevi.p@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Renukadevi P.jpg",
+    "filename": "Dr. Renukadevi P.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-045",
+    "full_name": "Dr. Rhea Srinivas",
+    "email": "dr.rhea.srinivas@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Rhea Srinivas.jpg",
+    "filename": "Dr. Rhea Srinivas.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-046",
+    "full_name": "Dr. S Jerald Nirmal Kumar",
+    "email": "dr.s.jerald.nirmal.kumar@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. S Jerald Nirmal Kumar.jpg",
+    "filename": "Dr. S Jerald Nirmal Kumar.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-047",
+    "full_name": "Dr. Sagar K G",
+    "email": "dr.sagar.k.g@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Sagar K G.jpg",
+    "filename": "Dr. Sagar K G.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-048",
+    "full_name": "Dr. Sankar K",
+    "email": "dr.sankar.k@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Sankar K.jpg",
+    "filename": "Dr. Sankar K.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-049",
+    "full_name": "Dr. Shivakumar C",
+    "email": "dr.shivakumar.c@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Shivakumar C_.jpg",
+    "filename": "Dr. Shivakumar C_.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-050",
+    "full_name": "Dr. Siddesha M S",
+    "email": "dr.siddesha.m.s@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Siddesha M S.jpg",
+    "filename": "Dr. Siddesha M S.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-051",
+    "full_name": "Dr. Sincy John",
+    "email": "dr.sincy.john@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Sincy John.jpg",
+    "filename": "Dr. Sincy John.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-052",
+    "full_name": "Dr. Sugumar Ramaiyan",
+    "email": "dr.sugumar.ramaiyan@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Sugumar Ramaiyan.jpg",
+    "filename": "Dr. Sugumar Ramaiyan.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-053",
+    "full_name": "Dr. Sunanda Das",
+    "email": "dr.sunanda.das@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Sunanda Das.jpg",
+    "filename": "Dr. Sunanda Das.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-054",
+    "full_name": "Dr. Suresh Kallam",
+    "email": "dr.suresh.kallam@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Suresh Kallam.jpg",
+    "filename": "Dr. Suresh Kallam.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-055",
+    "full_name": "Dr. Swati Gupta",
+    "email": "dr.swati.gupta@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. Swati Gupta.jpg",
+    "filename": "Dr. Swati Gupta.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-056",
+    "full_name": "Dr. T Jayanth Kumar",
+    "email": "dr.t.jayanth.kumar@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr. T Jayanth Kumar.jpg",
+    "filename": "Dr. T Jayanth Kumar.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-057",
+    "full_name": "Dr. Rajasimha Makaram",
+    "email": "dr.rajasimha.makaram@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr.-Rajasimha-Makaram.jpg",
+    "filename": "Dr.-Rajasimha-Makaram.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-058",
+    "full_name": "Dr. Srinivasa Rao P.",
+    "email": "dr.srinivasa.rao.p@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr.-Srinivasa-Rao-P.-.jpg",
+    "filename": "Dr.-Srinivasa-Rao-P.-.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-059",
+    "full_name": "Dr. V. Manikandan",
+    "email": "dr.v.manikandan@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr.-V.-Manikandan-.jpg",
+    "filename": "Dr.-V.-Manikandan-.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-060",
+    "full_name": "Dr.Kushal Chakraborty",
+    "email": "dr.kushal.chakraborty@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr.Kushal Chakraborty.jpg",
+    "filename": "Dr.Kushal Chakraborty.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-061",
+    "full_name": "Dr.Shajahan B",
+    "email": "dr.shajahan.b@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr.Shajahan B.jpg",
+    "filename": "Dr.Shajahan B.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-062",
+    "full_name": "Dr. Vaisakh Mohan",
+    "email": "dr.vaisakh.mohan@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Dr.Vaisakh_Mohan_K - Dr. Vaisakh Mohan.jpg",
+    "filename": "Dr.Vaisakh_Mohan_K - Dr. Vaisakh Mohan.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-063",
+    "full_name": "DrARajesh",
+    "email": "drarajesh@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/DrARajesh1.jpg",
+    "filename": "DrARajesh1.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-064",
+    "full_name": "DrASureshKuma",
+    "email": "drasureshkuma@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/DrASureshKuma.jpg",
+    "filename": "DrASureshKuma.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-065",
+    "full_name": "DrBalajeeA",
+    "email": "drbalajeea@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/DrBalajeeA.jpg",
+    "filename": "DrBalajeeA.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-066",
+    "full_name": "DrChandrasekarV",
+    "email": "drchandrasekarv@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/DrChandrasekarV.jpg",
+    "filename": "DrChandrasekarV.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-067",
+    "full_name": "DrPratheepKumarP",
+    "email": "drpratheepkumarp@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/DrPratheepKumarP.jpg",
+    "filename": "DrPratheepKumarP.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-068",
+    "full_name": "DrSKanithan",
+    "email": "drskanithan@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/DrSKanithan.jpg",
+    "filename": "DrSKanithan.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-069",
+    "full_name": "DrSanthoshKumar",
+    "email": "drsanthoshkumar@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/DrSanthoshKumar.jpg",
+    "filename": "DrSanthoshKumar.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-070",
+    "full_name": "DrSreerakuvandana",
+    "email": "drsreerakuvandana@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/DrSreerakuvandana.jpg",
+    "filename": "DrSreerakuvandana.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-071",
+    "full_name": "DrsSaravanakumar",
+    "email": "drssaravanakumar@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/DrsSaravanakumar.jpg",
+    "filename": "DrsSaravanakumar.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-072",
+    "full_name": "GovindSMenon",
+    "email": "govindsmenon@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/GovindSMenon.jpg",
+    "filename": "GovindSMenon.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-073",
+    "full_name": "Govindaraju MK",
+    "email": "govindaraju.mk@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Govindaraju MK.jpg",
+    "filename": "Govindaraju MK.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-074",
+    "full_name": "Guruvammal S",
+    "email": "guruvammal.s@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Guru_April 2024 - Guruvammal S.jpg",
+    "filename": "Guru_April 2024 - Guruvammal S.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-075",
+    "full_name": "Mr. Harsha S V",
+    "email": "mr.harsha.s.v@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/HARSHA S V - Mr. Harsha S V (1).jpg",
+    "filename": "HARSHA S V - Mr. Harsha S V (1).jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-076",
+    "full_name": "Harshitha B",
+    "email": "harshitha.b@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Harshitha B.jpg",
+    "filename": "Harshitha B.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-077",
+    "full_name": "Himanshu Verma",
+    "email": "himanshu.verma@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Himanshu Verma.jpg",
+    "filename": "Himanshu Verma.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-078",
+    "full_name": "Dr.Ravikumar Sethuraman",
+    "email": "dr.ravikumar.sethuraman@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/IMG-20240529-WA0035 - Dr.Ravikumar Sethuraman.jpg",
+    "filename": "IMG-20240529-WA0035 - Dr.Ravikumar Sethuraman.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-079",
+    "full_name": "LidiyaTV",
+    "email": "lidiyatv@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/LidiyaTV.jpg",
+    "filename": "LidiyaTV.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-080",
+    "full_name": "Manjula",
+    "email": "manjula@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Manjula.jpg",
+    "filename": "Manjula.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-081",
+    "full_name": "Manjunatha H N",
+    "email": "manjunatha.h.n@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Manjunatha H N.jpg",
+    "filename": "Manjunatha H N.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-082",
+    "full_name": "Mazhar Abbas",
+    "email": "mazhar.abbas@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Mazhar Abbas.jpg",
+    "filename": "Mazhar Abbas.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-083",
+    "full_name": "Mr. Abhishek M",
+    "email": "mr.abhishek.m@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Mr. Abhishek M.jpg",
+    "filename": "Mr. Abhishek M.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-084",
+    "full_name": "Mr. Ananda V M",
+    "email": "mr.ananda.v.m@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Mr. Ananda V M.jpg",
+    "filename": "Mr. Ananda V M.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-085",
+    "full_name": "Mr. Azhar Hussain Mozumder",
+    "email": "mr.azhar.hussain.mozumder@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Mr. Azhar Hussain Mozumder.jpg",
+    "filename": "Mr. Azhar Hussain Mozumder.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-086",
+    "full_name": "Mr. Basavaraju D. R",
+    "email": "mr.basavaraju.d.r@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Mr. Basavaraju D. R_.jpg",
+    "filename": "Mr. Basavaraju D. R_.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-087",
+    "full_name": "Mr. Nagendra Rao",
+    "email": "mr.nagendra.rao@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Mr. Nagendra Rao.jpg",
+    "filename": "Mr. Nagendra Rao.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-088",
+    "full_name": "Mr. Narasimhayya B E",
+    "email": "mr.narasimhayya.b.e@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Mr. Narasimhayya B E.jpg",
+    "filename": "Mr. Narasimhayya B E.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-089",
+    "full_name": "Mr. PuttaMadaiah",
+    "email": "mr.puttamadaiah@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Mr. PuttaMadaiah.jpg",
+    "filename": "Mr. PuttaMadaiah.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-090",
+    "full_name": "Mr. Shantha Kumar",
+    "email": "mr.shantha.kumar@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Mr. Shantha Kumar.jpg",
+    "filename": "Mr. Shantha Kumar.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-091",
+    "full_name": "MrAbhisekMidya",
+    "email": "mrabhisekmidya@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/MrAbhisekMidya.jpg",
+    "filename": "MrAbhisekMidya.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-092",
+    "full_name": "MrSareshKumarS",
+    "email": "mrsareshkumars@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/MrSareshKumarS.jpg",
+    "filename": "MrSareshKumarS.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-093",
+    "full_name": "MrVairavelChenniyappan",
+    "email": "mrvairavelchenniyappan@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/MrVairavelChenniyappan.jpg",
+    "filename": "MrVairavelChenniyappan.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-094",
+    "full_name": "MrVasanthRavi",
+    "email": "mrvasanthravi@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/MrVasanthRavi.jpg",
+    "filename": "MrVasanthRavi.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-095",
+    "full_name": "Mrs. Shashikala H K",
+    "email": "mrs.shashikala.h.k@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Mrs  Shashikala H K.jpg",
+    "filename": "Mrs  Shashikala H K.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-096",
+    "full_name": "Mrs. Chitali Dey",
+    "email": "mrs.chitali.dey@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Mrs. Chitali Dey.jpg",
+    "filename": "Mrs. Chitali Dey.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-097",
+    "full_name": "Ms. Sunena Rose M V",
+    "email": "ms.sunena.rose.m.v@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Ms. Sunena Rose M V.jpg",
+    "filename": "Ms. Sunena Rose M V.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-098",
+    "full_name": "Babu N S",
+    "email": "babu.n.s@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/N.Satishbabu - Babu N S.jpg",
+    "filename": "N.Satishbabu - Babu N S.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-099",
+    "full_name": "Namitha R",
+    "email": "namitha.r@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Namitha R.jpg",
+    "filename": "Namitha R.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-100",
+    "full_name": "NinithaMaryAntoninaNM",
+    "email": "ninithamaryantoninanm@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/NinithaMaryAntoninaNM.jpg",
+    "filename": "NinithaMaryAntoninaNM.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-101",
+    "full_name": "Prof. Baba Fakruddin Ali B H",
+    "email": "prof.baba.fakruddin.ali.b.h@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Professor",
+    "photo_url": "/faculty_photos/Prof. Baba Fakruddin Ali B H.jpg",
+    "filename": "Prof. Baba Fakruddin Ali B H.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-102",
+    "full_name": "Prof. Geetha Rani Kanagaraj",
+    "email": "prof.geetha.rani.kanagaraj@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Professor",
+    "photo_url": "/faculty_photos/Prof. Geetha Rani Kanagaraj.jpg",
+    "filename": "Prof. Geetha Rani Kanagaraj.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-103",
+    "full_name": "Prof. Junaid Rasool",
+    "email": "prof.junaid.rasool@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Professor",
+    "photo_url": "/faculty_photos/Prof. Junaid Rasool.jpg",
+    "filename": "Prof. Junaid Rasool.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-104",
+    "full_name": "Prof. K J Ghanashyam",
+    "email": "prof.k.j.ghanashyam@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Professor",
+    "photo_url": "/faculty_photos/Prof. K J Ghanashyam.jpg",
+    "filename": "Prof. K J Ghanashyam.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-105",
+    "full_name": "Ramesh K",
+    "email": "ramesh.k@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Ramesh K.jpg",
+    "filename": "Ramesh K.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-106",
+    "full_name": "Dr. Ramya Dorai",
+    "email": "dr.ramya.dorai@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Ramya Dorai - Dr. Ramya Dorai.jpg",
+    "filename": "Ramya Dorai - Dr. Ramya Dorai.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-107",
+    "full_name": "Ramya Muniyandi",
+    "email": "ramya.muniyandi@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Ramya Muniyandi.jpg",
+    "filename": "Ramya Muniyandi.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-108",
+    "full_name": "Ranjushree T S",
+    "email": "ranjushree.t.s@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Ranjushree T S.jpg",
+    "filename": "Ranjushree T S.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-109",
+    "full_name": "ShaikDilchashmi",
+    "email": "shaikdilchashmi@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/ShaikDilchashmi.jpg",
+    "filename": "ShaikDilchashmi.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-110",
+    "full_name": "Dr.Shivam Swarup",
+    "email": "dr.shivam.swarup@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/Shivam Swarup Passport Photo - Dr.Shivam Swarup.jpg",
+    "filename": "Shivam Swarup Passport Photo - Dr.Shivam Swarup.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-111",
+    "full_name": "Surabhi A",
+    "email": "surabhi.a@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Surabhi A.jpg",
+    "filename": "Surabhi A.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-112",
+    "full_name": "TVRaman",
+    "email": "tvraman@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/TVRaman1.jpg",
+    "filename": "TVRaman1.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-113",
+    "full_name": "Vinay M S",
+    "email": "vinay.m.s@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/Vinay M S.jpg",
+    "filename": "Vinay M S.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-114",
+    "full_name": "ajay k",
+    "email": "ajay.k@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/ajay-k.jpg",
+    "filename": "ajay-k.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-115",
+    "full_name": "avijaykumar",
+    "email": "avijaykumar@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/avijaykumar.jpg",
+    "filename": "avijaykumar.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-116",
+    "full_name": "dammi",
+    "email": "dammi@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/dammi.jpg",
+    "filename": "dammi.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-117",
+    "full_name": "Dr. ajay kumar singh",
+    "email": "dr.ajay.kumar.singh@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-ajay-kumar-singh.jpg",
+    "filename": "dr-ajay-kumar-singh.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-118",
+    "full_name": "Dr. anitha josephine",
+    "email": "dr.anitha.josephine@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-anitha-josephine.jpg",
+    "filename": "dr-anitha-josephine.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-119",
+    "full_name": "Arvind Raj",
+    "email": "arvind.raj@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/dr-arvind-k-s - Arvind Raj.jpg",
+    "filename": "dr-arvind-k-s - Arvind Raj.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-120",
+    "full_name": "Dr. b swaminathan",
+    "email": "dr.b.swaminathan@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-b-swaminathan (1).jpg",
+    "filename": "dr-b-swaminathan (1).jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-121",
+    "full_name": "Dr. babasaheb sambhajirao satpute",
+    "email": "dr.babasaheb.sambhajirao.satpute@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-babasaheb-sambhajirao-satpute.jpg",
+    "filename": "dr-babasaheb-sambhajirao-satpute.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-122",
+    "full_name": "Dr. c mahiba",
+    "email": "dr.c.mahiba@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-c-mahiba.jpg",
+    "filename": "dr-c-mahiba.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-123",
+    "full_name": "Dr. chandramma",
+    "email": "dr.chandramma@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-chandramma.jpg",
+    "filename": "dr-chandramma.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-124",
+    "full_name": "Dr. deepak kumar sinha",
+    "email": "dr.deepak.kumar.sinha@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-deepak-kumar-sinha.jpg",
+    "filename": "dr-deepak-kumar-sinha.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-125",
+    "full_name": "Dr. gowrishankar jayaraman",
+    "email": "dr.gowrishankar.jayaraman@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-gowrishankar-jayaraman.jpg",
+    "filename": "dr-gowrishankar-jayaraman.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-126",
+    "full_name": "Dr. lokaiah pullagura",
+    "email": "dr.lokaiah.pullagura@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-lokaiah-pullagura.jpg",
+    "filename": "dr-lokaiah-pullagura.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-127",
+    "full_name": "Dr. manujakshi b c",
+    "email": "dr.manujakshi.b.c@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-manujakshi-b-c.jpg",
+    "filename": "dr-manujakshi-b-c.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-128",
+    "full_name": "Dr. maruti",
+    "email": "dr.maruti@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-maruti.jpg",
+    "filename": "dr-maruti.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-129",
+    "full_name": "Dr. n priya",
+    "email": "dr.n.priya@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-n-priya.jpg",
+    "filename": "dr-n-priya.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-130",
+    "full_name": "Dr. n suresh kumar",
+    "email": "dr.n.suresh.kumar@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-n-suresh-kumar.jpg",
+    "filename": "dr-n-suresh-kumar.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-131",
+    "full_name": "Dr. nagaraj",
+    "email": "dr.nagaraj@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-nagaraj.jpg",
+    "filename": "dr-nagaraj.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-132",
+    "full_name": "Dr. naveen profile",
+    "email": "dr.naveen.profile@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-naveen-profile.jpg",
+    "filename": "dr-naveen-profile.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-133",
+    "full_name": "Dr. panduranga rao m v",
+    "email": "dr.panduranga.rao.m.v@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-panduranga-rao-m-v.jpg",
+    "filename": "dr-panduranga-rao-m-v.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-134",
+    "full_name": "Dr. prasanna",
+    "email": "dr.prasanna@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-prasanna.jpg",
+    "filename": "dr-prasanna.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-135",
+    "full_name": "Dr. ravindra raman cholla",
+    "email": "dr.ravindra.raman.cholla@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-ravindra-raman-cholla.jpg",
+    "filename": "dr-ravindra-raman-cholla.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-136",
+    "full_name": "Dr. s annamalai",
+    "email": "dr.s.annamalai@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-s-annamalai (1).jpg",
+    "filename": "dr-s-annamalai (1).jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-137",
+    "full_name": "Dr. s jeeva",
+    "email": "dr.s.jeeva@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-s-jeeva.jpg",
+    "filename": "dr-s-jeeva.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-138",
+    "full_name": "Dr. s vijayanand",
+    "email": "dr.s.vijayanand@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-s-vijayanand (1).jpg",
+    "filename": "dr-s-vijayanand (1).jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-139",
+    "full_name": "Dr. saravana kumar r",
+    "email": "dr.saravana.kumar.r@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-saravana-kumar-r.jpg",
+    "filename": "dr-saravana-kumar-r.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-140",
+    "full_name": "Dr. senthil kumar r",
+    "email": "dr.senthil.kumar.r@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-senthil-kumar-r.jpg",
+    "filename": "dr-senthil-kumar-r.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-141",
+    "full_name": "Dr. somashekhara reddy",
+    "email": "dr.somashekhara.reddy@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-somashekhara-reddy.jpg",
+    "filename": "dr-somashekhara-reddy.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-142",
+    "full_name": "Dr. srinivasa rao p",
+    "email": "dr.srinivasa.rao.p@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-srinivasa-rao-p.jpg",
+    "filename": "dr-srinivasa-rao-p.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-143",
+    "full_name": "Dr. suriya prakash",
+    "email": "dr.suriya.prakash@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-suriya-prakash.jpg",
+    "filename": "dr-suriya-prakash.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-144",
+    "full_name": "Dr. vikram neerugatti",
+    "email": "dr.vikram.neerugatti@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Associate Professor",
+    "photo_url": "/faculty_photos/dr-vikram-neerugatti.jpg",
+    "filename": "dr-vikram-neerugatti.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-145",
+    "full_name": "iambika",
+    "email": "iambika@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/iambika.jpg",
+    "filename": "iambika.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-146",
+    "full_name": "kamlesh tiwari",
+    "email": "kamlesh.tiwari@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/kamlesh-tiwari.jpg",
+    "filename": "kamlesh-tiwari.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-147",
+    "full_name": "karthick ragunath",
+    "email": "karthick.ragunath@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/karthick-ragunath.jpg",
+    "filename": "karthick-ragunath.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-148",
+    "full_name": "Karthikeyan S",
+    "email": "karthikeyan.s@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/karthikeyan SE - Karthikeyan S_.jpg",
+    "filename": "karthikeyan SE - Karthikeyan S_.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-149",
+    "full_name": "monika anand",
+    "email": "monika.anand@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/monika-anand.jpg",
+    "filename": "monika-anand.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-150",
+    "full_name": "Mr. lankhe ravi kumar",
+    "email": "mr.lankhe.ravi.kumar@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/mr-lankhe-ravi-kumar.jpg",
+    "filename": "mr-lankhe-ravi-kumar.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-151",
+    "full_name": "Mr. rajesh pandian n",
+    "email": "mr.rajesh.pandian.n@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/mr-rajesh-pandian-n.jpg",
+    "filename": "mr-rajesh-pandian-n.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-152",
+    "full_name": "Mr. shreenidhi h s",
+    "email": "mr.shreenidhi.h.s@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/mr-shreenidhi-h-s.jpg",
+    "filename": "mr-shreenidhi-h-s.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-153",
+    "full_name": "Mr. vinod g m",
+    "email": "mr.vinod.g.m@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/mr-vinod-g-m.jpg",
+    "filename": "mr-vinod-g-m.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-154",
+    "full_name": "Ms. rimjhim",
+    "email": "ms.rimjhim@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/ms-rimjhim.jpg",
+    "filename": "ms-rimjhim.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-155",
+    "full_name": "Ms. sahana shetty",
+    "email": "ms.sahana.shetty@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/ms-sahana-shetty.jpg",
+    "filename": "ms-sahana-shetty.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-156",
+    "full_name": "Subramani P",
+    "email": "subramani.p@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/n3 (1) - Subramani P.jpg",
+    "filename": "n3 (1) - Subramani P.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-157",
+    "full_name": "poojitha",
+    "email": "poojitha@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/poojitha.jpg",
+    "filename": "poojitha.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-158",
+    "full_name": "Prof. archana",
+    "email": "prof.archana@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Professor",
+    "photo_url": "/faculty_photos/prof-archana.jpg",
+    "filename": "prof-archana.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-159",
+    "full_name": "Prof. swapna sangeetha",
+    "email": "prof.swapna.sangeetha@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Professor",
+    "photo_url": "/faculty_photos/prof-swapna-sangeetha.jpg",
+    "filename": "prof-swapna-sangeetha.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-160",
+    "full_name": "raveena kp",
+    "email": "raveena.kp@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/raveena-kp.jpg",
+    "filename": "raveena-kp.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-161",
+    "full_name": "rohini bs",
+    "email": "rohini.bs@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/rohini-bs2.jpg",
+    "filename": "rohini-bs2.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-162",
+    "full_name": "sachin",
+    "email": "sachin@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/sachin.jpg",
+    "filename": "sachin.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-163",
+    "full_name": "shashikala",
+    "email": "shashikala@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/shashikala.jpg",
+    "filename": "shashikala.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-164",
+    "full_name": "sujeet s jagtap",
+    "email": "sujeet.s.jagtap@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/sujeet-s-jagtap.jpg",
+    "filename": "sujeet-s-jagtap.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-165",
+    "full_name": "suresha r",
+    "email": "suresha.r@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/suresha-r.jpg",
+    "filename": "suresha-r.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-166",
+    "full_name": "thiruvannamalai sivasankar",
+    "email": "thiruvannamalai.sivasankar@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/thiruvannamalai-sivasankar.jpg",
+    "filename": "thiruvannamalai-sivasankar.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-167",
+    "full_name": "vinuth",
+    "email": "vinuth@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/vinuth.jpg",
+    "filename": "vinuth.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-168",
+    "full_name": "vishal patil",
+    "email": "vishal.patil@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/vishal-patil.jpg",
+    "filename": "vishal-patil.jpg",
+    "is_active": true
+  },
+  {
+    "id": "FAC-CSE-169",
+    "full_name": "vishwanatha s",
+    "email": "vishwanatha.s@jainuniversity.ac.in",
+    "department": "Computer Science & Engineering",
+    "designation": "Assistant Professor",
+    "photo_url": "/faculty_photos/vishwanatha-s.jpg",
+    "filename": "vishwanatha-s.jpg",
+    "is_active": true
+  }
+]
