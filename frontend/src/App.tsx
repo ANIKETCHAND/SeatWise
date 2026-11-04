@@ -17,14 +17,19 @@ import { ReportsPage } from './pages/ReportsPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { StudentSeatLookupPage } from './pages/StudentSeatLookupPage';
+import { LandingPage } from './pages/LandingPage';
 
 export const App: React.FC = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* Public Landing Page */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Authenticated Application Layout */}
           <Route element={<AppLayout />}>
-            <Route index element={<DashboardPage />} />
+            <Route path="dashboard" element={<DashboardPage />} />
             <Route path="examinations" element={<ExamManagementPage />} />
             <Route path="seating-planner" element={<ExamSeatingPage />} />
             <Route path="exam-seating" element={<ExamSeatingPage />} />
