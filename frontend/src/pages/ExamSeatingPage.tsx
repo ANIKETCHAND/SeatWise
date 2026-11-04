@@ -34,6 +34,7 @@ import { useNotification } from '../context/NotificationContext';
 import { PolicyConfigurator } from '../components/seating/PolicyConfigurator';
 import { SeatingLegend } from '../components/seating/SeatingLegend';
 import { checkAllocationConflicts } from '../utils/seatingMath';
+import { CAMPUS_ROOMS } from '../data/campusFloorData';
 
 interface DeskCell {
   seat_label: string;
@@ -56,6 +57,21 @@ interface ExamOption {
   batches?: string[];
   halls?: string[];
 }
+
+const DEFAULT_CAMPUS_HALLS_CONFIG: Record<string, { rows: number; cols: number; blocked: string[] }> = {
+  'LH-101': { rows: 6, cols: 6, blocked: ['0-2', '2-4'] },
+  'LH-102': { rows: 6, cols: 8, blocked: ['1-3', '3-5', '5-0'] },
+  'EXAM-HALL-MAIN': { rows: 8, cols: 10, blocked: ['0-0', '0-9'] },
+  'LH-201': { rows: 5, cols: 8, blocked: [] },
+};
+
+CAMPUS_ROOMS.forEach((r) => {
+  DEFAULT_CAMPUS_HALLS_CONFIG[r.room_number] = {
+    rows: r.rows || 6,
+    cols: r.columns || 6,
+    blocked: r.blocked_seats || [],
+  };
+});
 
 export const ExamSeatingPage: React.FC = () => {
   const { showNotification } = useNotification();
@@ -123,84 +139,9 @@ export const ExamSeatingPage: React.FC = () => {
   const [attendanceMode, setAttendanceMode] = useState<boolean>(false);
 
   // Hall Layouts Definition with Authentic JU FET Campus Halls
-  const [hallsConfig, setHallsConfig] = useState<Record<string, { rows: number; cols: number; blocked: string[] }>>({
-    // 1st Floor
-    'A-101': { rows: 6, cols: 6, blocked: ['0-2', '2-4'] },
-    'A-102': { rows: 6, cols: 6, blocked: ['1-3'] },
-    'A-103': { rows: 6, cols: 6, blocked: [] },
-    'B-110': { rows: 6, cols: 6, blocked: [] },
-    'B-111': { rows: 6, cols: 6, blocked: ['0-1'] },
-    'B-112': { rows: 6, cols: 6, blocked: [] },
-    'B-125-A': { rows: 6, cols: 6, blocked: [] },
-    'B-125-B': { rows: 6, cols: 6, blocked: ['0-3'] },
-    'B-126-A': { rows: 6, cols: 6, blocked: [] },
-    'B-126-B': { rows: 6, cols: 6, blocked: [] },
-    'B-127-A': { rows: 6, cols: 6, blocked: [] },
-    'B-127-B': { rows: 6, cols: 6, blocked: [] },
-    'B-127-C': { rows: 6, cols: 6, blocked: [] },
-    'C-106': { rows: 6, cols: 6, blocked: [] },
-    'C-107': { rows: 6, cols: 6, blocked: [] },
-    'C-108': { rows: 6, cols: 6, blocked: [] },
-    'C-109': { rows: 6, cols: 6, blocked: [] },
-    'D-104': { rows: 6, cols: 6, blocked: [] },
-    'A-113': { rows: 10, cols: 10, blocked: ['0-0', '0-9'] },
-    // 2nd Floor
-    'A-201': { rows: 6, cols: 6, blocked: [] },
-    'A-202': { rows: 6, cols: 6, blocked: [] },
-    'A-203': { rows: 6, cols: 6, blocked: [] },
-    'A-204': { rows: 6, cols: 6, blocked: [] },
-    'A-205': { rows: 6, cols: 6, blocked: [] },
-    'A-206': { rows: 6, cols: 6, blocked: [] },
-    'A-210': { rows: 6, cols: 6, blocked: [] },
-    'A-211': { rows: 6, cols: 6, blocked: [] },
-    'A-212': { rows: 6, cols: 6, blocked: [] },
-    'B-207': { rows: 6, cols: 6, blocked: [] },
-    'B-208': { rows: 6, cols: 6, blocked: [] },
-    'B-224': { rows: 6, cols: 8, blocked: [] },
-    'D-204': { rows: 6, cols: 6, blocked: [] },
-    'D-205': { rows: 6, cols: 6, blocked: [] },
-    'D-206': { rows: 6, cols: 6, blocked: [] },
-    // 3rd Floor (Examination Sections & Valuation Centers)
-    'A-313': { rows: 6, cols: 6, blocked: [] },
-    'A-314': { rows: 6, cols: 6, blocked: [] },
-    'C-327': { rows: 6, cols: 6, blocked: [] },
-    'A-301': { rows: 6, cols: 6, blocked: [] },
-    'A-302': { rows: 6, cols: 6, blocked: [] },
-    'A-303': { rows: 6, cols: 6, blocked: [] },
-    'A-312': { rows: 6, cols: 6, blocked: [] },
-    'A-316': { rows: 6, cols: 6, blocked: [] },
-    'B-307': { rows: 6, cols: 6, blocked: [] },
-    'B-308': { rows: 6, cols: 6, blocked: [] },
-    'B-309': { rows: 6, cols: 6, blocked: [] },
-    'B-321-A': { rows: 6, cols: 6, blocked: [] },
-    'B-321-B': { rows: 6, cols: 6, blocked: [] },
-    'B-322-A': { rows: 6, cols: 6, blocked: [] },
-    'B-322-B': { rows: 6, cols: 6, blocked: [] },
-    'B-322-C': { rows: 6, cols: 6, blocked: [] },
-    'C-310': { rows: 6, cols: 6, blocked: [] },
-    'C-311': { rows: 6, cols: 6, blocked: [] },
-    'C-312': { rows: 6, cols: 6, blocked: [] },
-    'C-324-A': { rows: 6, cols: 6, blocked: [] },
-    'C-324-B': { rows: 6, cols: 6, blocked: [] },
-    'D-304': { rows: 6, cols: 6, blocked: [] },
-    'D-305': { rows: 6, cols: 6, blocked: [] },
-    'D-306': { rows: 6, cols: 6, blocked: [] },
-    // 4th Floor
-    'A-403': { rows: 6, cols: 6, blocked: [] },
-    'B-407': { rows: 6, cols: 6, blocked: [] },
-    'B-408': { rows: 6, cols: 6, blocked: [] },
-    'C-410': { rows: 6, cols: 6, blocked: [] },
-    'C-411': { rows: 6, cols: 6, blocked: [] },
-    'C-412': { rows: 6, cols: 6, blocked: [] },
-    // Ground Floor
-    'A-002': { rows: 10, cols: 12, blocked: [] },
-    'A-004': { rows: 8, cols: 8, blocked: [] },
-    // Legacy Aliases
-    'LH-101': { rows: 6, cols: 6, blocked: ['0-2', '2-4'] },
-    'LH-102': { rows: 6, cols: 8, blocked: ['1-3', '3-5', '5-0'] },
-    'EXAM-HALL-MAIN': { rows: 8, cols: 10, blocked: ['0-0', '0-9'] },
-    'LH-201': { rows: 5, cols: 8, blocked: [] },
-  });
+  const [hallsConfig, setHallsConfig] = useState<Record<string, { rows: number; cols: number; blocked: string[] }>>(
+    DEFAULT_CAMPUS_HALLS_CONFIG
+  );
 
   // Participating Batches Candidate Counts
   const [batchCounts, setBatchCounts] = useState<Record<string, number>>({
@@ -294,8 +235,10 @@ export const ExamSeatingPage: React.FC = () => {
             name: e.name,
             exam_date: e.exam_date,
             session: e.session,
-            batches: ['AIML-S3A', 'CSE-GEN-S3B', 'AIDE-S3A'],
-            halls: ['LH-101', 'LH-102'],
+            batches: e.batches && e.batches.length > 0 ? e.batches : ['AIML-S3A', 'CSE-GEN-S3B', 'AIDE-S3A'],
+            halls: (e.examination_halls && e.examination_halls.length > 0)
+              ? e.examination_halls.map((h: any) => h.rooms?.code || h.rooms?.name || h.room_id)
+              : (e.halls && e.halls.length > 0) ? e.halls : ['A-101', 'A-102', 'A-313'],
           }));
           setAvailableExams(mapped);
           if (!examIdFromQuery && !planIdFromQuery) {
@@ -331,7 +274,7 @@ export const ExamSeatingPage: React.FC = () => {
           if (res && res.assignments && res.assignments.length > 0) {
             const newGrid: Record<string, Record<string, DeskCell>> = {};
             res.assignments.forEach((a: any) => {
-              const hall = (a.rooms && a.rooms.name) || 'LH-101';
+              const hall = (a.rooms && (a.rooms.code || a.rooms.name)) || 'A-101';
               if (!newGrid[hall]) newGrid[hall] = {};
               const key = `${a.row}-${a.col}`;
               newGrid[hall][key] = {
@@ -1258,34 +1201,73 @@ export const ExamSeatingPage: React.FC = () => {
                   <option value="A-314">A-314 (Valuation Room, 120 m²)</option>
                   <option value="C-327">C-327 (Examination Section, 180 m²)</option>
                 </optgroup>
-                <optgroup label="1st Floor Lecture Halls & Labs">
+                <optgroup label="1st Floor Lecture Halls & Computing">
                   <option value="A-101">A-101 (Lecture Hall, 65 m²)</option>
                   <option value="A-102">A-102 (Lecture Hall, 65 m²)</option>
                   <option value="A-103">A-103 (Lecture Hall, 65 m²)</option>
+                  <option value="A-113">A-113 (Seminar Auditorium, 240 m²)</option>
                   <option value="B-110">B-110 (Lecture Hall, 65 m²)</option>
+                  <option value="B-111">B-111 (Lecture Hall, 65 m²)</option>
+                  <option value="B-112">B-112 (Lecture Hall, 65 m²)</option>
                   <option value="B-125-A">B-125-A (Computer Lab 1)</option>
                   <option value="B-125-B">B-125-B (Computer Lab 2)</option>
+                  <option value="B-126-A">B-126-A (Computer Lab 3)</option>
+                  <option value="B-126-B">B-126-B (Computer Lab 4)</option>
+                  <option value="B-127-A">B-127-A (Lecture Hall, 65 m²)</option>
+                  <option value="B-127-B">B-127-B (Lecture Hall, 65 m²)</option>
+                  <option value="B-127-C">B-127-C (Lecture Hall, 65 m²)</option>
                   <option value="C-106">C-106 (Lecture Hall, 65 m²)</option>
+                  <option value="C-107">C-107 (Lecture Hall, 65 m²)</option>
+                  <option value="C-108">C-108 (Lecture Hall, 65 m²)</option>
+                  <option value="C-109">C-109 (Lecture Hall, 65 m²)</option>
                   <option value="D-104">D-104 (Lecture Hall, 65 m²)</option>
                 </optgroup>
-                <optgroup label="2nd Floor Lecture Halls & Computing">
+                <optgroup label="2nd Floor Lecture Halls & Labs">
                   <option value="A-201">A-201 (Lecture Hall, 65 m²)</option>
                   <option value="A-202">A-202 (Lecture Hall, 65 m²)</option>
+                  <option value="A-203">A-203 (Lecture Hall, 65 m²)</option>
+                  <option value="A-204">A-204 (Lecture Hall, 65 m²)</option>
+                  <option value="A-205">A-205 (Lecture Hall, 65 m²)</option>
+                  <option value="A-206">A-206 (Lecture Hall, 65 m²)</option>
+                  <option value="A-210">A-210 (Lecture Hall, 65 m²)</option>
+                  <option value="A-211">A-211 (Lecture Hall, 65 m²)</option>
+                  <option value="A-212">A-212 (Lecture Hall, 65 m²)</option>
                   <option value="B-207">B-207 (Lecture Hall, 65 m²)</option>
-                  <option value="B-224">B-224 (Computer Lab)</option>
+                  <option value="B-208">B-208 (Lecture Hall, 65 m²)</option>
+                  <option value="B-224">B-224 (Advanced Computing Lab, 240 m²)</option>
                   <option value="D-204">D-204 (Lecture Hall, 65 m²)</option>
+                  <option value="D-205">D-205 (Lecture Hall, 65 m²)</option>
+                  <option value="D-206">D-206 (Lecture Hall, 65 m²)</option>
                 </optgroup>
-                <optgroup label="3rd Floor Lecture Halls">
+                <optgroup label="3rd Floor Lecture Halls & Labs">
                   <option value="A-301">A-301 (Lecture Hall, 65 m²)</option>
                   <option value="A-302">A-302 (Lecture Hall, 65 m²)</option>
+                  <option value="A-303">A-303 (Lecture Hall, 65 m²)</option>
+                  <option value="A-312">A-312 (Lecture Hall, 65 m²)</option>
+                  <option value="A-316">A-316 (Programming Lab, 240 m²)</option>
                   <option value="B-307">B-307 (Lecture Hall, 65 m²)</option>
+                  <option value="B-308">B-308 (Lecture Hall, 65 m²)</option>
+                  <option value="B-309">B-309 (Lecture Hall, 65 m²)</option>
+                  <option value="B-321-A">B-321-A (Lecture Hall, 65 m²)</option>
+                  <option value="B-321-B">B-321-B (Lecture Hall, 65 m²)</option>
                   <option value="C-310">C-310 (Lecture Hall, 65 m²)</option>
+                  <option value="C-311">C-311 (Lecture Hall, 65 m²)</option>
+                  <option value="C-312">C-312 (Lecture Hall, 65 m²)</option>
                   <option value="D-304">D-304 (Lecture Hall, 65 m²)</option>
+                  <option value="D-305">D-305 (Lecture Hall, 65 m²)</option>
+                  <option value="D-306">D-306 (Lecture Hall, 65 m²)</option>
                 </optgroup>
                 <optgroup label="4th Floor Lecture Halls">
                   <option value="A-403">A-403 (Lecture Hall, 65 m²)</option>
                   <option value="B-407">B-407 (Lecture Hall, 65 m²)</option>
+                  <option value="B-408">B-408 (Lecture Hall, 65 m²)</option>
                   <option value="C-410">C-410 (Lecture Hall, 65 m²)</option>
+                  <option value="C-411">C-411 (Lecture Hall, 65 m²)</option>
+                  <option value="C-412">C-412 (Lecture Hall, 65 m²)</option>
+                </optgroup>
+                <optgroup label="Ground Floor Auditoria">
+                  <option value="A-002">A-002 (Seminar Hall, 240 m²)</option>
+                  <option value="A-004">A-004 (Kemi Lecture Hall, 240 m²)</option>
                 </optgroup>
               </select>
             </div>

@@ -56,7 +56,7 @@ export const LandingProductPreview: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-zinc-500 mt-1">
-                Venue: Lecture Hall 101 (LH-101) • 2 Batches Mixed • Zero Adjacency Violations
+                Venue: Lecture Hall A-101 (FET Campus Block A) • 2 Batches Mixed • Zero Adjacency Violations
               </p>
             </div>
 

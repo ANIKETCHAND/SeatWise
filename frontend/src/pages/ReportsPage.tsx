@@ -20,25 +20,25 @@ import { useNotification } from '../context/NotificationContext';
 import { exportTableToCsv } from '../utils/exportHelpers';
 
 const DEFAULT_LOCATORS = [
-  { roll: '23JU0101', name: 'Aarav Sharma', exam: 'Mid-Term Examinations Nov 2026', hall: 'LH-101', seat: 'A1', batch: 'AIML-S3A', session: 'Morning', status: 'allocated' },
-  { roll: '23JU0102', name: 'Ananya Deshmukh', exam: 'Mid-Term Examinations Nov 2026', hall: 'LH-101', seat: 'B2', batch: 'AIML-S3A', session: 'Morning', status: 'allocated' },
-  { roll: '23JU0201', name: 'Farhan Akhtar', exam: 'Mid-Term Examinations Nov 2026', hall: 'LH-101', seat: 'A2', batch: 'CSE-GEN-S3B', session: 'Morning', status: 'allocated' },
-  { roll: '23JU0202', name: 'Gaurav Kulkarni', exam: 'Mid-Term Examinations Nov 2026', hall: 'LH-101', seat: 'B1', batch: 'CSE-GEN-S3B', session: 'Morning', status: 'allocated' },
-  { roll: '23JU0301', name: 'Janhavi Rao', exam: 'Mid-Term Examinations Nov 2026', hall: 'LH-102', seat: 'A1', batch: 'AIDE-S3A', session: 'Morning', status: 'allocated' },
-  { roll: '23JU0302', name: 'Karan Mehra', exam: 'Mid-Term Examinations Nov 2026', hall: 'LH-102', seat: 'B2', batch: 'AIDE-S3A', session: 'Morning', status: 'allocated' },
-  { roll: '23JU0303', name: 'Megha Nair', exam: 'Mid-Term Examinations Nov 2026', hall: 'LH-102', seat: 'C1', batch: 'AIDE-S3A', session: 'Morning', status: 'allocated' },
+  { roll: '23JU0101', name: 'Aarav Sharma', exam: 'Mid-Term Examinations Nov 2026', hall: 'A-101', seat: 'A1', batch: 'AIML-S3A', session: 'Morning', status: 'allocated' },
+  { roll: '23JU0102', name: 'Ananya Deshmukh', exam: 'Mid-Term Examinations Nov 2026', hall: 'A-101', seat: 'B2', batch: 'AIML-S3A', session: 'Morning', status: 'allocated' },
+  { roll: '23JU0201', name: 'Farhan Akhtar', exam: 'Mid-Term Examinations Nov 2026', hall: 'A-101', seat: 'A2', batch: 'CSE-GEN-S3B', session: 'Morning', status: 'allocated' },
+  { roll: '23JU0202', name: 'Gaurav Kulkarni', exam: 'Mid-Term Examinations Nov 2026', hall: 'A-101', seat: 'B1', batch: 'CSE-GEN-S3B', session: 'Morning', status: 'allocated' },
+  { roll: '23JU0301', name: 'Janhavi Rao', exam: 'Mid-Term Examinations Nov 2026', hall: 'A-102', seat: 'A1', batch: 'AIDE-S3A', session: 'Morning', status: 'allocated' },
+  { roll: '23JU0302', name: 'Karan Mehra', exam: 'Mid-Term Examinations Nov 2026', hall: 'A-102', seat: 'B2', batch: 'AIDE-S3A', session: 'Morning', status: 'allocated' },
+  { roll: '23JU0303', name: 'Megha Nair', exam: 'Mid-Term Examinations Nov 2026', hall: 'A-102', seat: 'C1', batch: 'AIDE-S3A', session: 'Morning', status: 'allocated' },
   { roll: '23JU0401', name: 'Rohan Iyer', exam: 'Mid-Term Examinations Nov 2026', hall: 'Unassigned', seat: '—', batch: 'AIML-S3A', session: 'Morning', status: 'unallocated' },
   { roll: '23JU0402', name: 'Sneha Reddy', exam: 'Mid-Term Examinations Nov 2026', hall: 'Unassigned', seat: '—', batch: 'CSE-GEN-S3B', session: 'Morning', status: 'unallocated' },
 ];
 
 const DEFAULT_EMPTY_SEATS = [
-  { hall: 'LH-101', row: 'A', col: 3, seat: 'A3', status: 'Empty Available' },
-  { hall: 'LH-101', row: 'A', col: 5, seat: 'A5', status: 'Empty Available' },
-  { hall: 'LH-101', row: 'A', col: 6, seat: 'A6', status: 'Blocked (Physically Damaged)' },
-  { hall: 'LH-101', row: 'C', col: 4, seat: 'C4', status: 'Blocked (Clearance Required)' },
-  { hall: 'LH-102', row: 'B', col: 4, seat: 'B4', status: 'Empty Available' },
-  { hall: 'LH-102', row: 'D', col: 6, seat: 'D6', status: 'Empty Available' },
-  { hall: 'EXAM-HALL-MAIN', row: 'A', col: 1, seat: 'A1', status: 'Blocked (Podium Clearance)' },
+  { hall: 'A-101', row: 'A', col: 3, seat: 'A3', status: 'Empty Available' },
+  { hall: 'A-101', row: 'A', col: 5, seat: 'A5', status: 'Empty Available' },
+  { hall: 'A-101', row: 'A', col: 6, seat: 'A6', status: 'Blocked (Physically Damaged)' },
+  { hall: 'A-101', row: 'C', col: 4, seat: 'C4', status: 'Blocked (Clearance Required)' },
+  { hall: 'A-102', row: 'B', col: 4, seat: 'B4', status: 'Empty Available' },
+  { hall: 'A-102', row: 'D', col: 6, seat: 'D6', status: 'Empty Available' },
+  { hall: 'A-313', row: 'A', col: 1, seat: 'A1', status: 'Blocked (Controller Clearance)' },
 ];
 
 export const ReportsPage: React.FC = () => {
@@ -52,12 +52,19 @@ export const ReportsPage: React.FC = () => {
     { id: 'EXAM-2026-1102', name: 'Semester End Assessment Cycle II' },
   ]);
   const [hallsList, setHallsList] = useState<{ id: string; name: string }[]>([
-    { id: 'LH-101', name: 'LH-101 (Lecture Hall 101)' },
-    { id: 'LH-102', name: 'LH-102 (Lecture Hall 102)' },
-    { id: 'EXAM-HALL-MAIN', name: 'EXAM-HALL-MAIN (Auditorium)' },
+    { id: 'A-101', name: 'A-101 (Lecture Hall A-101, 1F)' },
+    { id: 'A-102', name: 'A-102 (Lecture Hall A-102, 1F)' },
+    { id: 'A-313', name: 'A-313 (Examination Section, 3F)' },
+    { id: 'A-314', name: 'A-314 (Valuation Room, 3F)' },
+    { id: 'C-327', name: 'C-327 (Examination Section, 3F)' },
+    { id: 'B-125-A', name: 'B-125-A (Computer Lab 1, 1F)' },
+    { id: 'A-201', name: 'A-201 (Lecture Hall A-201, 2F)' },
+    { id: 'A-301', name: 'A-301 (Lecture Hall A-301, 3F)' },
+    { id: 'A-403', name: 'A-403 (Lecture Hall A-403, 4F)' },
+    { id: 'LH-101', name: 'LH-101 (Legacy Hall)' },
   ]);
   const [selectedExam, setSelectedExam] = useState('EXAM-2026-1101');
-  const [selectedHall, setSelectedHall] = useState('LH-101');
+  const [selectedHall, setSelectedHall] = useState('A-101');
   const [searchStudent, setSearchStudent] = useState('');
   const [studentLocators, setStudentLocators] = useState(DEFAULT_LOCATORS);
 

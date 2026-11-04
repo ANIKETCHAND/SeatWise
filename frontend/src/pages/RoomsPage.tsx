@@ -93,12 +93,31 @@ export const RoomsPage: React.FC = () => {
     const c = room.columns || 6;
     setEditorRows(r);
     setEditorCols(c);
-    const initialBlocked = new Set<string>();
-    for (let i = 0; i < room.blocked_seats_count; i++) {
-      initialBlocked.add(`${i % r}-${(i * 2 + 1) % c}`);
+    if (room.blocked_seats && room.blocked_seats.length > 0) {
+      setBlockedSeats(new Set(room.blocked_seats));
+    } else if (room.blocked_seats_count > 0) {
+      const initialBlocked = new Set<string>();
+      for (let i = 0; i < room.blocked_seats_count; i++) {
+        initialBlocked.add(`${i % r}-${(i * 2 + 1) % c}`);
+      }
+      setBlockedSeats(initialBlocked);
+    } else {
+      setBlockedSeats(new Set());
     }
-    setBlockedSeats(initialBlocked);
     setEditorFeedback(null);
+  };
+
+  const handleFloorChange = (floor: number) => {
+    setSelectedFloor(floor);
+    const targetFloorMeta = CAMPUS_FLOORS.find((f) => f.floor === floor) || CAMPUS_FLOORS[1];
+    if (selectedBlock !== 'all' && !targetFloorMeta.blocks.includes(selectedBlock)) {
+      setSelectedBlock('all');
+    }
+    const targetRooms = rooms.filter((r) => r.floor === floor);
+    if (targetRooms.length > 0) {
+      const preferred = targetRooms.find((r) => r.is_exam_center) || targetRooms[0];
+      selectRoomForEditing(preferred);
+    }
   };
 
   const toggleSeatBlocked = (r: number, c: number) => {
@@ -142,6 +161,7 @@ export const RoomsPage: React.FC = () => {
     const total = editorRows * editorCols;
     const blockedCount = blockedSeats.size;
     const usable = total - blockedCount;
+    const blockedArr = Array.from(blockedSeats);
 
     const updatedRooms = rooms.map((r) => {
       if (r.id === selectedRoom.id || r.room_number === selectedRoom.room_number) {
@@ -152,6 +172,7 @@ export const RoomsPage: React.FC = () => {
           capacity: total,
           usable_capacity: usable,
           blocked_seats_count: blockedCount,
+          blocked_seats: blockedArr,
         };
       }
       return r;
@@ -165,12 +186,13 @@ export const RoomsPage: React.FC = () => {
       capacity: total,
       usable_capacity: usable,
       blocked_seats_count: blockedCount,
+      blocked_seats: blockedArr,
     });
 
     api.updateRoomLayout(selectedRoom.id, {
       rows: editorRows,
       columns: editorCols,
-      blocked: Array.from(blockedSeats),
+      blocked: blockedArr,
     })
       .then(() => {
         setEditorFeedback(`Layout for ${selectedRoom.room_number} saved to database.`);
@@ -346,7 +368,7 @@ export const RoomsPage: React.FC = () => {
               <button
                 key={f.floor}
                 type="button"
-                onClick={() => setSelectedFloor(f.floor)}
+                onClick={() => handleFloorChange(f.floor)}
                 className={`p-3 rounded-lg border text-left transition-all relative ${
                   isCurrent
                     ? 'border-zinc-950 bg-zinc-950 text-white shadow-xs'
@@ -414,6 +436,19 @@ export const RoomsPage: React.FC = () => {
 
           {/* Classification Filter & Search */}
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            {/* Classification Selector */}
+            <select
+              value={selectedClassification}
+              onChange={(e) => setSelectedClassification(e.target.value as any)}
+              className="px-2.5 py-1 text-xs rounded-md bg-white border border-zinc-300 text-zinc-700 font-medium hover:border-zinc-500 focus:outline-none"
+            >
+              <option value="all">All Venue Classes</option>
+              <option value="Approved Examination Lecture Hall">Approved Exam Halls</option>
+              <option value="Computer Lab / Valuation Center">Computer Labs & Valuation</option>
+              <option value="Department Lab">Department Labs</option>
+              <option value="Faculty / Admin Office">Faculty & Admin</option>
+            </select>
+
             <div className="relative flex-1 sm:flex-initial">
               <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
               <input
@@ -421,7 +456,7 @@ export const RoomsPage: React.FC = () => {
                 placeholder="Search room (e.g. A-101)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1 bg-white border border-zinc-300 rounded-md text-xs text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-zinc-950 w-full sm:w-44"
+                className="pl-8 pr-3 py-1 bg-white border border-zinc-300 rounded-md text-xs text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-zinc-950 w-full sm:w-40"
               />
             </div>
 
@@ -435,7 +470,7 @@ export const RoomsPage: React.FC = () => {
               }`}
             >
               <ShieldCheck className="w-3 h-3" />
-              Exam Certified Only
+              Exam Certified
             </button>
           </div>
         </div>

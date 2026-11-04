@@ -42,6 +42,7 @@ export interface CampusRoom {
   capacity: number;
   usable_capacity: number;
   blocked_seats_count: number;
+  blocked_seats?: string[];
   is_exam_approved: boolean;
   is_exam_center?: boolean;
   center_type?: 'Examination Section' | 'Valuation Room';
@@ -400,6 +401,7 @@ export const CAMPUS_ROOMS: CampusRoom[] = [
     capacity: 36,
     usable_capacity: 34,
     blocked_seats_count: 2,
+    blocked_seats: ['0-2', '2-4'],
     is_exam_approved: true,
     is_active: true,
   },
@@ -419,6 +421,7 @@ export const CAMPUS_ROOMS: CampusRoom[] = [
     capacity: 36,
     usable_capacity: 35,
     blocked_seats_count: 1,
+    blocked_seats: ['1-3'],
     is_exam_approved: true,
     is_active: true,
   },

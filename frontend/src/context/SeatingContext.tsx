@@ -59,8 +59,8 @@ const SeatingContext = createContext<SeatingContextValue | undefined>(undefined)
 
 export const SeatingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedExamId, setSelectedExamId] = useState<string>('EXAM-2026-1101');
-  const [selectedHalls, setSelectedHalls] = useState<string[]>(['LH-101', 'LH-102']);
-  const [activeHall, setActiveHall] = useState<string>('LH-101');
+  const [selectedHalls, setSelectedHalls] = useState<string[]>(['A-101', 'A-102', 'A-313']);
+  const [activeHall, setActiveHall] = useState<string>('A-101');
   const [savedPlanId, setSavedPlanId] = useState<string | null>(null);
   const [policy, setPolicy] = useState<SeatingPolicy>(DEFAULT_POLICY);
   const [selectedSeatForMove, setSelectedSeatForMove] = useState<{ hall: string; seatLabel: string } | null>(null);

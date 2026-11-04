@@ -136,8 +136,10 @@ export const ExamManagementPage: React.FC = () => {
             subject_code: e.subject_code || '',
             exam_date: e.exam_date,
             session: e.session === 'AN' ? 'afternoon' : 'morning',
-            batches: ['AIML-S3A', 'CSE-GEN-S3B'],
-            halls: ['LH-101', 'LH-102'],
+            batches: e.batches && e.batches.length > 0 ? e.batches : ['AIML-S3A', 'CSE-GEN-S3B'],
+            halls: (e.examination_halls && e.examination_halls.length > 0)
+              ? e.examination_halls.map((h: any) => h.rooms?.code || h.rooms?.name || h.room_id)
+              : (e.halls && e.halls.length > 0) ? e.halls : ['A-101', 'A-102', 'A-313'],
             total_candidates: e.batch_count ? e.batch_count * 25 : 50,
             status: e.status || 'draft',
           }));
@@ -195,7 +197,7 @@ export const ExamManagementPage: React.FC = () => {
       exam_date: '2026-11-20',
       session: 'morning',
       batches: ['AIML-S3A', 'CSE-GEN-S3B'],
-      halls: ['LH-101'],
+      halls: ['A-101'],
       status: 'draft',
     });
     setErrorMessage(null);

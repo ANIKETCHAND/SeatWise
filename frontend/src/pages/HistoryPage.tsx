@@ -24,7 +24,7 @@ interface HistoryItem {
 }
 
 const INITIAL_HISTORY: HistoryItem[] = [
-  { id: 'PLAN-EX-9921', name: 'FET Mid-Term Seating Halls LH-101 & LH-102', kind: 'examination', created_at: '2026-11-03 14:30', room_or_halls: 'LH-101, LH-102 (2 Halls)', students_count: 52, status: 'published', solver_time_ms: 18 },
+  { id: 'PLAN-EX-9921', name: 'FET Mid-Term Seating Halls A-101 & A-102', kind: 'examination', created_at: '2026-11-03 14:30', room_or_halls: 'A-101, A-102 (2 Halls)', students_count: 52, status: 'published', solver_time_ms: 18 },
   { id: 'PLAN-CR-4402', name: 'AIML Sem 3 Sec A - DSA Lab Seating', kind: 'classroom', created_at: '2026-11-03 08:30', room_or_halls: 'AI-LAB-1', students_count: 32, status: 'published', solver_time_ms: 4 },
   { id: 'PLAN-CR-4401', name: 'CSE-GEN Sem 5 Sec C - Operating Systems', kind: 'classroom', created_at: '2026-11-02 11:00', room_or_halls: 'LH-201', students_count: 40, status: 'published', solver_time_ms: 5 },
   { id: 'PLAN-EX-9920', name: 'Cycle Test I - B.Tech Core Streams', kind: 'examination', created_at: '2026-10-28 09:15', room_or_halls: 'EXAM-HALL-MAIN', students_count: 110, status: 'published', solver_time_ms: 35 },

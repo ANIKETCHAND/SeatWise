@@ -9,6 +9,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { api } from '../services/api';
 import { SeatingPolicy } from '../types';
 import { checkAllocationConflicts } from '../utils/seatingMath';
+import { CAMPUS_ROOMS } from '../data/campusFloorData';
 
 export interface DeskCell {
   seat_label: string;
@@ -39,7 +40,7 @@ export const INITIAL_EXAMS: ExamOption[] = [
     exam_date: '2026-11-20',
     session: 'morning',
     batches: ['AIML-S3A', 'CSE-GEN-S3B', 'AIDE-S3A'],
-    halls: ['LH-101', 'LH-102'],
+    halls: ['A-101', 'A-102', 'A-313'],
   },
   {
     id: 'EXAM-2026-1102',
@@ -47,7 +48,7 @@ export const INITIAL_EXAMS: ExamOption[] = [
     exam_date: '2026-11-25',
     session: 'afternoon',
     batches: ['CSE-GEN-S3B', 'AIDE-S3A'],
-    halls: ['LH-101'],
+    halls: ['A-201', 'B-125-A'],
   },
   {
     id: 'EXAM-2026-1103',
@@ -55,7 +56,7 @@ export const INITIAL_EXAMS: ExamOption[] = [
     exam_date: '2026-12-02',
     session: 'morning',
     batches: ['AIML-S3A'],
-    halls: ['LH-102'],
+    halls: ['A-314', 'C-327'],
   },
 ];
 
@@ -65,6 +66,14 @@ export const INITIAL_HALLS_CONFIG: Record<string, { rows: number; cols: number; 
   'EXAM-HALL-MAIN': { rows: 8, cols: 10, blocked: ['0-0', '0-9'] },
   'LH-201': { rows: 5, cols: 8, blocked: [] },
 };
+
+CAMPUS_ROOMS.forEach((r) => {
+  INITIAL_HALLS_CONFIG[r.room_number] = {
+    rows: r.rows || 6,
+    cols: r.columns || 6,
+    blocked: r.blocked_seats || [],
+  };
+});
 
 export const INITIAL_BATCH_COUNTS: Record<string, number> = {
   'AIML-S3A': 20,
@@ -122,8 +131,8 @@ export function generateInitialAssignments(
 export function useSeatingPlanner(initialExamId?: string | null, initialPlanId?: string | null) {
   const [availableExams, setAvailableExams] = useState<ExamOption[]>(INITIAL_EXAMS);
   const [selectedExamId, setSelectedExamId] = useState<string>(initialExamId || 'EXAM-2026-1101');
-  const [selectedHalls, setSelectedHalls] = useState<string[]>(['LH-101', 'LH-102']);
-  const [activeHall, setActiveHall] = useState('LH-101');
+  const [selectedHalls, setSelectedHalls] = useState<string[]>(['A-101', 'A-102', 'A-313']);
+  const [activeHall, setActiveHall] = useState('A-101');
   const [savedPlanId, setSavedPlanId] = useState<string | null>(initialPlanId || null);
 
   const [policy, setPolicy] = useState<SeatingPolicy>({
@@ -139,6 +148,9 @@ export function useSeatingPlanner(initialExamId?: string | null, initialPlanId?:
   const [batchCounts, setBatchCounts] = useState(INITIAL_BATCH_COUNTS);
 
   const [allocationGrid, setAllocationGrid] = useState<Record<string, Record<string, DeskCell>>>({
+    'A-101': generateInitialAssignments('A-101', INITIAL_HALLS_CONFIG, INITIAL_BATCH_COUNTS),
+    'A-102': generateInitialAssignments('A-102', INITIAL_HALLS_CONFIG, INITIAL_BATCH_COUNTS),
+    'A-313': generateInitialAssignments('A-313', INITIAL_HALLS_CONFIG, INITIAL_BATCH_COUNTS),
     'LH-101': generateInitialAssignments('LH-101', INITIAL_HALLS_CONFIG, INITIAL_BATCH_COUNTS),
     'LH-102': generateInitialAssignments('LH-102', INITIAL_HALLS_CONFIG, INITIAL_BATCH_COUNTS),
   });
@@ -153,8 +165,10 @@ export function useSeatingPlanner(initialExamId?: string | null, initialPlanId?:
             name: e.name,
             exam_date: e.exam_date,
             session: e.session,
-            batches: e.batches || ['AIML-S3A', 'CSE-GEN-S3B'],
-            halls: e.halls || ['LH-101', 'LH-102'],
+            batches: e.batches && e.batches.length > 0 ? e.batches : ['AIML-S3A', 'CSE-GEN-S3B'],
+            halls: (e.examination_halls && e.examination_halls.length > 0)
+              ? e.examination_halls.map((h: any) => h.rooms?.code || h.rooms?.name || h.room_id)
+              : (e.halls && e.halls.length > 0) ? e.halls : ['A-101', 'A-102', 'A-313'],
           }));
           setAvailableExams(mapped);
         }
