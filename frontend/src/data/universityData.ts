@@ -189,3 +189,7 @@ export const TOTAL_BATCHES_COUNT = INITIAL_PROGRAMS.reduce(
   (acc, p) => acc + p.batches.length,
   0
 ); // 94
+
+// Architectural Campus Floor Plans & Rooms Data Model
+export * from './campusFloorData';
+

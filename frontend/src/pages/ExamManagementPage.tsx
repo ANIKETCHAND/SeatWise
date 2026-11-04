@@ -46,7 +46,7 @@ const INITIAL_EXAMS: ExamRecord[] = [
     exam_date: '2026-11-20',
     session: 'morning',
     batches: ['AIML-S3A', 'CSE-GEN-S3B', 'AIDE-S3A'],
-    halls: ['LH-101', 'LH-102'],
+    halls: ['A-101', 'A-102', 'A-313'],
     total_candidates: 52,
     status: 'allocated',
   },
@@ -58,7 +58,7 @@ const INITIAL_EXAMS: ExamRecord[] = [
     exam_date: '2026-11-25',
     session: 'afternoon',
     batches: ['CSE-GEN-S3B', 'AIDE-S3A'],
-    halls: ['LH-101'],
+    halls: ['A-201', 'B-125-A'],
     total_candidates: 32,
     status: 'draft',
   },
@@ -70,14 +70,31 @@ const INITIAL_EXAMS: ExamRecord[] = [
     exam_date: '2026-12-02',
     session: 'morning',
     batches: ['AIML-S3A'],
-    halls: ['LH-102'],
+    halls: ['A-314', 'C-327'],
     total_candidates: 20,
     status: 'published',
   },
 ];
 
 const AVAILABLE_BATCHES = ['AIML-S3A', 'CSE-GEN-S3B', 'AIDE-S3A', 'CSBS-S5A', 'CTIS-S5A', 'CyberSecurity-S5A'];
-const AVAILABLE_HALLS = ['LH-101', 'LH-102', 'EXAM-HALL-MAIN', 'LH-201'];
+const AVAILABLE_HALLS = [
+  // 1st Floor (FET Campus Core Lecture Halls & Computing Labs)
+  'A-101', 'A-102', 'A-103', 'B-110', 'B-111', 'B-112', 'B-127-A', 'B-127-B', 'B-127-C',
+  'C-106', 'C-107', 'C-108', 'C-109', 'D-104', 'A-113', 'B-125-A', 'B-125-B', 'B-126-A', 'B-126-B',
+  // 2nd Floor
+  'A-201', 'A-202', 'A-203', 'A-204', 'A-205', 'A-206', 'A-210', 'A-211', 'A-212',
+  'B-207', 'B-208', 'B-224', 'D-204', 'D-205', 'D-206',
+  // 3rd Floor (Examination Sections & Valuation Centers)
+  'A-313', 'A-314', 'C-327', 'A-301', 'A-302', 'A-303', 'A-312', 'A-316',
+  'B-307', 'B-308', 'B-309', 'B-321-A', 'B-321-B', 'B-322-A', 'B-322-B', 'B-322-C',
+  'C-310', 'C-311', 'C-312', 'C-324-A', 'C-324-B', 'D-304', 'D-305', 'D-306',
+  // 4th Floor
+  'A-403', 'B-407', 'B-408', 'C-410', 'C-411', 'C-412',
+  // Ground Floor
+  'A-002', 'A-004',
+  // Legacy Aliases
+  'LH-101', 'LH-102', 'EXAM-HALL-MAIN', 'LH-201',
+];
 
 export const ExamManagementPage: React.FC = () => {
   const { role } = useAuth();
@@ -103,7 +120,7 @@ export const ExamManagementPage: React.FC = () => {
     exam_date: '2026-11-20',
     session: 'morning' as 'morning' | 'afternoon',
     batches: ['AIML-S3A', 'CSE-GEN-S3B'],
-    halls: ['LH-101'],
+    halls: ['A-101'],
     status: 'draft' as 'draft' | 'allocated' | 'published' | 'archived',
   });
 
@@ -636,22 +653,26 @@ export const ExamManagementPage: React.FC = () => {
                 <label className="text-xs font-semibold text-slate-700 block mb-1">
                   Examination Venue Halls ({formData.halls.length} selected)
                 </label>
-                <div className="flex flex-wrap gap-1.5 p-2 border border-slate-200 rounded-lg bg-slate-50">
+                <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50">
                   {hallsList.map((hall) => {
                     const isSelected = formData.halls.includes(hall);
+                    const isExamCenter = hall === 'A-313' || hall === 'A-314' || hall === 'C-327';
                     return (
                       <button
                         type="button"
                         key={hall}
                         onClick={() => toggleHall(hall)}
-                        className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all ${
+                        className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all font-mono ${
                           isSelected
-                            ? 'bg-slate-800 text-white shadow-2xs'
+                            ? 'bg-zinc-950 text-white shadow-2xs'
+                            : isExamCenter
+                            ? 'bg-zinc-200 border border-zinc-400 text-zinc-900 font-bold hover:bg-zinc-300'
                             : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-100'
                         }`}
                       >
                         <DoorClosed className="w-3 h-3 inline mr-1" />
                         {hall}
+                        {isExamCenter && <span className="ml-1 text-[9px] text-zinc-500 font-normal">⭐</span>}
                       </button>
                     );
                   })}

@@ -71,7 +71,7 @@ export const ExamSeatingPage: React.FC = () => {
       exam_date: '2026-11-20',
       session: 'morning',
       batches: ['AIML-S3A', 'CSE-GEN-S3B', 'AIDE-S3A'],
-      halls: ['LH-101', 'LH-102'],
+      halls: ['A-101', 'A-102', 'A-313'],
     },
     {
       id: 'EXAM-2026-1102',
@@ -79,7 +79,7 @@ export const ExamSeatingPage: React.FC = () => {
       exam_date: '2026-11-25',
       session: 'afternoon',
       batches: ['CSE-GEN-S3B', 'AIDE-S3A'],
-      halls: ['LH-101'],
+      halls: ['A-201', 'B-125-A'],
     },
     {
       id: 'EXAM-2026-1103',
@@ -87,13 +87,13 @@ export const ExamSeatingPage: React.FC = () => {
       exam_date: '2026-12-02',
       session: 'morning',
       batches: ['AIML-S3A'],
-      halls: ['LH-102'],
+      halls: ['A-314', 'C-327'],
     },
   ]);
 
   const [selectedExamId, setSelectedExamId] = useState<string>(examIdFromQuery || 'EXAM-2026-1101');
-  const [selectedHalls, setSelectedHalls] = useState<string[]>(['LH-101', 'LH-102']);
-  const [activeHall, setActiveHall] = useState('LH-101');
+  const [selectedHalls, setSelectedHalls] = useState<string[]>(['A-101', 'A-102', 'A-313']);
+  const [activeHall, setActiveHall] = useState('A-101');
   const [savedPlanId, setSavedPlanId] = useState<string | null>(planIdFromQuery);
 
   // Seating Policy
@@ -122,8 +122,80 @@ export const ExamSeatingPage: React.FC = () => {
   const [swapSourceKey, setSwapSourceKey] = useState<string | null>(null);
   const [attendanceMode, setAttendanceMode] = useState<boolean>(false);
 
-  // Hall Layouts Definition
+  // Hall Layouts Definition with Authentic JU FET Campus Halls
   const [hallsConfig, setHallsConfig] = useState<Record<string, { rows: number; cols: number; blocked: string[] }>>({
+    // 1st Floor
+    'A-101': { rows: 6, cols: 6, blocked: ['0-2', '2-4'] },
+    'A-102': { rows: 6, cols: 6, blocked: ['1-3'] },
+    'A-103': { rows: 6, cols: 6, blocked: [] },
+    'B-110': { rows: 6, cols: 6, blocked: [] },
+    'B-111': { rows: 6, cols: 6, blocked: ['0-1'] },
+    'B-112': { rows: 6, cols: 6, blocked: [] },
+    'B-125-A': { rows: 6, cols: 6, blocked: [] },
+    'B-125-B': { rows: 6, cols: 6, blocked: ['0-3'] },
+    'B-126-A': { rows: 6, cols: 6, blocked: [] },
+    'B-126-B': { rows: 6, cols: 6, blocked: [] },
+    'B-127-A': { rows: 6, cols: 6, blocked: [] },
+    'B-127-B': { rows: 6, cols: 6, blocked: [] },
+    'B-127-C': { rows: 6, cols: 6, blocked: [] },
+    'C-106': { rows: 6, cols: 6, blocked: [] },
+    'C-107': { rows: 6, cols: 6, blocked: [] },
+    'C-108': { rows: 6, cols: 6, blocked: [] },
+    'C-109': { rows: 6, cols: 6, blocked: [] },
+    'D-104': { rows: 6, cols: 6, blocked: [] },
+    'A-113': { rows: 10, cols: 10, blocked: ['0-0', '0-9'] },
+    // 2nd Floor
+    'A-201': { rows: 6, cols: 6, blocked: [] },
+    'A-202': { rows: 6, cols: 6, blocked: [] },
+    'A-203': { rows: 6, cols: 6, blocked: [] },
+    'A-204': { rows: 6, cols: 6, blocked: [] },
+    'A-205': { rows: 6, cols: 6, blocked: [] },
+    'A-206': { rows: 6, cols: 6, blocked: [] },
+    'A-210': { rows: 6, cols: 6, blocked: [] },
+    'A-211': { rows: 6, cols: 6, blocked: [] },
+    'A-212': { rows: 6, cols: 6, blocked: [] },
+    'B-207': { rows: 6, cols: 6, blocked: [] },
+    'B-208': { rows: 6, cols: 6, blocked: [] },
+    'B-224': { rows: 6, cols: 8, blocked: [] },
+    'D-204': { rows: 6, cols: 6, blocked: [] },
+    'D-205': { rows: 6, cols: 6, blocked: [] },
+    'D-206': { rows: 6, cols: 6, blocked: [] },
+    // 3rd Floor (Examination Sections & Valuation Centers)
+    'A-313': { rows: 6, cols: 6, blocked: [] },
+    'A-314': { rows: 6, cols: 6, blocked: [] },
+    'C-327': { rows: 6, cols: 6, blocked: [] },
+    'A-301': { rows: 6, cols: 6, blocked: [] },
+    'A-302': { rows: 6, cols: 6, blocked: [] },
+    'A-303': { rows: 6, cols: 6, blocked: [] },
+    'A-312': { rows: 6, cols: 6, blocked: [] },
+    'A-316': { rows: 6, cols: 6, blocked: [] },
+    'B-307': { rows: 6, cols: 6, blocked: [] },
+    'B-308': { rows: 6, cols: 6, blocked: [] },
+    'B-309': { rows: 6, cols: 6, blocked: [] },
+    'B-321-A': { rows: 6, cols: 6, blocked: [] },
+    'B-321-B': { rows: 6, cols: 6, blocked: [] },
+    'B-322-A': { rows: 6, cols: 6, blocked: [] },
+    'B-322-B': { rows: 6, cols: 6, blocked: [] },
+    'B-322-C': { rows: 6, cols: 6, blocked: [] },
+    'C-310': { rows: 6, cols: 6, blocked: [] },
+    'C-311': { rows: 6, cols: 6, blocked: [] },
+    'C-312': { rows: 6, cols: 6, blocked: [] },
+    'C-324-A': { rows: 6, cols: 6, blocked: [] },
+    'C-324-B': { rows: 6, cols: 6, blocked: [] },
+    'D-304': { rows: 6, cols: 6, blocked: [] },
+    'D-305': { rows: 6, cols: 6, blocked: [] },
+    'D-306': { rows: 6, cols: 6, blocked: [] },
+    // 4th Floor
+    'A-403': { rows: 6, cols: 6, blocked: [] },
+    'B-407': { rows: 6, cols: 6, blocked: [] },
+    'B-408': { rows: 6, cols: 6, blocked: [] },
+    'C-410': { rows: 6, cols: 6, blocked: [] },
+    'C-411': { rows: 6, cols: 6, blocked: [] },
+    'C-412': { rows: 6, cols: 6, blocked: [] },
+    // Ground Floor
+    'A-002': { rows: 10, cols: 12, blocked: [] },
+    'A-004': { rows: 8, cols: 8, blocked: [] },
+    // Legacy Aliases
     'LH-101': { rows: 6, cols: 6, blocked: ['0-2', '2-4'] },
     'LH-102': { rows: 6, cols: 8, blocked: ['1-3', '3-5', '5-0'] },
     'EXAM-HALL-MAIN': { rows: 8, cols: 10, blocked: ['0-0', '0-9'] },
@@ -191,9 +263,26 @@ export const ExamSeatingPage: React.FC = () => {
   };
 
   const [allocationGrid, setAllocationGrid] = useState<Record<string, Record<string, DeskCell>>>({
+    'A-101': generateInitialAssignments('A-101'),
+    'A-102': generateInitialAssignments('A-102'),
+    'A-313': generateInitialAssignments('A-313'),
+    'A-201': generateInitialAssignments('A-201'),
+    'B-125-A': generateInitialAssignments('B-125-A'),
+    'A-314': generateInitialAssignments('A-314'),
+    'C-327': generateInitialAssignments('C-327'),
     'LH-101': generateInitialAssignments('LH-101'),
     'LH-102': generateInitialAssignments('LH-102'),
   });
+
+  // Ensure active hall is populated in allocationGrid
+  useEffect(() => {
+    if (activeHall && !allocationGrid[activeHall]) {
+      setAllocationGrid((prev) => ({
+        ...prev,
+        [activeHall]: generateInitialAssignments(activeHall),
+      }));
+    }
+  }, [activeHall, hallsConfig]);
 
   // Load Examinations from Supabase
   useEffect(() => {
@@ -274,6 +363,16 @@ export const ExamSeatingPage: React.FC = () => {
   const activeExam = useMemo(() => {
     return availableExams.find((e) => e.id === selectedExamId) || availableExams[0];
   }, [selectedExamId, availableExams]);
+
+  // Synchronize selected halls when active exam changes
+  useEffect(() => {
+    if (activeExam && activeExam.halls && activeExam.halls.length > 0) {
+      setSelectedHalls(activeExam.halls);
+      if (!activeExam.halls.includes(activeHall)) {
+        setActiveHall(activeExam.halls[0]);
+      }
+    }
+  }, [activeExam]);
 
   const currentHallConfig = hallsConfig[activeHall] || { rows: 6, cols: 6, blocked: [] };
   const currentGrid = allocationGrid[activeHall] || {};
@@ -1109,27 +1208,86 @@ export const ExamSeatingPage: React.FC = () => {
               </select>
             </div>
 
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider mr-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-bold text-zinc-700 uppercase tracking-wider mr-1">
                 Venue:
               </span>
-              {selectedHalls.map((hall) => (
-                <button
-                  key={hall}
-                  onClick={() => {
-                    setActiveHall(hall);
-                    setSelectedSeatKey(null);
-                  }}
-                  className={`px-3 py-1.5 text-xs rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                    activeHall === hall
-                      ? 'bg-primary-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  <DoorClosed className="w-3.5 h-3.5" />
-                  {hall}
-                </button>
-              ))}
+              {selectedHalls.map((hall) => {
+                const isExamCenter = hall === 'A-313' || hall === 'A-314' || hall === 'C-327';
+                return (
+                  <button
+                    key={hall}
+                    onClick={() => {
+                      setActiveHall(hall);
+                      setSelectedSeatKey(null);
+                    }}
+                    className={`px-3 py-1.5 text-xs rounded-lg font-bold transition-all flex items-center gap-1.5 font-mono ${
+                      activeHall === hall
+                        ? 'bg-zinc-950 text-white shadow-xs'
+                        : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border border-zinc-200'
+                    }`}
+                  >
+                    <DoorClosed className="w-3.5 h-3.5" />
+                    {hall}
+                    {isExamCenter && (
+                      <span className="text-[9px] px-1 py-0.2 bg-zinc-800 text-zinc-200 rounded">
+                        ⭐ SEC
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+
+              {/* Quick Add Any Authentic College Hall */}
+              <select
+                value=""
+                onChange={(e) => {
+                  const h = e.target.value;
+                  if (!h) return;
+                  if (!selectedHalls.includes(h)) {
+                    setSelectedHalls([...selectedHalls, h]);
+                  }
+                  setActiveHall(h);
+                  setSelectedSeatKey(null);
+                }}
+                className="text-xs border border-zinc-300 rounded-lg px-2 py-1.5 bg-white text-zinc-700 font-medium hover:border-zinc-500 focus:outline-none"
+              >
+                <option value="">+ Add Campus Hall...</option>
+                <optgroup label="Official Examination Centers (3rd Floor)">
+                  <option value="A-313">A-313 (Examination Section, 180 m²)</option>
+                  <option value="A-314">A-314 (Valuation Room, 120 m²)</option>
+                  <option value="C-327">C-327 (Examination Section, 180 m²)</option>
+                </optgroup>
+                <optgroup label="1st Floor Lecture Halls & Labs">
+                  <option value="A-101">A-101 (Lecture Hall, 65 m²)</option>
+                  <option value="A-102">A-102 (Lecture Hall, 65 m²)</option>
+                  <option value="A-103">A-103 (Lecture Hall, 65 m²)</option>
+                  <option value="B-110">B-110 (Lecture Hall, 65 m²)</option>
+                  <option value="B-125-A">B-125-A (Computer Lab 1)</option>
+                  <option value="B-125-B">B-125-B (Computer Lab 2)</option>
+                  <option value="C-106">C-106 (Lecture Hall, 65 m²)</option>
+                  <option value="D-104">D-104 (Lecture Hall, 65 m²)</option>
+                </optgroup>
+                <optgroup label="2nd Floor Lecture Halls & Computing">
+                  <option value="A-201">A-201 (Lecture Hall, 65 m²)</option>
+                  <option value="A-202">A-202 (Lecture Hall, 65 m²)</option>
+                  <option value="B-207">B-207 (Lecture Hall, 65 m²)</option>
+                  <option value="B-224">B-224 (Computer Lab)</option>
+                  <option value="D-204">D-204 (Lecture Hall, 65 m²)</option>
+                </optgroup>
+                <optgroup label="3rd Floor Lecture Halls">
+                  <option value="A-301">A-301 (Lecture Hall, 65 m²)</option>
+                  <option value="A-302">A-302 (Lecture Hall, 65 m²)</option>
+                  <option value="B-307">B-307 (Lecture Hall, 65 m²)</option>
+                  <option value="C-310">C-310 (Lecture Hall, 65 m²)</option>
+                  <option value="D-304">D-304 (Lecture Hall, 65 m²)</option>
+                </optgroup>
+                <optgroup label="4th Floor Lecture Halls">
+                  <option value="A-403">A-403 (Lecture Hall, 65 m²)</option>
+                  <option value="B-407">B-407 (Lecture Hall, 65 m²)</option>
+                  <option value="C-410">C-410 (Lecture Hall, 65 m²)</option>
+                </optgroup>
+              </select>
             </div>
           </div>
 

@@ -1,79 +1,101 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   DoorClosed,
-  Plus,
   ShieldCheck,
   Ban,
   CheckCircle2,
   Columns,
   Rows,
   Save,
-  Sliders,
   Layers,
+  Search,
+  Building,
+  Filter,
+  Award,
+  Check,
+  RefreshCw,
+  LayoutGrid,
+  Compass,
+  Maximize2,
+  MapPin,
+  Sparkles,
 } from 'lucide-react';
 import { Room } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { api } from '../services/api';
-
-const INITIAL_ROOMS: Room[] = [
-  { id: 'rm-101', room_number: 'LH-101', name: 'Lecture Hall 101', building: 'Academic Block A', floor: 1, room_type: 'exam_hall', rows: 6, columns: 6, capacity: 36, usable_capacity: 34, blocked_seats_count: 2, is_exam_approved: true, is_active: true },
-  { id: 'rm-102', room_number: 'LH-102', name: 'Lecture Hall 102', building: 'Academic Block A', floor: 1, room_type: 'exam_hall', rows: 6, columns: 8, capacity: 48, usable_capacity: 45, blocked_seats_count: 3, is_exam_approved: true, is_active: true },
-  { id: 'rm-201', room_number: 'LH-201', name: 'Classroom 201', building: 'Academic Block B', floor: 2, room_type: 'classroom', rows: 5, columns: 8, capacity: 40, usable_capacity: 40, blocked_seats_count: 0, is_exam_approved: false, is_active: true },
-  { id: 'rm-202', room_number: 'LH-202', name: 'Classroom 202', building: 'Academic Block B', floor: 2, room_type: 'classroom', rows: 5, columns: 8, capacity: 40, usable_capacity: 38, blocked_seats_count: 2, is_exam_approved: false, is_active: true },
-  { id: 'rm-301', room_number: 'AI-LAB-1', name: 'Artificial Intelligence Lab', building: 'Technology Tower', floor: 3, room_type: 'lab', rows: 4, columns: 8, capacity: 32, usable_capacity: 30, blocked_seats_count: 2, is_exam_approved: false, is_active: true },
-  { id: 'rm-401', room_number: 'EXAM-HALL-MAIN', name: 'Central Examination Auditorium', building: 'Auditorium Complex', floor: 1, room_type: 'exam_hall', rows: 10, columns: 12, capacity: 120, usable_capacity: 115, blocked_seats_count: 5, is_exam_approved: true, is_active: true },
-];
+import {
+  CAMPUS_ROOMS,
+  CAMPUS_FLOORS,
+  CampusRoom,
+  CampusBlock,
+  CampusRoomClassification,
+} from '../data/campusFloorData';
 
 export const RoomsPage: React.FC = () => {
   const { isAdmin } = useAuth();
   const { showNotification } = useNotification();
-  const [rooms, setRooms] = useState<Room[]>(INITIAL_ROOMS);
-  const [activeTab, setActiveTab] = useState<'all' | 'exam' | 'classroom' | 'lab'>('all');
-  const [selectedRoom, setSelectedRoom] = useState<Room>(INITIAL_ROOMS[0]);
-  
+
+  // Master Rooms State (Initialized with comprehensive authentic FET Campus architectural rooms)
+  const [rooms, setRooms] = useState<CampusRoom[]>(CAMPUS_ROOMS);
+
+  // Filter & Navigation State
+  const [selectedFloor, setSelectedFloor] = useState<number>(1);
+  const [selectedBlock, setSelectedBlock] = useState<'all' | CampusBlock>('all');
+  const [selectedClassification, setSelectedClassification] = useState<'all' | CampusRoomClassification>('all');
+  const [examOnly, setExamOnly] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [viewMode, setViewMode] = useState<'map' | 'cards'>('map');
+
   // Interactive Layout Editor State
-  const [editorRows, setEditorRows] = useState(selectedRoom.rows);
-  const [editorCols, setEditorCols] = useState(selectedRoom.columns);
+  const [selectedRoom, setSelectedRoom] = useState<CampusRoom>(
+    CAMPUS_ROOMS.find((r) => r.room_number === 'A-101') || CAMPUS_ROOMS[0]
+  );
+  const [editorRows, setEditorRows] = useState<number>(selectedRoom.rows || 6);
+  const [editorCols, setEditorCols] = useState<number>(selectedRoom.columns || 6);
   const [blockedSeats, setBlockedSeats] = useState<Set<string>>(new Set(['0-2', '2-4']));
   const [editorFeedback, setEditorFeedback] = useState<string | null>(null);
 
+  // Sync with Backend API if available
   useEffect(() => {
     api.getRooms()
       .then((data) => {
         if (data && data.length > 0) {
-          const mapped: Room[] = data.map((r: any) => ({
-            id: r.id,
-            room_number: r.code || r.name,
-            name: r.name,
-            building: r.building || 'Academic Block',
-            floor: r.floor || 1,
-            room_type: r.room_type || 'classroom',
-            rows: r.rows || 5,
-            columns: r.columns || 8,
-            capacity: r.total_seats || (r.rows || 5) * (r.columns || 8),
-            usable_capacity: r.usable_seats || (r.total_seats || 40) - (r.blocked_seats || 0),
-            blocked_seats_count: r.blocked_seats || 0,
-            is_exam_approved: !!r.is_exam_approved,
-            is_active: r.status !== 'inactive',
-          }));
-          setRooms(mapped);
-          setSelectedRoom(mapped[0]);
-          setEditorRows(mapped[0].rows);
-          setEditorCols(mapped[0].columns);
+          // Merge API overrides onto authentic campus floor rooms
+          setRooms((prev) =>
+            prev.map((r) => {
+              const remote = data.find(
+                (d: any) =>
+                  (d.code && d.code.toLowerCase() === r.room_number.toLowerCase()) ||
+                  (d.name && d.name.toLowerCase() === r.name.toLowerCase())
+              );
+              if (!remote) return r;
+              return {
+                ...r,
+                id: remote.id || r.id,
+                rows: remote.rows || r.rows,
+                columns: remote.columns || r.columns,
+                capacity: remote.total_seats || r.capacity,
+                usable_capacity: remote.usable_seats || r.usable_capacity,
+                blocked_seats_count: remote.blocked_seats || r.blocked_seats_count,
+                is_exam_approved: remote.is_exam_approved !== undefined ? !!remote.is_exam_approved : r.is_exam_approved,
+              };
+            })
+          );
         }
       })
       .catch(() => {});
   }, []);
 
-  const selectRoomForEditing = (room: Room) => {
+  const selectRoomForEditing = (room: CampusRoom) => {
     setSelectedRoom(room);
-    setEditorRows(room.rows);
-    setEditorCols(room.columns);
+    const r = room.rows || 6;
+    const c = room.columns || 6;
+    setEditorRows(r);
+    setEditorCols(c);
     const initialBlocked = new Set<string>();
-    // Pre-populate some blocked seats matching count
     for (let i = 0; i < room.blocked_seats_count; i++) {
-      initialBlocked.add(`${i % room.rows}-${(i * 2 + 1) % room.columns}`);
+      initialBlocked.add(`${i % r}-${(i * 2 + 1) % c}`);
     }
     setBlockedSeats(initialBlocked);
     setEditorFeedback(null);
@@ -90,13 +112,39 @@ export const RoomsPage: React.FC = () => {
     setBlockedSeats(next);
   };
 
+  const toggleExamApproval = (roomId: string) => {
+    const updated = rooms.map((r) => {
+      if (r.id === roomId || r.room_number === roomId) {
+        return { ...r, is_exam_approved: !r.is_exam_approved };
+      }
+      return r;
+    });
+    setRooms(updated);
+    if (selectedRoom.id === roomId || selectedRoom.room_number === roomId) {
+      setSelectedRoom((prev) => ({ ...prev, is_exam_approved: !prev.is_exam_approved }));
+    }
+    showNotification('success', `Updated examination certification for venue.`);
+  };
+
+  const setStandardExamGrid = () => {
+    setEditorRows(6);
+    setEditorCols(6);
+    setBlockedSeats(new Set());
+    setEditorFeedback('Applied standard 6×6 (36 seats) exam layout.');
+  };
+
+  const clearBlockedSeats = () => {
+    setBlockedSeats(new Set());
+    setEditorFeedback('Cleared all blocked desks.');
+  };
+
   const saveLayout = () => {
     const total = editorRows * editorCols;
     const blockedCount = blockedSeats.size;
     const usable = total - blockedCount;
 
     const updatedRooms = rooms.map((r) => {
-      if (r.id === selectedRoom.id) {
+      if (r.id === selectedRoom.id || r.room_number === selectedRoom.room_number) {
         return {
           ...r,
           rows: editorRows,
@@ -125,171 +173,582 @@ export const RoomsPage: React.FC = () => {
       blocked: Array.from(blockedSeats),
     })
       .then(() => {
-        setEditorFeedback(`Room layout for ${selectedRoom.room_number} saved. Usable seats: ${usable}/${total}.`);
+        setEditorFeedback(`Layout for ${selectedRoom.room_number} saved to database.`);
         showNotification('success', `Room layout for ${selectedRoom.room_number} saved.`);
       })
       .catch((err: any) => {
-        setEditorFeedback(`Room layout for ${selectedRoom.room_number} updated locally.`);
-        showNotification('warning', `Layout updated locally (${err.message || 'Database sync failed'})`);
+        setEditorFeedback(`Layout for ${selectedRoom.room_number} updated locally.`);
+        showNotification('warning', `Layout updated locally (${err.message || 'Saved in memory'})`);
       });
 
     setTimeout(() => setEditorFeedback(null), 4000);
   };
 
-  const filteredRooms = rooms.filter((r) => {
-    if (activeTab === 'exam') return r.is_exam_approved;
-    if (activeTab === 'classroom') return r.room_type === 'classroom';
-    if (activeTab === 'lab') return r.room_type === 'lab';
-    return true;
-  });
+  // Filtered rooms based on floor, block, classification, and search
+  const floorRooms = useMemo(() => {
+    return rooms.filter((r) => r.floor === selectedFloor);
+  }, [rooms, selectedFloor]);
+
+  const filteredRooms = useMemo(() => {
+    return floorRooms.filter((r) => {
+      if (selectedBlock !== 'all' && r.block !== selectedBlock) return false;
+      if (selectedClassification !== 'all' && r.classification !== selectedClassification) return false;
+      if (examOnly && !r.is_exam_approved) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchNum = r.room_number.toLowerCase().includes(q);
+        const matchName = r.name.toLowerCase().includes(q);
+        const matchClass = r.classification.toLowerCase().includes(q);
+        if (!matchNum && !matchName && !matchClass) return false;
+      }
+      return true;
+    });
+  }, [floorRooms, selectedBlock, selectedClassification, examOnly, searchQuery]);
+
+  // Designated Examination Centers
+  const examCenters = useMemo(() => {
+    return rooms.filter((r) => r.is_exam_center);
+  }, [rooms]);
+
+  // Floor stats
+  const totalFloorRooms = floorRooms.length;
+  const examApprovedCount = floorRooms.filter((r) => r.is_exam_approved).length;
+  const totalFloorCapacity = floorRooms.reduce((acc, r) => acc + (r.usable_capacity || 0), 0);
+  const activeFloorMeta = CAMPUS_FLOORS.find((f) => f.floor === selectedFloor) || CAMPUS_FLOORS[1];
 
   const totalUsableSeats = editorRows * editorCols - blockedSeats.size;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      {/* Top Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-zinc-200">
         <div>
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-            <DoorClosed className="w-5 h-5 text-primary-600" />
-            Classrooms & Examination Halls Management
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Configure room dimensions, manage defective/blocked seats, and certify examination venues.
-          </p>
+          <div className="flex items-center gap-2">
+            <span className="p-2 bg-zinc-950 text-white rounded-lg">
+              <DoorClosed className="w-5 h-5 text-white" />
+            </span>
+            <div>
+              <h1 className="text-xl font-bold text-zinc-950 tracking-tight flex items-center gap-2">
+                Classrooms, Examination Halls & Floor Visualizer
+              </h1>
+              <p className="text-xs text-zinc-500">
+                JU - School of Engineering and Technology (FET Campus) • Architectural Floor Plans & Venues Management
+              </p>
+            </div>
+          </div>
         </div>
 
-        {isAdmin && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">Exam Approved Halls: <strong>{rooms.filter(r => r.is_exam_approved).length}</strong></span>
+        {/* Global Stats */}
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <div className="px-3 py-1.5 bg-zinc-100 border border-zinc-300 rounded-lg font-mono">
+            <span className="text-zinc-500 text-[10px] block uppercase font-bold">Total Rooms</span>
+            <span className="font-bold text-zinc-950">{rooms.length} venues</span>
           </div>
-        )}
+          <div className="px-3 py-1.5 bg-zinc-950 text-white border border-zinc-950 rounded-lg font-mono">
+            <span className="text-zinc-400 text-[10px] block uppercase font-bold">Exam Approved</span>
+            <span className="font-bold text-white">{rooms.filter((r) => r.is_exam_approved).length} halls</span>
+          </div>
+          <div className="px-3 py-1.5 bg-zinc-100 border border-zinc-300 rounded-lg font-mono">
+            <span className="text-zinc-500 text-[10px] block uppercase font-bold">Exam Centers</span>
+            <span className="font-bold text-zinc-950">3 certified</span>
+          </div>
+        </div>
       </div>
 
-      {editorFeedback && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-lg flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          {editorFeedback}
-        </div>
-      )}
-
-      {/* Main Split: Room List and Visual Grid Editor */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Rooms Table */}
-        <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200 shadow-xs p-4 flex flex-col justify-between">
-          <div>
-            {/* Filter Tabs */}
-            <div className="flex items-center gap-1.5 border-b border-slate-100 pb-3 mb-3">
-              {[
-                { id: 'all', label: 'All Venues' },
-                { id: 'exam', label: 'Exam Approved' },
-                { id: 'classroom', label: 'Classrooms' },
-                { id: 'lab', label: 'Labs' },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-2.5 py-1 text-xs rounded-md font-medium transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-slate-900 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="space-y-2 overflow-y-auto max-h-[580px] pr-1">
-              {filteredRooms.map((r) => {
-                const isSelected = r.id === selectedRoom.id;
-                return (
-                  <div
-                    key={r.id}
-                    onClick={() => selectRoomForEditing(r)}
-                    className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                      isSelected
-                        ? 'border-primary-500 bg-primary-50/40 shadow-xs'
-                        : 'border-slate-200 hover:border-slate-300 bg-slate-50/40'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-xs text-slate-900">{r.room_number}</span>
-                        <span className="text-[10px] text-slate-500">({r.building}, Fl {r.floor})</span>
-                      </div>
-                      {r.is_exam_approved && (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">
-                          <ShieldCheck className="w-3 h-3" />
-                          Exam Certified
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-200/60 text-xs">
-                      <span className="text-slate-500 text-[11px] font-medium">{r.name}</span>
-                      <div className="flex items-center gap-2 text-[11px] font-mono">
-                        <span className="text-slate-700 font-bold">{r.usable_capacity} seats</span>
-                        {r.blocked_seats_count > 0 && (
-                          <span className="text-rose-600 font-semibold">({r.blocked_seats_count} blocked)</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+      {/* Designated Examination Centers Banner */}
+      <div className="p-4 bg-zinc-950 text-white rounded-xl border border-zinc-800 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="p-2 bg-white text-zinc-950 rounded-lg font-bold text-xs flex items-center gap-1 shrink-0">
+              <Award className="w-4 h-4 text-zinc-950" />
+              CONFIDENTIAL
+            </span>
+            <div>
+              <h3 className="text-sm font-bold tracking-tight text-white flex items-center gap-2">
+                Official Examination & Valuation Centers (3rd Floor)
+              </h3>
+              <p className="text-xs text-zinc-400">
+                Authorized wings for paper custody, confidential valuations, and secure controller operations.
+              </p>
             </div>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {examCenters.map((ec) => (
+              <button
+                key={ec.id}
+                type="button"
+                onClick={() => {
+                  setSelectedFloor(ec.floor);
+                  selectRoomForEditing(ec);
+                }}
+                className={`px-3 py-1.5 rounded-lg border text-xs font-mono font-bold flex items-center gap-2 transition-all ${
+                  selectedRoom.room_number === ec.room_number
+                    ? 'bg-white text-zinc-950 border-white shadow-xs'
+                    : 'bg-zinc-900 text-zinc-200 border-zinc-700 hover:bg-zinc-800 hover:border-zinc-500'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>{ec.room_number}</span>
+                <span className="text-[10px] px-1.5 py-0.2 bg-zinc-800 text-zinc-300 rounded font-normal">
+                  {ec.center_type}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400">
-            Click any room to open its interactive visual seating matrix editor.
+      {/* Interactive Floor Switcher */}
+      <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Building className="w-4 h-4 text-zinc-700" />
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-700">Select Campus Floor:</span>
+          </div>
+
+          {/* View Mode Toggle */}
+          <div className="inline-flex rounded-lg border border-zinc-200 p-0.5 bg-zinc-100 text-xs">
+            <button
+              type="button"
+              onClick={() => setViewMode('map')}
+              className={`px-3 py-1 rounded-md font-medium flex items-center gap-1.5 transition-all ${
+                viewMode === 'map'
+                  ? 'bg-zinc-950 text-white shadow-xs'
+                  : 'text-zinc-600 hover:text-zinc-950'
+              }`}
+            >
+              <Compass className="w-3.5 h-3.5" />
+              Schematic Floor Map
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('cards')}
+              className={`px-3 py-1 rounded-md font-medium flex items-center gap-1.5 transition-all ${
+                viewMode === 'cards'
+                  ? 'bg-zinc-950 text-white shadow-xs'
+                  : 'text-zinc-600 hover:text-zinc-950'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Room Cards Grid
+            </button>
           </div>
         </div>
 
-        {/* Right: Visual Grid Layout Editor */}
-        <div className="lg:col-span-7 bg-white rounded-xl border border-slate-200 shadow-xs p-5 flex flex-col justify-between">
-          <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-sm text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-200">
-                    {selectedRoom.room_number}
+        {/* Floor Selection Tabs */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          {CAMPUS_FLOORS.map((f) => {
+            const isCurrent = selectedFloor === f.floor;
+            const floorHallsCount = rooms.filter((r) => r.floor === f.floor).length;
+            const floorExamHallsCount = rooms.filter((r) => r.floor === f.floor && r.is_exam_approved).length;
+
+            return (
+              <button
+                key={f.floor}
+                type="button"
+                onClick={() => setSelectedFloor(f.floor)}
+                className={`p-3 rounded-lg border text-left transition-all relative ${
+                  isCurrent
+                    ? 'border-zinc-950 bg-zinc-950 text-white shadow-xs'
+                    : 'border-zinc-200 hover:border-zinc-300 bg-zinc-50/50 hover:bg-zinc-100/60 text-zinc-800'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className={`text-[10px] font-mono font-bold uppercase px-1.5 py-0.5 rounded ${
+                    isCurrent ? 'bg-zinc-800 text-zinc-200' : 'bg-zinc-200 text-zinc-700'
+                  }`}>
+                    {f.short_label}
                   </span>
-                  <h2 className="text-base font-bold text-slate-800">{selectedRoom.name}</h2>
+                  {f.floor === 3 && (
+                    <span className={`text-[9px] font-bold px-1 rounded ${
+                      isCurrent ? 'bg-white text-zinc-950' : 'bg-zinc-900 text-white'
+                    }`}>
+                      EXAM SEC
+                    </span>
+                  )}
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Visual Layout Grid Editor • Click any desk to mark defective/blocked.
-                </p>
+                <h4 className={`text-xs font-bold mt-2 ${isCurrent ? 'text-white' : 'text-zinc-900'}`}>
+                  {f.name}
+                </h4>
+                <div className="flex items-center gap-2 mt-1 text-[10px] opacity-80">
+                  <span>{floorHallsCount} rooms</span>
+                  <span>•</span>
+                  <span>{floorExamHallsCount} exam halls</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Floor Subtitle / Description */}
+        <div className="p-2.5 bg-zinc-50 rounded-lg border border-zinc-200/80 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-zinc-600 gap-2">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-zinc-900">{activeFloorMeta.name}:</span>
+            <span>{activeFloorMeta.subtitle}</span>
+          </div>
+          <div className="text-[11px] font-mono text-zinc-500">
+            Capacity: <strong>{totalFloorCapacity}</strong> seats across <strong>{totalFloorRooms}</strong> rooms
+          </div>
+        </div>
+
+        {/* Filter Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-zinc-100">
+          {/* Block Selector */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] font-semibold text-zinc-500 mr-1">Block / Wing:</span>
+            {(['all', ...activeFloorMeta.blocks] as const).map((blk) => (
+              <button
+                key={blk}
+                type="button"
+                onClick={() => setSelectedBlock(blk)}
+                className={`px-2.5 py-1 text-xs rounded-md font-medium transition-all ${
+                  selectedBlock === blk
+                    ? 'bg-zinc-950 text-white'
+                    : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
+                }`}
+              >
+                {blk === 'all' ? 'All Blocks' : blk === 'Central' ? 'Central Core' : `Block ${blk}`}
+              </button>
+            ))}
+          </div>
+
+          {/* Classification Filter & Search */}
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:flex-initial">
+              <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search room (e.g. A-101)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 pr-3 py-1 bg-white border border-zinc-300 rounded-md text-xs text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-zinc-950 w-full sm:w-44"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setExamOnly(!examOnly)}
+              className={`px-2.5 py-1 text-xs rounded-md font-medium border flex items-center gap-1 transition-all ${
+                examOnly
+                  ? 'bg-zinc-950 text-white border-zinc-950'
+                  : 'bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-50'
+              }`}
+            >
+              <ShieldCheck className="w-3 h-3" />
+              Exam Certified Only
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Split Layout: Floor Map / Cards (Left 7 Cols) and Seat Matrix Editor (Right 5 Cols) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Side: Map or Cards */}
+        <div className="lg:col-span-7 space-y-4">
+          {viewMode === 'map' ? (
+            /* Interactive Schematic Architectural Floor Map */
+            <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs p-4">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-zinc-100">
+                <div className="flex items-center gap-2">
+                  <Compass className="w-4 h-4 text-zinc-800" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-900">
+                    Architectural Wing Layout • {activeFloorMeta.name}
+                  </h3>
+                </div>
+                <span className="text-[11px] text-zinc-500 font-mono">
+                  {filteredRooms.length} venues shown
+                </span>
               </div>
 
-              {isAdmin && (
+              {/* Blueprint Layout Grid */}
+              <div className="space-y-4">
+                {/* North Wing: Block D (if present) */}
+                {activeFloorMeta.blocks.includes('D') && (selectedBlock === 'all' || selectedBlock === 'D') && (
+                  <div className="p-3 bg-zinc-50/70 border border-zinc-200 rounded-lg">
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-200 text-xs font-bold text-zinc-800">
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-zinc-800" />
+                        North Wing — Block D (Advanced Sciences & Library)
+                      </span>
+                      <span className="text-[10px] text-zinc-400 font-mono font-normal">FET Campus</span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {filteredRooms
+                        .filter((r) => r.block === 'D')
+                        .map((r) => (
+                          <RoomMapTile
+                            key={r.id}
+                            room={r}
+                            isSelected={selectedRoom.room_number === r.room_number}
+                            onSelect={() => selectRoomForEditing(r)}
+                          />
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Main Middle Row: Block A (West), Central Hub, Block B (East) */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                  {/* West Wing: Block A */}
+                  {(selectedBlock === 'all' || selectedBlock === 'A') && (
+                    <div className={`p-3 bg-zinc-50/70 border border-zinc-200 rounded-lg ${
+                      selectedBlock === 'A' ? 'md:col-span-12' : activeFloorMeta.blocks.includes('B') ? 'md:col-span-6' : 'md:col-span-12'
+                    }`}>
+                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-200 text-xs font-bold text-zinc-800">
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-zinc-950" />
+                          West Wing — Block A (Lecture Theatres & Labs)
+                        </span>
+                        <span className="text-[10px] text-zinc-400 font-mono font-normal">Block A</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {filteredRooms
+                          .filter((r) => r.block === 'A')
+                          .map((r) => (
+                            <RoomMapTile
+                              key={r.id}
+                              room={r}
+                              isSelected={selectedRoom.room_number === r.room_number}
+                              onSelect={() => selectRoomForEditing(r)}
+                            />
+                          ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* East Wing: Block B */}
+                  {activeFloorMeta.blocks.includes('B') && (selectedBlock === 'all' || selectedBlock === 'B') && (
+                    <div className={`p-3 bg-zinc-50/70 border border-zinc-200 rounded-lg ${
+                      selectedBlock === 'B' ? 'md:col-span-12' : activeFloorMeta.blocks.includes('A') ? 'md:col-span-6' : 'md:col-span-12'
+                    }`}>
+                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-200 text-xs font-bold text-zinc-800">
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-zinc-950" />
+                          East Wing — Block B (Computing Labs & Halls)
+                        </span>
+                        <span className="text-[10px] text-zinc-400 font-mono font-normal">Block B</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {filteredRooms
+                          .filter((r) => r.block === 'B')
+                          .map((r) => (
+                            <RoomMapTile
+                              key={r.id}
+                              room={r}
+                              isSelected={selectedRoom.room_number === r.room_number}
+                              onSelect={() => selectRoomForEditing(r)}
+                            />
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Central Core: Amphitheatre or Atrium */}
+                {activeFloorMeta.blocks.includes('Central') && (selectedBlock === 'all' || selectedBlock === 'Central') && (
+                  <div className="p-3 bg-zinc-100 border border-zinc-300 rounded-lg">
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-200 text-xs font-bold text-zinc-900">
+                      <span className="flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-zinc-700" />
+                        Central Core Hub (Atrium / Stage)
+                      </span>
+                      <span className="text-[10px] text-zinc-500 font-mono">Central Core</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {filteredRooms
+                        .filter((r) => r.block === 'Central')
+                        .map((r) => (
+                          <RoomMapTile
+                            key={r.id}
+                            room={r}
+                            isSelected={selectedRoom.room_number === r.room_number}
+                            onSelect={() => selectRoomForEditing(r)}
+                          />
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* South Wing: Block C (if present) */}
+                {activeFloorMeta.blocks.includes('C') && (selectedBlock === 'all' || selectedBlock === 'C') && (
+                  <div className="p-3 bg-zinc-50/70 border border-zinc-200 rounded-lg">
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-200 text-xs font-bold text-zinc-800">
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-zinc-800" />
+                        South Wing — Block C (Engineering Labs & Tech Wings)
+                      </span>
+                      <span className="text-[10px] text-zinc-400 font-mono font-normal">Block C</span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {filteredRooms
+                        .filter((r) => r.block === 'C')
+                        .map((r) => (
+                          <RoomMapTile
+                            key={r.id}
+                            room={r}
+                            isSelected={selectedRoom.room_number === r.room_number}
+                            onSelect={() => selectRoomForEditing(r)}
+                          />
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* Cards Grid View */
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[720px] overflow-y-auto pr-1">
+                {filteredRooms.map((r) => {
+                  const isSelected = selectedRoom.room_number === r.room_number;
+                  return (
+                    <div
+                      key={r.id}
+                      onClick={() => selectRoomForEditing(r)}
+                      className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                        isSelected
+                          ? 'border-zinc-950 bg-zinc-950 text-white shadow-xs'
+                          : 'border-zinc-200 hover:border-zinc-300 bg-white hover:bg-zinc-50/70 text-zinc-900'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`font-mono font-bold text-xs px-2 py-0.5 rounded ${
+                            isSelected ? 'bg-zinc-800 text-white' : 'bg-zinc-100 text-zinc-900 border border-zinc-200'
+                          }`}>
+                            {r.room_number}
+                          </span>
+                          <span className={`text-[10px] ${isSelected ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                            Block {r.block}
+                          </span>
+                        </div>
+                        {r.is_exam_center ? (
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${
+                            isSelected ? 'bg-white text-zinc-950' : 'bg-zinc-900 text-white'
+                          }`}>
+                            {r.center_type}
+                          </span>
+                        ) : r.is_exam_approved ? (
+                          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                            isSelected ? 'bg-zinc-800 text-zinc-200' : 'bg-zinc-100 text-zinc-800 border border-zinc-300'
+                          }`}>
+                            <ShieldCheck className="w-3 h-3" />
+                            Exam Certified
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <h4 className={`text-xs font-bold mt-2 truncate ${isSelected ? 'text-white' : 'text-zinc-900'}`}>
+                        {r.name}
+                      </h4>
+
+                      <div className={`mt-2 pt-2 border-t flex items-center justify-between text-xs font-mono ${
+                        isSelected ? 'border-zinc-800 text-zinc-300' : 'border-zinc-100 text-zinc-600'
+                      }`}>
+                        <span>{r.area_sqm} m²</span>
+                        <span>{r.rows}R × {r.columns}C</span>
+                        <span className="font-bold">{r.usable_capacity} seats</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right Side: Interactive Room Matrix Layout Editor */}
+        <div className="lg:col-span-5 bg-white rounded-xl border border-zinc-200 shadow-2xs p-5 flex flex-col justify-between">
+          <div className="space-y-4">
+            {/* Selected Venue Header */}
+            <div className="pb-3 border-b border-zinc-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-bold text-sm bg-zinc-950 text-white px-2.5 py-0.5 rounded">
+                    {selectedRoom.room_number}
+                  </span>
+                  <h2 className="text-sm font-bold text-zinc-950 truncate max-w-[220px]">
+                    {selectedRoom.name}
+                  </h2>
+                </div>
+                <div className="flex items-center gap-2 mt-1 text-[11px] text-zinc-500">
+                  <span>Block {selectedRoom.block}</span>
+                  <span>•</span>
+                  <span>{selectedRoom.floor_label}</span>
+                  <span>•</span>
+                  <span className="font-mono font-semibold">{selectedRoom.area_sqm} m²</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-1.5">
                 <button
-                  onClick={saveLayout}
-                  className="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white text-xs font-semibold rounded-lg shadow-sm flex items-center gap-1.5 transition-all self-start sm:self-auto"
+                  type="button"
+                  onClick={() => toggleExamApproval(selectedRoom.room_number)}
+                  className={`px-2.5 py-1 text-xs rounded-md font-semibold border flex items-center gap-1 transition-all ${
+                    selectedRoom.is_exam_approved
+                      ? 'bg-zinc-100 text-zinc-900 border-zinc-300 hover:bg-zinc-200'
+                      : 'bg-zinc-950 text-white border-zinc-950 hover:bg-zinc-800'
+                  }`}
+                  title={selectedRoom.is_exam_approved ? 'Revoke exam certification' : 'Certify venue for exams'}
                 >
-                  <Save className="w-4 h-4" />
-                  Save Room Layout
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  {selectedRoom.is_exam_approved ? 'Certified' : 'Certify'}
                 </button>
-              )}
+
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={saveLayout}
+                    className="px-3 py-1 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-semibold rounded-md shadow-xs flex items-center gap-1 transition-all"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    Save
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {editorFeedback && (
+              <div className="p-2.5 bg-zinc-100 border border-zinc-300 text-zinc-900 text-xs rounded-lg flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-zinc-950 shrink-0" />
+                {editorFeedback}
+              </div>
+            )}
+
+            {/* Classification & Area Info Pill */}
+            <div className="p-2.5 bg-zinc-50 rounded-lg border border-zinc-200 text-xs space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500 text-[10px] uppercase font-bold">Venue Classification:</span>
+                <span className="font-semibold text-zinc-900">{selectedRoom.classification}</span>
+              </div>
+              <div className="flex items-center justify-between font-mono text-[11px]">
+                <span className="text-zinc-500">Floor Area Space:</span>
+                <span className="text-zinc-800">
+                  {selectedRoom.area_sqm} m² ({(selectedRoom.area_sqm / (totalUsableSeats || 1)).toFixed(1)} m²/seat)
+                </span>
+              </div>
             </div>
 
             {/* Grid dimension controls */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4 p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2.5 bg-zinc-50 rounded-lg border border-zinc-200 text-xs">
               <div className="flex items-center gap-2">
-                <Rows className="w-4 h-4 text-slate-400" />
+                <Rows className="w-4 h-4 text-zinc-400" />
                 <div>
-                  <span className="text-slate-500 text-[10px] uppercase font-semibold">Rows:</span>
+                  <span className="text-zinc-500 text-[10px] uppercase font-bold">Rows:</span>
                   <div className="flex items-center gap-1 mt-0.5">
                     <button
+                      type="button"
                       onClick={() => setEditorRows(Math.max(1, editorRows - 1))}
-                      className="w-5 h-5 rounded bg-white border border-slate-300 font-bold flex items-center justify-center hover:bg-slate-100"
+                      className="w-5 h-5 rounded bg-white border border-zinc-300 font-bold flex items-center justify-center hover:bg-zinc-100 text-xs"
                     >
                       -
                     </button>
-                    <span className="font-mono font-bold text-slate-800 px-1.5">{editorRows}</span>
+                    <span className="font-mono font-bold text-zinc-900 px-1">{editorRows}</span>
                     <button
-                      onClick={() => setEditorRows(editorRows + 1)}
-                      className="w-5 h-5 rounded bg-white border border-slate-300 font-bold flex items-center justify-center hover:bg-slate-100"
+                      type="button"
+                      onClick={() => setEditorRows(Math.min(12, editorRows + 1))}
+                      className="w-5 h-5 rounded bg-white border border-zinc-300 font-bold flex items-center justify-center hover:bg-zinc-100 text-xs"
                     >
                       +
                     </button>
@@ -298,20 +757,22 @@ export const RoomsPage: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                <Columns className="w-4 h-4 text-slate-400" />
+                <Columns className="w-4 h-4 text-zinc-400" />
                 <div>
-                  <span className="text-slate-500 text-[10px] uppercase font-semibold">Columns:</span>
+                  <span className="text-zinc-500 text-[10px] uppercase font-bold">Cols:</span>
                   <div className="flex items-center gap-1 mt-0.5">
                     <button
+                      type="button"
                       onClick={() => setEditorCols(Math.max(1, editorCols - 1))}
-                      className="w-5 h-5 rounded bg-white border border-slate-300 font-bold flex items-center justify-center hover:bg-slate-100"
+                      className="w-5 h-5 rounded bg-white border border-zinc-300 font-bold flex items-center justify-center hover:bg-zinc-100 text-xs"
                     >
                       -
                     </button>
-                    <span className="font-mono font-bold text-slate-800 px-1.5">{editorCols}</span>
+                    <span className="font-mono font-bold text-zinc-900 px-1">{editorCols}</span>
                     <button
-                      onClick={() => setEditorCols(editorCols + 1)}
-                      className="w-5 h-5 rounded bg-white border border-slate-300 font-bold flex items-center justify-center hover:bg-slate-100"
+                      type="button"
+                      onClick={() => setEditorCols(Math.min(12, editorCols + 1))}
+                      className="w-5 h-5 rounded bg-white border border-zinc-300 font-bold flex items-center justify-center hover:bg-zinc-100 text-xs"
                     >
                       +
                     </button>
@@ -320,31 +781,52 @@ export const RoomsPage: React.FC = () => {
               </div>
 
               <div>
-                <span className="text-slate-500 text-[10px] uppercase font-semibold">Usable Capacity:</span>
-                <p className="font-mono font-bold text-emerald-600 text-sm mt-0.5">
-                  {totalUsableSeats} seats
+                <span className="text-zinc-500 text-[10px] uppercase font-bold">Usable Seats:</span>
+                <p className="font-mono font-bold text-zinc-950 text-sm mt-0.5">
+                  {totalUsableSeats}
                 </p>
               </div>
 
               <div>
-                <span className="text-slate-500 text-[10px] uppercase font-semibold">Blocked Desks:</span>
-                <p className="font-mono font-bold text-rose-600 text-sm mt-0.5">
-                  {blockedSeats.size} desks
+                <span className="text-zinc-500 text-[10px] uppercase font-bold">Blocked:</span>
+                <p className="font-mono font-bold text-zinc-500 text-sm mt-0.5">
+                  {blockedSeats.size}
                 </p>
+              </div>
+            </div>
+
+            {/* Quick Presets */}
+            <div className="flex items-center justify-between text-xs pt-1">
+              <span className="text-[11px] text-zinc-500">Quick Config:</span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={setStandardExamGrid}
+                  className="px-2 py-0.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-[11px] font-medium rounded border border-zinc-300"
+                >
+                  Standard 6×6
+                </button>
+                <button
+                  type="button"
+                  onClick={clearBlockedSeats}
+                  className="px-2 py-0.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-[11px] font-medium rounded border border-zinc-300"
+                >
+                  Clear Blocked
+                </button>
               </div>
             </div>
 
             {/* Front of Room Indicator */}
-            <div className="w-full py-1.5 mb-4 bg-slate-200/80 rounded text-center text-[10px] font-bold text-slate-600 uppercase tracking-widest border border-slate-300/80">
+            <div className="w-full py-1.5 bg-zinc-100 rounded text-center text-[10px] font-bold text-zinc-700 uppercase tracking-widest border border-zinc-300">
               [ Whiteboard / Podium / Teacher's Desk ]
             </div>
 
             {/* Visual Seat Matrix */}
-            <div className="overflow-x-auto pb-4">
+            <div className="overflow-x-auto pb-2 max-h-[360px] overflow-y-auto">
               <div
-                className="grid gap-2 justify-center mx-auto"
+                className="grid gap-1.5 justify-center mx-auto"
                 style={{
-                  gridTemplateColumns: `repeat(${editorCols}, minmax(42px, 52px))`,
+                  gridTemplateColumns: `repeat(${editorCols}, minmax(38px, 48px))`,
                 }}
               >
                 {Array.from({ length: editorRows }).map((_, r) => {
@@ -359,21 +841,21 @@ export const RoomsPage: React.FC = () => {
                         key={key}
                         type="button"
                         onClick={() => toggleSeatBlocked(r, c)}
-                        className={`h-11 rounded-lg border text-center transition-all flex flex-col items-center justify-center relative group ${
+                        className={`h-10 rounded border text-center transition-all flex flex-col items-center justify-center relative group ${
                           isBlocked
-                            ? 'bg-rose-50 border-rose-300 text-rose-700 shadow-inner'
-                            : 'bg-white border-slate-300 hover:border-primary-500 hover:bg-primary-50/30 text-slate-700 shadow-2xs'
+                            ? 'bg-zinc-200 border-zinc-400 text-zinc-400 line-through'
+                            : 'bg-white border-zinc-300 hover:border-zinc-950 hover:bg-zinc-50 text-zinc-900 shadow-2xs'
                         }`}
                       >
                         <span className="font-mono text-[10px] font-bold leading-none">
                           {seatLabel}
                         </span>
                         {isBlocked ? (
-                          <Ban className="w-3 h-3 text-rose-500 mt-0.5" />
+                          <Ban className="w-2.5 h-2.5 text-zinc-500 mt-0.5" />
                         ) : (
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-950 mt-1" />
                         )}
-                        <span className="absolute -top-6 bg-slate-900 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                        <span className="absolute -top-6 bg-zinc-950 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
                           {isBlocked ? 'Blocked Desk' : `Desk ${seatLabel} (Usable)`}
                         </span>
                       </button>
@@ -385,27 +867,94 @@ export const RoomsPage: React.FC = () => {
           </div>
 
           {/* Legend */}
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <div className="flex items-center gap-4">
+          <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs text-zinc-500">
+            <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-white border border-slate-300 flex items-center justify-center">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="w-3 h-3 rounded bg-white border border-zinc-400 flex items-center justify-center">
+                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-950" />
                 </span>
                 <span className="text-[11px]">Usable Desk</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-rose-50 border border-rose-300 flex items-center justify-center">
-                  <Ban className="w-2.5 h-2.5 text-rose-500" />
+                <span className="w-3 h-3 rounded bg-zinc-200 border border-zinc-400 flex items-center justify-center">
+                  <Ban className="w-2 h-2 text-zinc-600" />
                 </span>
-                <span className="text-[11px]">Blocked / Defective (Never Assigned)</span>
+                <span className="text-[11px]">Blocked / Defective</span>
               </div>
             </div>
 
-            <span className="text-[11px] font-mono text-slate-400">
-              Grid: {editorRows}R × {editorCols}C = {editorRows * editorCols} Desks
+            <span className="text-[11px] font-mono text-zinc-400">
+              {editorRows * editorCols} Desks Total
             </span>
           </div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+// Sub-component: Architectural Room Tile in Floor Map
+const RoomMapTile: React.FC<{
+  room: CampusRoom;
+  isSelected: boolean;
+  onSelect: () => void;
+}> = ({ room, isSelected, onSelect }) => {
+  return (
+    <div
+      onClick={onSelect}
+      className={`p-2.5 rounded-lg border cursor-pointer transition-all flex flex-col justify-between ${
+        isSelected
+          ? 'border-zinc-950 bg-zinc-950 text-white shadow-xs ring-1 ring-zinc-950'
+          : room.is_exam_center
+          ? 'border-zinc-800 bg-zinc-900 text-white hover:border-zinc-950'
+          : 'border-zinc-200 hover:border-zinc-400 bg-white text-zinc-900 hover:bg-zinc-50/50'
+      }`}
+    >
+      <div>
+        <div className="flex items-center justify-between gap-1">
+          <span className={`font-mono font-bold text-xs px-1.5 py-0.5 rounded ${
+            isSelected
+              ? 'bg-zinc-800 text-white'
+              : room.is_exam_center
+              ? 'bg-zinc-800 text-zinc-200'
+              : 'bg-zinc-100 text-zinc-900 border border-zinc-200'
+          }`}>
+            {room.room_number}
+          </span>
+          <span className={`text-[10px] font-mono ${
+            isSelected || room.is_exam_center ? 'text-zinc-400' : 'text-zinc-500'
+          }`}>
+            {room.area_sqm} m²
+          </span>
+        </div>
+
+        <h4 className={`text-xs font-semibold mt-1.5 line-clamp-1 ${
+          isSelected || room.is_exam_center ? 'text-white' : 'text-zinc-900'
+        }`}>
+          {room.name}
+        </h4>
+      </div>
+
+      <div className={`mt-2 pt-1.5 border-t flex items-center justify-between text-[10px] ${
+        isSelected || room.is_exam_center ? 'border-zinc-800 text-zinc-300' : 'border-zinc-100 text-zinc-500'
+      }`}>
+        {room.is_exam_center ? (
+          <span className="font-bold text-white uppercase text-[9px] flex items-center gap-1">
+            <Award className="w-2.5 h-2.5" />
+            {room.center_type}
+          </span>
+        ) : room.is_exam_approved ? (
+          <span className="font-semibold flex items-center gap-1 text-[10px]">
+            <ShieldCheck className="w-2.5 h-2.5" />
+            Exam Hall
+          </span>
+        ) : (
+          <span className="truncate max-w-[85px]">{room.room_type}</span>
+        )}
+
+        <span className="font-mono font-bold">
+          {room.usable_capacity} seats
+        </span>
       </div>
     </div>
   );
