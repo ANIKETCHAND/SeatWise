@@ -61,11 +61,15 @@ export const Navbar: React.FC = () => {
         {/* Role Switcher */}
         <div className="flex items-center gap-2 bg-zinc-100 p-1 rounded-lg border border-zinc-200">
           <Shield className="w-3.5 h-3.5 text-zinc-600 ml-1.5" />
-          <span className="text-xs font-semibold text-zinc-700 hidden md:inline">Role:</span>
+          <label htmlFor="role-switcher" className="text-xs font-semibold text-zinc-700 hidden md:inline cursor-pointer">
+            Role:
+          </label>
           <select
+            id="role-switcher"
+            aria-label="Switch User Role"
             value={role}
             onChange={(e) => switchRole(e.target.value as UserRole)}
-            className="text-xs font-medium bg-white border border-zinc-300 rounded px-2 py-1 text-zinc-900 shadow-xs focus:outline-hidden focus:ring-1 focus:ring-zinc-900 cursor-pointer"
+            className="text-xs font-medium bg-white border border-zinc-300 rounded px-2.5 py-1 text-zinc-900 shadow-xs focus:outline-hidden focus:ring-1 focus:ring-zinc-900 cursor-pointer font-sans"
           >
             <option value="admin">Administrator</option>
             <option value="exam_staff">Examination Staff</option>
