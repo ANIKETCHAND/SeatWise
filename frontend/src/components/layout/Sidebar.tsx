@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   GraduationCap,
@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   Sparkles,
   Search,
+  LogOut,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -44,7 +45,13 @@ const navItems: NavItem[] = [
 ];
 
 export const Sidebar: React.FC = () => {
-  const { role, user } = useAuth();
+  const { role, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await logout();
+    navigate('/');
+  };
 
   return (
     <aside className="w-64 bg-slate-900 text-slate-200 flex flex-col shrink-0 min-h-screen border-r border-slate-800">
@@ -110,17 +117,26 @@ export const Sidebar: React.FC = () => {
         })}
       </nav>
 
-      {/* Footer Profile */}
-      <div className="p-3 border-t border-slate-800/80 bg-slate-950/30">
-        <div className="flex items-center gap-3 px-2 py-1.5">
-          <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center font-bold text-xs text-primary-300 uppercase">
+      {/* Footer Profile & Sign Out */}
+      <div className="p-3 border-t border-slate-800/80 bg-slate-950/40 space-y-2">
+        <div className="flex items-center gap-3 px-2 py-1">
+          <div className="w-8 h-8 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center font-bold text-xs text-primary-300 uppercase shrink-0">
             {user?.full_name?.charAt(0) || 'U'}
           </div>
-          <div className="overflow-hidden">
-            <p className="text-xs font-medium text-slate-200 truncate">{user?.full_name}</p>
-            <p className="text-[10px] text-slate-400 truncate">{user?.email || 'Authenticated'}</p>
+          <div className="overflow-hidden flex-1 min-w-0">
+            <p className="text-xs font-semibold text-slate-200 truncate">{user?.full_name || 'Guest User'}</p>
+            <p className="text-[10px] text-slate-400 truncate">{user?.email || 'Authenticated Portal'}</p>
           </div>
         </div>
+
+        <button
+          onClick={handleSignOut}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-600 border border-rose-500/20 transition-all cursor-pointer"
+          title="Sign out and return to landing page"
+        >
+          <LogOut className="w-3.5 h-3.5 shrink-0" />
+          <span>Sign Out</span>
+        </button>
       </div>
     </aside>
   );

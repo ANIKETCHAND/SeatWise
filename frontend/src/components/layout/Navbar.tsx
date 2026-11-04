@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
 import { api } from '../../services/api';
-import { Database, Server, UserCheck, Shield } from 'lucide-react';
+import { Database, Server, UserCheck, Shield, LogOut } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
-  const { user, role, switchRole } = useAuth();
+  const { user, role, switchRole, logout } = useAuth();
+  const navigate = useNavigate();
   const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
   const [dbConfigured, setDbConfigured] = useState<boolean>(false);
+
+  const handleSignOut = async () => {
+    await logout();
+    navigate('/');
+  };
 
   useEffect(() => {
     api.getHealth()
@@ -75,17 +82,28 @@ export const Navbar: React.FC = () => {
           </select>
         </div>
 
-        {/* User preview */}
-        <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-          <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xs">
-            <UserCheck className="w-4 h-4" />
+        {/* User preview & Sign Out Action */}
+        <div className="flex items-center gap-3 pl-2 border-l border-slate-200">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xs">
+              <UserCheck className="w-4 h-4" />
+            </div>
+            <div className="hidden lg:block text-left">
+              <p className="text-xs font-medium text-slate-700 leading-tight truncate max-w-[140px]">
+                {user?.full_name?.split(' ')[0]}
+              </p>
+              <p className="text-[10px] text-slate-400 capitalize">{role.replace('_', ' ')}</p>
+            </div>
           </div>
-          <div className="hidden lg:block text-left">
-            <p className="text-xs font-medium text-slate-700 leading-tight truncate max-w-[140px]">
-              {user?.full_name?.split(' ')[0]}
-            </p>
-            <p className="text-[10px] text-slate-400 capitalize">{role.replace('_', ' ')}</p>
-          </div>
+
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 transition-colors cursor-pointer"
+            title="Sign out of SeatWise"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Sign Out</span>
+          </button>
         </div>
       </div>
     </header>
