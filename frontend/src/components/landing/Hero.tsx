@@ -20,10 +20,8 @@ export const LandingHero: React.FC = () => {
           src="/open-peeps-sheet.png"
           rows={15}
           cols={7}
-          className="absolute bottom-0 left-0 w-full h-[85vh] pointer-events-none opacity-90 select-none"
+          className="absolute bottom-0 left-0 w-full h-[85vh] pointer-events-none select-none"
         />
-        {/* Subtle bottom fade to blend smoothly into the next section */}
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
       </div>
 
       {/* Hero Content Layer */}
