@@ -30,7 +30,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { name: 'Examinations', path: '/examinations', icon: FileCheck2, staffOnly: true },
   { name: 'Seating Planner', path: '/seating-planner', icon: Binary, staffOnly: true },
   { name: 'Classrooms & Halls', path: '/rooms', icon: DoorClosed, staffOnly: true },
