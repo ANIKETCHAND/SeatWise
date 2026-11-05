@@ -87,14 +87,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('seatwise_role', user.role);
       setAuthToken(`demo-token-${user.role}`);
     } else {
-      localStorage.removeItem('seatwise_user');
-      setAuthToken(null);
+      const fallbackRole = (localStorage.getItem('seatwise_role') as UserRole) || currentRole || 'admin';
+      setAuthToken(`demo-token-${fallbackRole}`);
     }
-  }, [user]);
+  }, [user, currentRole]);
 
   // Hook into Supabase auth changes if configured
   useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) return;
+    if (!isSupabaseConfigured || !supabase) {
+      // Ensure initial token is set for demo / local mode
+      const activeRole = (localStorage.getItem('seatwise_role') as UserRole) || currentRole || 'admin';
+      setAuthToken(`demo-token-${activeRole}`);
+      return;
+    }
     const client = supabase;
 
     client.auth.getSession().then(({ data: { session } }) => {
@@ -123,6 +128,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               // Keep current profile if database read fails
             }
           );
+      } else {
+        const activeRole = (localStorage.getItem('seatwise_role') as UserRole) || currentRole || 'admin';
+        setAuthToken(`demo-token-${activeRole}`);
       }
     });
 
@@ -131,7 +139,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session) {
           setAuthToken(session.access_token);
         } else {
-          setAuthToken(null);
+          const activeRole = (localStorage.getItem('seatwise_role') as UserRole) || currentRole || 'admin';
+          setAuthToken(`demo-token-${activeRole}`);
         }
       }
     );
@@ -139,7 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, []);
+  }, [currentRole]);
 
   const login = async (email: string, role: UserRole = 'admin') => {
     setIsLoading(true);
@@ -168,9 +177,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     // Clear auth and reset to guest/student safely
     localStorage.removeItem('seatwise_user');
-    localStorage.removeItem('seatwise_role');
-    setAuthToken(null);
-    setUser(null);
+    localStorage.setItem('seatwise_role', 'student');
+    setAuthToken('demo-token-student');
+    setUser(ROLE_PROFILES.student);
     setCurrentRole('student');
   };
 

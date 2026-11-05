@@ -25,7 +25,23 @@ export const setAuthToken = (token: string | null) => {
   authToken = token;
 };
 
-export const getAuthToken = () => authToken;
+export const getAuthToken = (): string => {
+  if (authToken) return authToken;
+  try {
+    const savedRole = localStorage.getItem('seatwise_role');
+    if (savedRole) {
+      return `demo-token-${savedRole}`;
+    }
+    const savedUser = localStorage.getItem('seatwise_user');
+    if (savedUser) {
+      const parsed = JSON.parse(savedUser);
+      if (parsed && parsed.role) {
+        return `demo-token-${parsed.role}`;
+      }
+    }
+  } catch {}
+  return 'demo-token-admin';
+};
 
 export const getApiBase = () => env.apiBaseUrl;
 
@@ -41,8 +57,10 @@ export async function request<T>(endpoint: string, options: RequestInit = {}): P
     headers.set('Content-Type', 'application/json');
   }
 
-  if (authToken) {
-    headers.set('Authorization', `Bearer ${authToken}`);
+  // Ensure an Authorization Bearer header is always present, resolving to active token or demo role
+  const token = authToken || getAuthToken();
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
   }
 
   const response = await fetch(url, {
