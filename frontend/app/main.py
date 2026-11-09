@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from .config import get_settings
 from .database.client import DatabaseNotConfigured
 from .routes import (
+    admin_routes,
     auth_routes,
     classroom_seating_routes,
     dashboard_routes,
@@ -24,6 +25,7 @@ from .routes import (
     report_routes,
     room_routes,
     seating_routes,
+    student_portal_routes,
     student_routes,
     timetable_routes,
     university_routes,
@@ -71,6 +73,8 @@ async def db_not_configured_handler(request: Request, exc: DatabaseNotConfigured
 prefix = settings.api_v1_prefix
 
 app.include_router(auth_routes.router, prefix=prefix)
+app.include_router(admin_routes.router, prefix=prefix)
+app.include_router(student_portal_routes.router, prefix=prefix)
 app.include_router(university_routes.router, prefix=prefix)
 app.include_router(timetable_routes.router, prefix=prefix)
 app.include_router(student_routes.router, prefix=prefix)

@@ -47,7 +47,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
                 if (!response.credential) {
                   throw new Error('No credential returned from Google Sign-In.');
                 }
-                await loginWithGoogle(response.credential, preferredRole);
+                await loginWithGoogle(response.credential);
                 onSuccess?.();
               } catch (err: any) {
                 console.error('Google Sign-In failed:', err);

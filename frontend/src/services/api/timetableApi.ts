@@ -1,7 +1,7 @@
 import { request } from './client';
 
 export const timetableApi = {
-  getTimetable: (params: { program_id?: string; semester?: number; section?: string; day?: string }) => {
+  getTimetable: (params: { program_id?: string; semester?: number; section?: string; day?: string } = {}) => {
     const q = new URLSearchParams();
     if (params.program_id) q.append('program_id', params.program_id);
     if (params.semester) q.append('semester', params.semester.toString());

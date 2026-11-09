@@ -14,7 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { isSupabaseConfigured } from '../services/supabase';
 
 export const SettingsPage: React.FC = () => {
-  const { user, role, switchRole } = useAuth();
+  const { user, role } = useAuth();
   const [institutionName, setInstitutionName] = useState('Jain (Deemed-to-be University)');
   const [facultyDept, setFacultyDept] = useState('Faculty of Engineering and Technology (FET)');
   const [academicYear, setAcademicYear] = useState('2026-2027');

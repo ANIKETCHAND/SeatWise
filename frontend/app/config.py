@@ -41,6 +41,9 @@ class Settings(BaseSettings):
         "https://frontend-lyart-nu-63.vercel.app"
     )
     solver_time_limit_seconds: float = 20.0
+    initial_admin_bootstrap_secret: str = ""
+    min_password_length: int = 12
+    rate_limit_per_minute: int = 10
 
     @property
     def cors_origin_list(self) -> List[str]:

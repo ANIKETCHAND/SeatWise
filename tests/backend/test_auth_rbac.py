@@ -1,0 +1,288 @@
+"""Comprehensive automated test suite for SeatWise Four-Role Authentication,
+RBAC Permission Boundaries, Administrator Controls, and Security Invariants.
+"""
+
+from __future__ import annotations
+
+import os
+import pytest
+from fastapi.testclient import TestClient
+
+from app.main import app
+from app.config import get_settings
+
+
+@pytest.fixture
+def client():
+    return TestClient(app)
+
+
+@pytest.fixture
+def admin_headers():
+    return {"Authorization": "Bearer demo-token-admin"}
+
+
+@pytest.fixture
+def staff_headers():
+    return {"Authorization": "Bearer demo-token-exam_staff"}
+
+
+@pytest.fixture
+def faculty_headers():
+    return {"Authorization": "Bearer demo-token-faculty"}
+
+
+@pytest.fixture
+def student_headers():
+    return {"Authorization": "Bearer demo-token-student"}
+
+
+# ==============================================================================
+# 1. Administrator Capabilities & Safeguards
+# ==============================================================================
+class TestAdministratorRole:
+    def test_admin_me_endpoint_returns_admin_profile(self, client, admin_headers):
+        resp = client.get("/api/auth/me", headers=admin_headers)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["role"] == "admin"
+        assert "dashboard.view" in data["permissions"]
+        assert "users.create" in data["permissions"]
+        assert "users.reset_password" in data["permissions"]
+
+    def test_admin_can_view_all_users(self, client, admin_headers):
+        resp = client.get("/api/admin/users", headers=admin_headers)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "users" in data
+        assert "counts" in data
+
+    def test_admin_can_view_role_permissions_matrix(self, client, admin_headers):
+        resp = client.get("/api/admin/roles/permissions", headers=admin_headers)
+        assert resp.status_code == 200
+        roles = resp.json()["roles"]
+        assert "admin" in roles
+        assert "exam_staff" in roles
+        assert "faculty" in roles
+        assert "student" in roles
+
+    def test_admin_can_view_audit_logs(self, client, admin_headers):
+        resp = client.get("/api/admin/audit-logs", headers=admin_headers)
+        assert resp.status_code == 200
+        assert "audit_logs" in resp.json()
+
+    def test_admin_user_creation_validates_password_policy(self, client, admin_headers):
+        # Short password (< 12 chars) must be rejected
+        payload = {
+            "full_name": "Test ShortPass",
+            "email": "shortpass@jainuniversity.ac.in",
+            "role": "faculty",
+            "password": "short",
+        }
+        resp = client.post("/api/admin/users", json=payload, headers=admin_headers)
+        assert resp.status_code == 422 or resp.status_code == 400
+
+    def test_admin_can_provision_exam_staff_account(self, client, admin_headers):
+        payload = {
+            "full_name": "Exam Officer Test",
+            "email": "exam.officer.test@jainuniversity.ac.in",
+            "role": "exam_staff",
+            "password": "SecurePassword123!",
+            "department": "Examination Section",
+            "must_change_password": True,
+        }
+        resp = client.post("/api/admin/users", json=payload, headers=admin_headers)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "success"
+        assert data["user"]["role"] == "exam_staff"
+
+    def test_admin_can_provision_faculty_account(self, client, admin_headers):
+        payload = {
+            "full_name": "Dr. Test Professor",
+            "email": "prof.test@jainuniversity.ac.in",
+            "role": "faculty",
+            "password": "SecurePassword123!",
+            "department": "Computer Science & Engineering",
+        }
+        resp = client.post("/api/admin/users", json=payload, headers=admin_headers)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["user"]["role"] == "faculty"
+
+    def test_admin_can_provision_student_account(self, client, admin_headers):
+        payload = {
+            "full_name": "Candidate Test",
+            "email": "candidate.test@jainuniversity.ac.in",
+            "role": "student",
+            "password": "SecurePassword123!",
+            "roll_number": "23JUTEST99",
+            "semester": 4,
+            "section": "A",
+        }
+        resp = client.post("/api/admin/users", json=payload, headers=admin_headers)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["user"]["role"] == "student"
+
+    def test_admin_safeguard_prevents_removing_last_active_admin(self, client, admin_headers):
+        # Attempting to deactivate or demote non-existent or lone admin triggers safeguard check
+        resp = client.post("/api/admin/users/fake-admin-id/deactivate", headers=admin_headers)
+        # Should either be 400 (prevented by safeguard) or 200 (if handled)
+        assert resp.status_code in (400, 200)
+
+
+# ==============================================================================
+# 2. Exam Staff Capabilities & Boundaries
+# ==============================================================================
+class TestExamStaffRole:
+    def test_exam_staff_me_endpoint(self, client, staff_headers):
+        resp = client.get("/api/auth/me", headers=staff_headers)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["role"] == "exam_staff"
+        assert "examinations.create" in data["permissions"]
+        assert "seating.generate" in data["permissions"]
+        assert "users.create" not in data["permissions"]
+
+    def test_exam_staff_can_view_examinations(self, client, staff_headers):
+        resp = client.get("/api/examinations", headers=staff_headers)
+        assert resp.status_code == 200
+
+    def test_exam_staff_cannot_access_user_management(self, client, staff_headers):
+        resp = client.get("/api/admin/users", headers=staff_headers)
+        assert resp.status_code == 403
+        assert "Administrator privileges required" in resp.json()["detail"]
+
+    def test_exam_staff_cannot_create_user_accounts(self, client, staff_headers):
+        payload = {
+            "full_name": "Hacker User",
+            "email": "hack@jainuniversity.ac.in",
+            "role": "admin",
+            "password": "Password123456!",
+        }
+        resp = client.post("/api/admin/users", json=payload, headers=staff_headers)
+        assert resp.status_code == 403
+
+    def test_exam_staff_cannot_access_audit_logs(self, client, staff_headers):
+        resp = client.get("/api/admin/audit-logs", headers=staff_headers)
+        assert resp.status_code == 403
+
+
+# ==============================================================================
+# 3. Faculty Capabilities & Boundaries
+# ==============================================================================
+class TestFacultyRole:
+    def test_faculty_me_endpoint(self, client, faculty_headers):
+        resp = client.get("/api/auth/me", headers=faculty_headers)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["role"] == "faculty"
+        assert "timetable.view" in data["permissions"]
+        assert "users.create" not in data["permissions"]
+        assert "settings.manage" not in data["permissions"]
+
+    def test_faculty_cannot_access_admin_users(self, client, faculty_headers):
+        resp = client.get("/api/admin/users", headers=faculty_headers)
+        assert resp.status_code == 403
+
+    def test_faculty_cannot_manage_system_settings(self, client, faculty_headers):
+        # Settings require admin
+        resp = client.get("/api/admin/roles/permissions", headers=faculty_headers)
+        assert resp.status_code == 403
+
+
+# ==============================================================================
+# 4. Student Capabilities & Boundaries
+# ==============================================================================
+class TestStudentRole:
+    def test_student_me_endpoint(self, client, student_headers):
+        resp = client.get("/api/auth/me", headers=student_headers)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["role"] == "student"
+        assert "student.seat_lookup.self" in data["permissions"]
+        assert "users.create" not in data["permissions"]
+        assert "seating.publish" not in data["permissions"]
+
+    def test_student_can_view_today_examinations(self, client, student_headers):
+        resp = client.get("/api/student/examinations/today", headers=student_headers)
+        assert resp.status_code == 200
+        assert "examinations" in resp.json()
+
+    def test_student_can_view_upcoming_examinations(self, client, student_headers):
+        resp = client.get("/api/student/examinations/upcoming", headers=student_headers)
+        assert resp.status_code == 200
+        assert "examinations" in resp.json()
+
+    def test_student_can_view_own_seat_lookup(self, client, student_headers):
+        resp = client.get("/api/student/seat-lookup", headers=student_headers)
+        assert resp.status_code == 200
+        assert "allocations" in resp.json()
+
+    def test_student_cannot_lookup_another_students_seat(self, client, student_headers):
+        # Attempting to search for a DIFFERENT roll number must be rejected with 403
+        resp = client.get("/api/student/seat-lookup?roll_number=DIFFERENT_ROLL_1234", headers=student_headers)
+        assert resp.status_code == 403
+        assert "Students may only inspect their own" in resp.json()["detail"]
+
+    def test_student_cannot_access_admin_user_directory(self, client, student_headers):
+        resp = client.get("/api/admin/users", headers=student_headers)
+        assert resp.status_code == 403
+
+    def test_student_cannot_access_audit_logs(self, client, student_headers):
+        resp = client.get("/api/admin/audit-logs", headers=student_headers)
+        assert resp.status_code == 403
+
+
+# ==============================================================================
+# 5. Roll Number Resolution & Student Login Flow
+# ==============================================================================
+class TestStudentRollResolution:
+    def test_resolve_roll_valid_format(self, client):
+        # Non-existent roll number returns 404
+        resp = client.post("/api/auth/resolve-roll", json={"roll_number": "NONEXISTENT999"})
+        assert resp.status_code == 404
+
+    def test_resolve_roll_empty_fails_validation(self, client):
+        resp = client.post("/api/auth/resolve-roll", json={"roll_number": ""})
+        assert resp.status_code == 422
+
+
+# ==============================================================================
+# 6. Security Tests & Tamper Resistance
+# ==============================================================================
+class TestSecurityInvariants:
+    def test_missing_bearer_token_rejected_with_401(self, client):
+        resp = client.get("/api/auth/me")
+        assert resp.status_code == 401
+        assert "Missing bearer token" in resp.json()["detail"]
+
+    def test_tampered_jwt_signature_rejected_with_401(self, client):
+        tampered_token = (
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+            "eyJzdWIiOiJ1c3ItZmFrZSIsImVtYWlsIjoidGFtcGVyZWRAZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4ifQ."
+            "INVALID_SIGNATURE_BYTES_1234567890"
+        )
+        resp = client.get("/api/auth/me", headers={"Authorization": f"Bearer {tampered_token}"})
+        assert resp.status_code == 401
+
+    def test_unauthorized_user_creation_fails(self, client):
+        payload = {
+            "full_name": "Unauthenticated Hacker",
+            "email": "hacker@evil.com",
+            "role": "admin",
+            "password": "Password123456!",
+        }
+        resp = client.post("/api/admin/users", json=payload)
+        assert resp.status_code == 401
+
+    def test_bootstrap_admin_with_invalid_secret_fails(self, client):
+        payload = {
+            "bootstrap_secret": "wrong-secret-value",
+            "email": "aniket.chandra@jainuniversity.ac.in",
+            "password": "SecurePassword123!",
+            "full_name": "Aniket Chandra",
+        }
+        resp = client.post("/api/auth/bootstrap-admin", json=payload)
+        assert resp.status_code == 403

@@ -13,6 +13,7 @@ def test_migration_files_exist():
         "003_seed_university.sql",
         "004_rpc.sql",
         "005_import_rpc.sql",
+        "006_auth_rbac_audit.sql",
     ]
     for f in expected:
         assert (migrations_dir / f).exists(), f"Missing migration file: {f}"
@@ -93,3 +94,18 @@ def test_rpc_transactional_functions_defined():
     import_rpc_path = Path(__file__).resolve().parents[2] / "database" / "migrations" / "005_import_rpc.sql"
     import_sql = import_rpc_path.read_text(encoding="utf-8")
     assert "function public.import_timetable_data" in import_sql
+
+
+def test_rbac_and_auth_migration_defined():
+    mig_path = Path(__file__).resolve().parents[2] / "database" / "migrations" / "006_auth_rbac_audit.sql"
+    sql = mig_path.read_text(encoding="utf-8")
+
+    assert "role_permissions" in sql
+    assert "user_permissions" in sql
+    assert "user_assignments" in sql
+    assert "system_settings" in sql
+    assert "must_change_password" in sql
+    assert "account_status" in sql
+    assert "role_permissions_admin_write" in sql
+    assert "user_permissions_admin_write" in sql
+

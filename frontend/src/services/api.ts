@@ -2,7 +2,9 @@
  * Central API Service Layer (Unified Facade).
  * 
  * Provides unified access to all domain-specific API clients:
- * - authApi (Authentication & Status)
+ * - authApi (Authentication, Roll Resolution & Status)
+ * - adminApi (User Management, Password Resets & Audit Logs)
+ * - studentApi (Personal Schedule & Desk Locator)
  * - dashboardApi (Dashboard Analytics)
  * - universityApi (Programs & Batches)
  * - timetableApi (Timetable Import & Query)
@@ -23,6 +25,8 @@ import {
   getApiBase,
   request,
   authApi,
+  adminApi,
+  studentApi,
   dashboardApi,
   universityApi,
   timetableApi,
@@ -42,6 +46,8 @@ export {
   getApiBase,
   request,
   authApi,
+  adminApi,
+  studentApi,
   dashboardApi,
   universityApi,
   timetableApi,
@@ -55,10 +61,32 @@ export {
 };
 
 export const api = {
-  // Auth
+  // Auth & Account Management
   getMe: authApi.getMe,
   getStatus: authApi.getStatus,
   getHealth: authApi.getHealth,
+  resolveStudentRoll: authApi.resolveStudentRoll,
+  changePassword: authApi.changePassword,
+  bootstrapAdmin: authApi.bootstrapAdmin,
+
+  // Admin User & Access Management
+  getUsers: adminApi.getUsers,
+  createUser: adminApi.createUser,
+  updateUser: adminApi.updateUser,
+  resetPassword: adminApi.resetPassword,
+  deactivateUser: adminApi.deactivateUser,
+  reactivateUser: adminApi.reactivateUser,
+  getUserPermissions: adminApi.getUserPermissions,
+  updateUserPermissions: adminApi.updateUserPermissions,
+  getRolePermissionsMatrix: adminApi.getRolePermissionsMatrix,
+  getAuditLogs: adminApi.getAuditLogs,
+
+  // Student Personal Portal
+  getStudentMe: studentApi.getStudentMe,
+  getTodayExaminations: studentApi.getTodayExaminations,
+  getUpcomingExaminations: studentApi.getUpcomingExaminations,
+  lookupMySeat: studentApi.lookupMySeat,
+  getHistory: studentApi.getHistory,
 
   // Dashboard
   getDashboardStats: dashboardApi.getDashboardStats,

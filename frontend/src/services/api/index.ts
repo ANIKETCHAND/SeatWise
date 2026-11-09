@@ -7,6 +7,8 @@
 
 import { request, ApiError, setAuthToken, getAuthToken, getApiBase } from './client';
 import { authApi } from './authApi';
+import { adminApi } from './adminApi';
+import { studentApi } from './studentApi';
 import { dashboardApi } from './dashboardApi';
 import { universityApi } from './universityApi';
 import { timetableApi } from './timetableApi';
@@ -25,6 +27,8 @@ export {
   getAuthToken,
   getApiBase,
   authApi,
+  adminApi,
+  studentApi,
   dashboardApi,
   universityApi,
   timetableApi,
@@ -40,6 +44,12 @@ export {
 export const api = {
   // Auth
   ...authApi,
+
+  // Admin & User Management
+  ...adminApi,
+
+  // Student Personal Portal
+  ...studentApi,
 
   // Dashboard
   ...dashboardApi,

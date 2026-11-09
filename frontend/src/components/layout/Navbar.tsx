@@ -6,7 +6,7 @@ import { api } from '../../services/api';
 import { Database, Server, UserCheck, Shield, LogOut } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
-  const { user, role, switchRole, logout } = useAuth();
+  const { user, role, logout } = useAuth();
   const navigate = useNavigate();
   const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
   const [dbConfigured, setDbConfigured] = useState<boolean>(false);
@@ -58,24 +58,10 @@ export const Navbar: React.FC = () => {
           </span>
         </div>
 
-        {/* Role Switcher */}
-        <div className="flex items-center gap-2 bg-zinc-100 p-1 rounded-lg border border-zinc-200">
-          <Shield className="w-3.5 h-3.5 text-zinc-600 ml-1.5" />
-          <label htmlFor="role-switcher" className="text-xs font-semibold text-zinc-700 hidden md:inline cursor-pointer">
-            Role:
-          </label>
-          <select
-            id="role-switcher"
-            aria-label="Switch User Role"
-            value={role}
-            onChange={(e) => switchRole(e.target.value as UserRole)}
-            className="text-xs font-medium bg-white border border-zinc-300 rounded px-2.5 py-1 text-zinc-900 shadow-xs focus:outline-hidden focus:ring-1 focus:ring-zinc-900 cursor-pointer font-sans"
-          >
-            <option value="admin">Administrator</option>
-            <option value="exam_staff">Examination Staff</option>
-            <option value="faculty">Faculty</option>
-            <option value="student">Student</option>
-          </select>
+        {/* Authoritative Role Badge */}
+        <div className="flex items-center gap-1.5 px-3 py-1 bg-zinc-100 rounded-full border border-zinc-200 text-xs font-semibold text-zinc-800 font-mono">
+          <Shield className="w-3.5 h-3.5 text-zinc-600" />
+          <span className="capitalize">{role ? role.replace('_', ' ') : 'Guest'}</span>
         </div>
 
         {/* User preview & Sign Out Action */}

@@ -5,12 +5,64 @@ from __future__ import annotations
 from pydantic import BaseModel, Field, field_validator
 
 
-# ---------- Auth ----------
+# ---------- Auth & User Management ----------
 class MeResponse(BaseModel):
     user_id: str
     email: str | None
     role: str
     full_name: str
+    department: str | None = None
+    account_status: str = "active"
+    must_change_password: bool = False
+    permissions: list[str] = Field(default_factory=list)
+
+
+class BootstrapAdminRequest(BaseModel):
+    bootstrap_secret: str
+    email: str
+    password: str = Field(min_length=12)
+    full_name: str = "Aniket Chandra"
+
+
+class UserCreateRequest(BaseModel):
+    full_name: str = Field(min_length=1, max_length=120)
+    email: str
+    username: str | None = None
+    role: str = Field(pattern="^(admin|exam_staff|faculty|student)$")
+    password: str = Field(min_length=12)
+    department: str | None = None
+    roll_number: str | None = None
+    semester: int | None = Field(default=None, ge=1, le=10)
+    section: str | None = None
+    assigned_subjects: list[str] = Field(default_factory=list)
+    account_status: str = Field(default="active", pattern="^(active|deactivated)$")
+    must_change_password: bool = True
+
+
+class UserUpdateRequest(BaseModel):
+    full_name: str | None = None
+    department: str | None = None
+    role: str | None = Field(default=None, pattern="^(admin|exam_staff|faculty|student)$")
+    account_status: str | None = Field(default=None, pattern="^(active|deactivated|suspended)$")
+    must_change_password: bool | None = None
+
+
+class AdminPasswordResetRequest(BaseModel):
+    new_password: str = Field(min_length=12)
+    require_change_on_login: bool = True
+
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str | None = None
+    new_password: str = Field(min_length=12)
+
+
+class UpdatePermissionsRequest(BaseModel):
+    permissions: list[str]
+
+
+class ResolveRollRequest(BaseModel):
+    roll_number: str = Field(min_length=2, max_length=40)
 
 
 # ---------- University ----------

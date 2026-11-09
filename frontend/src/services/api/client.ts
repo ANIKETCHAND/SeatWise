@@ -25,22 +25,8 @@ export const setAuthToken = (token: string | null) => {
   authToken = token;
 };
 
-export const getAuthToken = (): string => {
-  if (authToken) return authToken;
-  try {
-    const savedRole = localStorage.getItem('seatwise_role');
-    if (savedRole) {
-      return `demo-token-${savedRole}`;
-    }
-    const savedUser = localStorage.getItem('seatwise_user');
-    if (savedUser) {
-      const parsed = JSON.parse(savedUser);
-      if (parsed && parsed.role) {
-        return `demo-token-${parsed.role}`;
-      }
-    }
-  } catch {}
-  return 'demo-token-admin';
+export const getAuthToken = (): string | null => {
+  return authToken;
 };
 
 export const getApiBase = () => env.apiBaseUrl;

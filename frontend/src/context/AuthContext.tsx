@@ -1,285 +1,243 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { UserProfile, UserRole } from '../types';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
-import { setAuthToken } from '../services/api';
-import { parseGoogleJwt } from '../services/googleAuth';
+import { setAuthToken } from '../services/api/client';
+import { api } from '../services/api';
 
 interface AuthContextType {
   user: UserProfile | null;
-  role: UserRole;
+  role: UserRole | null;
   isLoading: boolean;
-  login: (email: string, role?: UserRole) => Promise<void>;
-  loginWithGoogle: (credential: string, preferredRole?: UserRole) => Promise<UserProfile>;
-  logout: () => Promise<void>;
-  switchRole: (role: UserRole) => void;
+  isAuthenticated: boolean;
   isAdmin: boolean;
   isFaculty: boolean;
   isExamStaff: boolean;
   isStudent: boolean;
+  loginWithEmail: (email: string, password: string) => Promise<UserProfile>;
+  loginWithRollNumber: (rollNumber: string, password: string) => Promise<UserProfile>;
+  loginWithGoogle: (credential: string) => Promise<UserProfile>;
+  logout: () => Promise<void>;
+  refreshProfile: () => Promise<UserProfile | null>;
+  hasPermission: (permissionKey: string) => boolean;
 }
-
-export const ROLE_PROFILES: Record<UserRole, UserProfile> = {
-  admin: {
-    id: 'usr-admin-01',
-    email: 'admin@jainuniversity.ac.in',
-    role: 'admin',
-    full_name: 'Dr. Ramesh Kumar (Administrator)',
-    department: 'Computer Science & Engineering',
-  },
-  faculty: {
-    id: 'usr-fac-01',
-    email: 'ananya.sharma@jainuniversity.ac.in',
-    role: 'faculty',
-    full_name: 'Prof. Ananya Sharma (Faculty)',
-    department: 'Information Science & Engineering',
-  },
-  exam_staff: {
-    id: 'usr-staff-01',
-    email: 'exam.cell@jainuniversity.ac.in',
-    role: 'exam_staff',
-    full_name: 'S. K. Verma (Exam Superintendent)',
-    department: 'Examination Section',
-  },
-  student: {
-    id: 'usr-stud-01',
-    email: 'rohit.s@jainuniversity.ac.in',
-    role: 'student',
-    full_name: 'Rohit S. (Student - Roll: 23JU0102)',
-    department: 'Computer Science & Engineering',
-    roll_number: '23JU0102',
-  },
-};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentRole, setCurrentRole] = useState<UserRole>(() => {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const fetchProfileFromBackend = useCallback(async (): Promise<UserProfile | null> => {
     try {
-      const savedRole = localStorage.getItem('seatwise_role') as UserRole;
-      if (savedRole && ['admin', 'faculty', 'exam_staff', 'student'].includes(savedRole)) {
-        return savedRole;
+      const data = await api.getMe();
+      if (data && data.user_id) {
+        const profile: UserProfile = {
+          id: data.user_id,
+          email: data.email,
+          role: data.role as UserRole,
+          full_name: data.full_name || 'Authenticated User',
+          department: data.department,
+          account_status: data.account_status,
+          must_change_password: data.must_change_password,
+          permissions: data.permissions || [],
+        };
+        setUser(profile);
+        return profile;
       }
-      const savedUser = localStorage.getItem('seatwise_user');
-      if (savedUser) {
-        const parsed = JSON.parse(savedUser);
-        if (parsed?.role && ['admin', 'faculty', 'exam_staff', 'student'].includes(parsed.role)) {
-          return parsed.role;
-        }
-      }
-    } catch {}
-    return 'admin';
-  });
-
-  const [user, setUser] = useState<UserProfile | null>(() => {
-    try {
-      const saved = localStorage.getItem('seatwise_user');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed && parsed.role) return parsed;
-      }
-    } catch {}
-    return ROLE_PROFILES[currentRole] || ROLE_PROFILES.admin;
-  });
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('seatwise_user', JSON.stringify(user));
-      localStorage.setItem('seatwise_role', user.role);
-      setAuthToken(`demo-token-${user.role}`);
-    } else {
-      const fallbackRole = (localStorage.getItem('seatwise_role') as UserRole) || currentRole || 'admin';
-      setAuthToken(`demo-token-${fallbackRole}`);
+    } catch (err: any) {
+      console.warn('Backend profile resolution failed:', err.message || err);
     }
-  }, [user, currentRole]);
+    return null;
+  }, []);
 
-  // Hook into Supabase auth changes if configured
+  // Initialize Supabase Auth session listener
   useEffect(() => {
+    let isMounted = true;
+
     if (!isSupabaseConfigured || !supabase) {
-      // Ensure initial token is set for demo / local mode
-      const activeRole = (localStorage.getItem('seatwise_role') as UserRole) || currentRole || 'admin';
-      setAuthToken(`demo-token-${activeRole}`);
+      setIsLoading(false);
       return;
     }
+
     const client = supabase;
 
+    // Check active session on initial page load
     client.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+      if (!isMounted) return;
+      if (session?.access_token) {
         setAuthToken(session.access_token);
-        client
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-          .then(
-            ({ data }) => {
-              if (data && data.role) {
-                const matchedRole = data.role as UserRole;
-                setCurrentRole(matchedRole);
-                setUser({
-                  id: data.id,
-                  email: session.user.email || null,
-                  role: matchedRole,
-                  full_name: data.full_name || 'University User',
-                  department: data.department,
-                });
-              }
-            },
-            () => {
-              // Keep current profile if database read fails
-            }
-          );
+        fetchProfileFromBackend().finally(() => {
+          if (isMounted) setIsLoading(false);
+        });
       } else {
-        const activeRole = (localStorage.getItem('seatwise_role') as UserRole) || currentRole || 'admin';
-        setAuthToken(`demo-token-${activeRole}`);
+        setAuthToken(null);
+        setUser(null);
+        setIsLoading(false);
+      }
+    }).catch(() => {
+      if (isMounted) {
+        setAuthToken(null);
+        setUser(null);
+        setIsLoading(false);
       }
     });
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (session) {
-          setAuthToken(session.access_token);
-        } else {
-          const activeRole = (localStorage.getItem('seatwise_role') as UserRole) || currentRole || 'admin';
-          setAuthToken(`demo-token-${activeRole}`);
+    // Listen to real-time authentication state changes
+    const { data: authListener } = client.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
+
+      if (session?.access_token) {
+        setAuthToken(session.access_token);
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+          await fetchProfileFromBackend();
         }
+      } else if (event === 'SIGNED_OUT') {
+        setAuthToken(null);
+        setUser(null);
       }
-    );
+      setIsLoading(false);
+    });
 
     return () => {
+      isMounted = false;
       authListener.subscription.unsubscribe();
     };
-  }, [currentRole]);
+  }, [fetchProfileFromBackend]);
 
-  const login = async (email: string, role: UserRole = 'admin') => {
+  const loginWithEmail = async (email: string, password: string): Promise<UserProfile> => {
     setIsLoading(true);
     try {
-      const targetProfile = ROLE_PROFILES[role] || {
-        id: `usr-${Date.now()}`,
-        email,
-        role,
-        full_name: email.split('@')[0].replace('.', ' ').toUpperCase(),
-      };
-      setCurrentRole(role);
-      setUser(targetProfile);
-      localStorage.setItem('seatwise_role', role);
-      localStorage.setItem('seatwise_user', JSON.stringify(targetProfile));
-      setAuthToken(`demo-token-${role}`);
+      if (!isSupabaseConfigured || !supabase) {
+        throw new Error('Supabase authentication is not configured in this environment.');
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Authentication failed. Please check your credentials.');
+      }
+
+      if (!data.session) {
+        throw new Error('No session established by authentication provider.');
+      }
+
+      setAuthToken(data.session.access_token);
+      const profile = await fetchProfileFromBackend();
+
+      if (!profile) {
+        throw new Error('Authentication succeeded, but failed to load user profile from database.');
+      }
+
+      if (profile.account_status === 'deactivated' || profile.account_status === 'suspended') {
+        await logout();
+        throw new Error('Your account has been deactivated. Please contact an administrator.');
+      }
+
+      return profile;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const loginWithGoogle = async (credential: string, preferredRole?: UserRole): Promise<UserProfile> => {
+  const loginWithRollNumber = async (rollNumber: string, password: string): Promise<UserProfile> => {
     setIsLoading(true);
     try {
-      const payload = parseGoogleJwt(credential);
-      if (!payload) {
-        throw new Error('Could not parse Google ID token credential.');
+      const resolved = await api.resolveStudentRoll(rollNumber.trim());
+      if (!resolved?.email) {
+        throw new Error('Could not resolve an authenticated email for this roll number.');
+      }
+      return await loginWithEmail(resolved.email, password);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithGoogle = async (credential: string): Promise<UserProfile> => {
+    setIsLoading(true);
+    try {
+      if (!isSupabaseConfigured || !supabase) {
+        throw new Error('Supabase authentication is not configured.');
       }
 
-      // Determine initial role: use override if specified, otherwise deduce from email or current role
-      let targetRole: UserRole = preferredRole || currentRole || 'admin';
-      const email = (payload.email || '').toLowerCase();
-      if (!preferredRole) {
-        if (email.includes('admin') || email.includes('dean')) {
-          targetRole = 'admin';
-        } else if (email.includes('faculty') || email.includes('prof')) {
-          targetRole = 'faculty';
-        } else if (email.includes('exam') || email.includes('staff')) {
-          targetRole = 'exam_staff';
-        } else if (email.includes('student') || /\d{2}[a-z]{2}\d{4}/.test(email)) {
-          targetRole = 'student';
-        }
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: credential,
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Google authentication failed.');
       }
 
-      const googleProfile: UserProfile = {
-        id: `usr-google-${payload.sub}`,
-        email: payload.email,
-        role: targetRole,
-        full_name: payload.name || 'Google User',
-        avatar_url: payload.picture,
-        department: 'School of Engineering and Technology',
-      };
-
-      setCurrentRole(targetRole);
-      setUser(googleProfile);
-      localStorage.setItem('seatwise_role', targetRole);
-      localStorage.setItem('seatwise_user', JSON.stringify(googleProfile));
-      localStorage.setItem('seatwise_google_credential', credential);
-      setAuthToken(`demo-token-${targetRole}`);
-
-      if (isSupabaseConfigured && supabase) {
-        try {
-          await supabase.auth.signInWithIdToken({
-            provider: 'google',
-            token: credential,
-          });
-        } catch (err) {
-          // Non-blocking in demo/offline Supabase environments
-        }
+      if (!data.session) {
+        throw new Error('Google Sign-In succeeded but no active session was returned.');
       }
 
-      return googleProfile;
+      setAuthToken(data.session.access_token);
+      const profile = await fetchProfileFromBackend();
+
+      if (!profile) {
+        throw new Error('Could not load user profile from database after Google Sign-In.');
+      }
+
+      return profile;
     } finally {
       setIsLoading(false);
     }
   };
 
   const logout = async () => {
-    if (isSupabaseConfigured && supabase) {
-      try {
-        await supabase.auth.signOut();
-      } catch {}
+    setIsLoading(true);
+    try {
+      if (isSupabaseConfigured && supabase) {
+        try {
+          await supabase.auth.signOut();
+        } catch {}
+      }
+      if (window.google?.accounts?.id) {
+        try {
+          window.google.accounts.id.disableAutoSelect();
+        } catch {}
+      }
+      setAuthToken(null);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
     }
-    if (window.google?.accounts?.id) {
-      try {
-        window.google.accounts.id.disableAutoSelect();
-      } catch {}
-    }
-    // Clear auth and reset to guest/student safely
-    localStorage.removeItem('seatwise_user');
-    localStorage.removeItem('seatwise_google_credential');
-    localStorage.setItem('seatwise_role', 'student');
-    setAuthToken('demo-token-student');
-    setUser(ROLE_PROFILES.student);
-    setCurrentRole('student');
   };
 
-  const switchRole = (newRole: UserRole) => {
-    const target = ROLE_PROFILES[newRole] || {
-      id: `usr-${newRole}-01`,
-      email: `${newRole}@jainuniversity.ac.in`,
-      role: newRole,
-      full_name: `${newRole.toUpperCase()} User`,
-    };
-
-    // Unconditionally update both role and user state
-    setCurrentRole(newRole);
-    setUser(target);
-    localStorage.setItem('seatwise_role', newRole);
-    localStorage.setItem('seatwise_user', JSON.stringify(target));
-    setAuthToken(`demo-token-${newRole}`);
+  const refreshProfile = async (): Promise<UserProfile | null> => {
+    return await fetchProfileFromBackend();
   };
 
-  const activeRole = currentRole || user?.role || 'admin';
-  const activeUser = user || ROLE_PROFILES[activeRole] || ROLE_PROFILES.admin;
+  const hasPermission = (permissionKey: string): boolean => {
+    if (!user) return false;
+    if (user.role === 'admin') return true;
+    return Boolean(user.permissions && user.permissions.includes(permissionKey));
+  };
+
+  const role = user?.role || null;
+  const isAuthenticated = Boolean(user && user.id);
 
   return (
     <AuthContext.Provider
       value={{
-        user: activeUser,
-        role: activeRole,
+        user,
+        role,
         isLoading,
-        login,
+        isAuthenticated,
+        isAdmin: role === 'admin',
+        isExamStaff: role === 'exam_staff',
+        isFaculty: role === 'faculty',
+        isStudent: role === 'student',
+        loginWithEmail,
+        loginWithRollNumber,
         loginWithGoogle,
         logout,
-        switchRole,
-        isAdmin: activeRole === 'admin',
-        isFaculty: activeRole === 'faculty',
-        isExamStaff: activeRole === 'exam_staff',
-        isStudent: activeRole === 'student',
+        refreshProfile,
+        hasPermission,
       }}
     >
       {children}

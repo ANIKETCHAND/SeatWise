@@ -8,6 +8,64 @@ export interface UserProfile {
   roll_number?: string;
   department?: string;
   avatar_url?: string;
+  account_status?: 'active' | 'deactivated' | 'suspended';
+  must_change_password?: boolean;
+  permissions?: string[];
+}
+
+export interface AdminUser {
+  id: string;
+  email: string | null;
+  role: UserRole;
+  full_name: string;
+  department?: string;
+  account_status: 'active' | 'deactivated' | 'suspended';
+  must_change_password: boolean;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface AuditLog {
+  id: string;
+  actor_user_id?: string;
+  user_id?: string;
+  action: string;
+  entity_type: string;
+  entity_id?: string;
+  target_user_id?: string;
+  affected_resource?: string;
+  details?: any;
+  metadata?: any;
+  created_at: string;
+}
+
+export interface StudentSeatInfo {
+  student_name: string;
+  roll_number: string;
+  examination_id?: string;
+  examination_name: string;
+  examination_date: string;
+  examination_session: string;
+  hall_name: string;
+  room_code?: string;
+  building?: string;
+  floor?: string;
+  row: number;
+  column: number;
+  seat_label: string;
+  room_dimensions?: {
+    rows: number;
+    columns: number;
+  };
+}
+
+export interface StudentExam {
+  id: string;
+  examination_name: string;
+  date: string;
+  session: string;
+  session_label?: string;
+  status: string;
 }
 
 export interface Program {
