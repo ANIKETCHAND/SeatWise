@@ -15,6 +15,7 @@ interface AuthContextType {
   isStudent: boolean;
   loginWithEmail: (email: string, password: string) => Promise<UserProfile>;
   loginWithRollNumber: (rollNumber: string, password: string) => Promise<UserProfile>;
+  loginWithIdentifier: (identifier: string, password: string) => Promise<UserProfile>;
   loginWithGoogle: (credential: string) => Promise<UserProfile>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<UserProfile | null>;
@@ -155,6 +156,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginWithIdentifier = async (identifier: string, password: string): Promise<UserProfile> => {
+    const clean = identifier.trim();
+    if (clean.includes('@')) {
+      return await loginWithEmail(clean, password);
+    }
+    setIsLoading(true);
+    try {
+      let resolvedEmail: string | null = null;
+      try {
+        const res = await api.resolveIdentifier(clean);
+        if (res?.email) resolvedEmail = res.email;
+      } catch {
+        try {
+          const res = await api.resolveStudentRoll(clean);
+          if (res?.email) resolvedEmail = res.email;
+        } catch {}
+      }
+
+      if (!resolvedEmail) {
+        throw new Error('No account found matching this username or roll number.');
+      }
+      return await loginWithEmail(resolvedEmail, password);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const loginWithGoogle = async (credential: string): Promise<UserProfile> => {
     setIsLoading(true);
     try {
@@ -234,6 +262,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isStudent: role === 'student',
         loginWithEmail,
         loginWithRollNumber,
+        loginWithIdentifier,
         loginWithGoogle,
         logout,
         refreshProfile,

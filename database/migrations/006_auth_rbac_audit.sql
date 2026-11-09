@@ -7,12 +7,14 @@
 -- ---------- Extend Profiles ----------
 alter table public.profiles
   add column if not exists email text,
+  add column if not exists username text,
   add column if not exists department text,
   add column if not exists account_status text not null default 'active' check (account_status in ('active', 'deactivated', 'suspended')),
   add column if not exists must_change_password boolean not null default false;
 
 create index if not exists idx_profiles_role on public.profiles (role);
 create index if not exists idx_profiles_email on public.profiles (lower(email));
+create index if not exists idx_profiles_username on public.profiles (lower(username));
 create index if not exists idx_profiles_status on public.profiles (account_status);
 
 -- Update user_roles view to expose new fields
@@ -22,6 +24,7 @@ create or replace view public.user_roles as
     role,
     full_name,
     email,
+    username,
     department,
     account_status,
     must_change_password,

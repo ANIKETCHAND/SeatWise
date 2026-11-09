@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Users,
   ShieldCheck,
@@ -24,6 +25,7 @@ import { AdminUser, UserRole } from '../types';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 
 export const UserManagementPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState<boolean>(true);
@@ -54,6 +56,8 @@ export const UserManagementPage: React.FC = () => {
   const [newRollNumber, setNewRollNumber] = useState('');
   const [newSemester, setNewSemester] = useState<number>(1);
   const [newSection, setNewSection] = useState('A');
+  const [newAssignedSubjects, setNewAssignedSubjects] = useState('');
+  const [newAccountStatus, setNewAccountStatus] = useState<'active' | 'deactivated'>('active');
   const [newPassword, setNewPassword] = useState('');
   const [newConfirmPassword, setNewConfirmPassword] = useState('');
   const [newMustChange, setNewMustChange] = useState(true);
@@ -96,6 +100,24 @@ export const UserManagementPage: React.FC = () => {
   };
 
   useEffect(() => {
+    const roleParam = searchParams.get('role');
+    const tabParam = searchParams.get('tab');
+    const actionParam = searchParams.get('action');
+
+    if (tabParam === 'permissions') {
+      setActiveTab('permissions');
+    } else if (roleParam && ['admin', 'exam_staff', 'faculty', 'student'].includes(roleParam)) {
+      setActiveTab(roleParam as any);
+    } else if (roleParam === 'all') {
+      setActiveTab('all');
+    }
+
+    if (actionParam === 'create') {
+      setShowCreateModal(true);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     fetchUsers();
     fetchRoleMatrix();
   }, [activeTab]);
@@ -132,12 +154,17 @@ export const UserManagementPage: React.FC = () => {
       await api.createUser({
         full_name: newFullName.trim(),
         email: newEmail.trim().toLowerCase(),
+        username: newUsername.trim() || undefined,
         role: newRole,
         password: newPassword,
         department: newDepartment.trim() || undefined,
         roll_number: newRole === 'student' ? newRollNumber.trim() : undefined,
         semester: newRole === 'student' ? newSemester : undefined,
         section: newRole === 'student' ? newSection.trim() : undefined,
+        assigned_subjects: newAssignedSubjects
+          ? newAssignedSubjects.split(',').map((s) => s.trim()).filter(Boolean)
+          : undefined,
+        account_status: newAccountStatus,
         must_change_password: newMustChange,
       });
 
@@ -163,6 +190,8 @@ export const UserManagementPage: React.FC = () => {
     setNewRollNumber('');
     setNewSemester(1);
     setNewSection('A');
+    setNewAssignedSubjects('');
+    setNewAccountStatus('active');
     setNewPassword('');
     setNewConfirmPassword('');
     setNewMustChange(true);
@@ -758,6 +787,51 @@ export const UserManagementPage: React.FC = () => {
                   className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-xs focus:ring-1 focus:ring-black"
                 />
               </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-zinc-700 block mb-1">
+                    Assigned Username (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={newUsername}
+                    onChange={(e) => setNewUsername(e.target.value)}
+                    placeholder="e.g. aniket or exam.officer"
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-xs font-mono focus:ring-1 focus:ring-black"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-zinc-700 block mb-1">
+                    Account Status
+                  </label>
+                  <select
+                    value={newAccountStatus}
+                    onChange={(e) => setNewAccountStatus(e.target.value as 'active' | 'deactivated')}
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-xs focus:ring-1 focus:ring-black"
+                  >
+                    <option value="active">Active (Access permitted)</option>
+                    <option value="deactivated">Deactivated (Access revoked)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Faculty / Exam Staff specific fields */}
+              {(newRole === 'faculty' || newRole === 'exam_staff') && (
+                <div>
+                  <label className="text-xs font-semibold text-zinc-700 block mb-1">
+                    Assigned Subjects / Courses (Where applicable, comma-separated)
+                  </label>
+                  <input
+                    type="text"
+                    value={newAssignedSubjects}
+                    onChange={(e) => setNewAssignedSubjects(e.target.value)}
+                    placeholder="e.g. 23CSE401, 23CSE402, 23AIML501"
+                    className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-xl text-xs focus:ring-1 focus:ring-black"
+                  />
+                </div>
+              )}
 
               {/* Student specific fields */}
               {newRole === 'student' && (

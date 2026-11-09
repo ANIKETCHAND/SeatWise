@@ -75,7 +75,7 @@ const ROLES: RoleDefinition[] = [
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { role: urlRole } = useParams<{ role?: string }>();
-  const { loginWithEmail, loginWithRollNumber, user, isAuthenticated } = useAuth();
+  const { loginWithEmail, loginWithRollNumber, loginWithIdentifier, user, isAuthenticated } = useAuth();
 
   // If already logged in, redirect to correct role dashboard
   useEffect(() => {
@@ -135,9 +135,7 @@ export const LoginPage: React.FC = () => {
 
   useEffect(() => {
     const roleFromUrl = getInitialRole();
-    if (roleFromUrl) {
-      setActiveRole(roleFromUrl);
-    }
+    setActiveRole(roleFromUrl);
   }, [urlRole]);
 
   const handleSelectRole = (role: UserRole) => {
@@ -145,6 +143,7 @@ export const LoginPage: React.FC = () => {
     setErrorMessage(null);
     setIdentifier('');
     setPassword('');
+    navigate(`/login/${role.replace('_', '-')}`);
   };
 
   const handleBackToRoles = () => {
@@ -166,9 +165,9 @@ export const LoginPage: React.FC = () => {
 
     try {
       let loggedProfile;
-      // If student and input is a roll number (doesn't contain @)
-      if (activeRole === 'student' && !cleanId.includes('@')) {
-        loggedProfile = await loginWithRollNumber(cleanId, password);
+      // If identifier is not an email, resolve username or roll number
+      if (!cleanId.includes('@')) {
+        loggedProfile = await loginWithIdentifier(cleanId, password);
       } else {
         loggedProfile = await loginWithEmail(cleanId, password);
       }

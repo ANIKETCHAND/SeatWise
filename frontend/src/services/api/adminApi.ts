@@ -14,12 +14,14 @@ export const adminApi = {
   createUser: (payload: {
     full_name: string;
     email: string;
+    username?: string;
     role: string;
     password: string;
     department?: string;
     roll_number?: string;
     semester?: number;
     section?: string;
+    assigned_subjects?: string[];
     account_status?: string;
     must_change_password?: boolean;
   }) =>
@@ -28,7 +30,7 @@ export const adminApi = {
       body: JSON.stringify(payload),
     }),
 
-  updateUser: (id: string, patch: Partial<AdminUser>) =>
+  updateUser: (id: string, patch: Partial<AdminUser> & { assigned_subjects?: string[] }) =>
     request<{ status: string; user: AdminUser }>(`/admin/users/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(patch),

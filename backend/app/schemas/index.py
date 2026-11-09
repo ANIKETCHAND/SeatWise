@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, field_validator
 class MeResponse(BaseModel):
     user_id: str
     email: str | None
+    username: str | None = None
     role: str
     full_name: str
     department: str | None = None
@@ -41,10 +42,12 @@ class UserCreateRequest(BaseModel):
 
 class UserUpdateRequest(BaseModel):
     full_name: str | None = None
+    username: str | None = None
     department: str | None = None
     role: str | None = Field(default=None, pattern="^(admin|exam_staff|faculty|student)$")
     account_status: str | None = Field(default=None, pattern="^(active|deactivated|suspended)$")
     must_change_password: bool | None = None
+    assigned_subjects: list[str] | None = None
 
 
 class AdminPasswordResetRequest(BaseModel):
@@ -63,6 +66,10 @@ class UpdatePermissionsRequest(BaseModel):
 
 class ResolveRollRequest(BaseModel):
     roll_number: str = Field(min_length=2, max_length=40)
+
+
+class ResolveIdentifierRequest(BaseModel):
+    identifier: str = Field(min_length=2, max_length=120)
 
 
 # ---------- University ----------

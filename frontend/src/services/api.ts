@@ -66,6 +66,7 @@ export const api = {
   getStatus: authApi.getStatus,
   getHealth: authApi.getHealth,
   resolveStudentRoll: authApi.resolveStudentRoll,
+  resolveIdentifier: authApi.resolveIdentifier,
   changePassword: authApi.changePassword,
   bootstrapAdmin: authApi.bootstrapAdmin,
 

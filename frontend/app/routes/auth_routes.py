@@ -13,11 +13,23 @@ from ..schemas.index import (
     BootstrapAdminRequest,
     ChangePasswordRequest,
     MeResponse,
+    ResolveIdentifierRequest,
     ResolveRollRequest,
 )
 from ..utils.rate_limiter import check_rate_limit
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+def _mask_email(email: str) -> str:
+    parts = email.split("@")
+    user_part = parts[0]
+    domain_part = parts[1] if len(parts) > 1 else ""
+    if len(user_part) > 2:
+        masked_user = user_part[0] + "*" * (len(user_part) - 2) + user_part[-1]
+    else:
+        masked_user = user_part[0] + "*"
+    return f"{masked_user}@{domain_part}"
 
 
 @router.get("/me", response_model=MeResponse)
@@ -26,6 +38,7 @@ def me(auth: AuthContext = Depends(get_auth)) -> MeResponse:
     return MeResponse(
         user_id=auth.user_id,
         email=auth.email,
+        username=auth.username,
         role=auth.role,
         full_name=auth.full_name,
         department=auth.department,
@@ -44,6 +57,103 @@ def status(auth: AuthContext = Depends(get_auth)) -> dict:
     except Exception:
         db_ok = False
     return {"authenticated": True, "role": auth.role, "database": "ok" if db_ok else "unreachable"}
+
+
+@router.post("/resolve-identifier")
+def resolve_identifier(payload: ResolveIdentifierRequest, request: Request) -> dict:
+    """Resolve an institutional login identifier (username or roll number) to its auth email."""
+    check_rate_limit(request, action="resolve_identifier", max_requests=10, window_seconds=60)
+    db = require_db()
+    identifier = payload.identifier.strip()
+
+    # 1. Check students by roll_number
+    try:
+        stud_res = (
+            db.table("students")
+            .select("id,roll_number,full_name,email")
+            .ilike("roll_number", identifier.upper())
+            .limit(1)
+            .execute()
+        )
+        if stud_res.data and stud_res.data[0].get("email"):
+            st = stud_res.data[0]
+            return {
+                "found": True,
+                "type": "student",
+                "identifier": st.get("roll_number"),
+                "full_name": st.get("full_name"),
+                "email": st["email"],
+                "masked_email": _mask_email(st["email"]),
+            }
+    except Exception:
+        pass
+
+    # 2. Check profiles by username
+    try:
+        prof_res = (
+            db.table("profiles")
+            .select("id,role,full_name,email,username")
+            .ilike("username", identifier)
+            .limit(1)
+            .execute()
+        )
+        if prof_res.data and prof_res.data[0].get("email"):
+            pr = prof_res.data[0]
+            return {
+                "found": True,
+                "type": pr.get("role", "user"),
+                "identifier": pr.get("username"),
+                "full_name": pr.get("full_name"),
+                "email": pr["email"],
+                "masked_email": _mask_email(pr["email"]),
+            }
+    except Exception:
+        pass
+
+    # 3. Check profiles by email directly
+    if "@" in identifier:
+        try:
+            email_res = (
+                db.table("profiles")
+                .select("id,role,full_name,email,username")
+                .ilike("email", identifier.lower())
+                .limit(1)
+                .execute()
+            )
+            if email_res.data and email_res.data[0].get("email"):
+                pr = email_res.data[0]
+                return {
+                    "found": True,
+                    "type": pr.get("role", "user"),
+                    "identifier": pr.get("email"),
+                    "full_name": pr.get("full_name"),
+                    "email": pr["email"],
+                    "masked_email": _mask_email(pr["email"]),
+                }
+        except Exception:
+            pass
+
+    # Demo testing fallback
+    id_lower = identifier.lower()
+    demo_roster = {
+        "admin": ("admin@jainuniversity.ac.in", "admin", "Demo Administrator"),
+        "exam_staff": ("exam.cell@jainuniversity.ac.in", "exam_staff", "Demo Exam Staff"),
+        "faculty": ("faculty@jainuniversity.ac.in", "faculty", "Demo Faculty"),
+        "student": ("student@jainuniversity.ac.in", "student", "Demo Student"),
+        "23ju0102": ("student@jainuniversity.ac.in", "student", "Demo Student"),
+    }
+    if id_lower in demo_roster:
+        demo_email, demo_role, demo_name = demo_roster[id_lower]
+        return {
+            "found": True,
+            "type": demo_role,
+            "identifier": identifier,
+            "full_name": demo_name,
+            "email": demo_email,
+            "masked_email": _mask_email(demo_email),
+        }
+
+    raise HTTPException(status_code=404, detail="No registered account found matching the provided identifier.")
 
 
 @router.post("/resolve-roll")
@@ -71,22 +181,12 @@ def resolve_student_roll(payload: ResolveRollRequest, request: Request) -> dict:
             detail="Student account exists but does not have a linked login email. Please contact examination staff.",
         )
 
-    # Provide masked email for confirmation
-    parts = email.split("@")
-    user_part = parts[0]
-    domain_part = parts[1] if len(parts) > 1 else ""
-    if len(user_part) > 2:
-        masked_user = user_part[0] + "*" * (len(user_part) - 2) + user_part[-1]
-    else:
-        masked_user = user_part[0] + "*"
-    masked_email = f"{masked_user}@{domain_part}"
-
     return {
         "found": True,
         "roll_number": student.get("roll_number"),
         "full_name": student.get("full_name"),
         "email": email,
-        "masked_email": masked_email,
+        "masked_email": _mask_email(email),
     }
 
 

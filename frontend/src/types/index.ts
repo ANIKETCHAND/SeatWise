@@ -3,6 +3,7 @@ export type UserRole = 'admin' | 'faculty' | 'exam_staff' | 'student';
 export interface UserProfile {
   id: string;
   email: string | null;
+  username?: string;
   role: UserRole;
   full_name: string;
   roll_number?: string;
@@ -16,9 +17,11 @@ export interface UserProfile {
 export interface AdminUser {
   id: string;
   email: string | null;
+  username?: string;
   role: UserRole;
   full_name: string;
   department?: string;
+  assigned_subjects?: string[];
   account_status: 'active' | 'deactivated' | 'suspended';
   must_change_password: boolean;
   created_at: string;

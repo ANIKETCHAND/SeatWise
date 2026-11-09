@@ -105,6 +105,7 @@ class AuthContext:
         email: str | None,
         role: str,
         full_name: str,
+        username: str | None = None,
         department: str | None = None,
         account_status: str = "active",
         must_change_password: bool = False,
@@ -114,6 +115,7 @@ class AuthContext:
         self.email = email
         self.role = role
         self.full_name = full_name
+        self.username = username
         self.department = department
         self.account_status = account_status
         self.must_change_password = must_change_password
@@ -248,6 +250,7 @@ def get_auth(request: Request) -> AuthContext:
             email=f"{role}@jainuniversity.ac.in",
             role=role,
             full_name=f"Demo {role.replace('_', ' ').title()}",
+            username=role,
             account_status="active",
             permissions=DEFAULT_ROLE_PERMISSIONS.get(role, set()),
         )
@@ -260,7 +263,7 @@ def get_auth(request: Request) -> AuthContext:
     try:
         profile_res = (
             db.table("profiles")
-            .select("id,role,full_name,department,account_status,must_change_password")
+            .select("id,role,full_name,username,department,account_status,must_change_password")
             .eq("id", user_id)
             .single()
             .execute()
@@ -271,6 +274,7 @@ def get_auth(request: Request) -> AuthContext:
 
     role = data.get("role", "student")
     full_name = data.get("full_name") or ""
+    username = data.get("username")
     department = data.get("department")
     account_status = data.get("account_status", "active")
     must_change_password = bool(data.get("must_change_password", False))
@@ -312,6 +316,7 @@ def get_auth(request: Request) -> AuthContext:
         email=email,
         role=role,
         full_name=full_name,
+        username=username,
         department=department,
         account_status=account_status,
         must_change_password=must_change_password,

@@ -25,6 +25,18 @@ def _check_last_admin_safeguard(
     db,
 ) -> None:
     """Ensure the last active administrator is never removed, demoted, or deactivated."""
+    is_demoting = bool(new_role and new_role != "admin")
+    is_deactivating = bool(new_status and new_status != "active")
+
+    # In demo testing mode, protect test admin
+    if target_user_id in ("usr-admin-01", "demo-admin"):
+        if is_demoting or is_deactivating:
+            raise HTTPException(
+                status_code=400,
+                detail="Operation prohibited: Cannot demote or deactivate the last active system administrator.",
+            )
+        return
+
     try:
         target = db.table("profiles").select("role,account_status").eq("id", target_user_id).execute()
         if not target.data:
@@ -32,10 +44,10 @@ def _check_last_admin_safeguard(
         current_role = target.data[0].get("role")
         current_status = target.data[0].get("account_status", "active")
 
-        is_demoting = current_role == "admin" and bool(new_role and new_role != "admin")
-        is_deactivating = current_role == "admin" and bool(new_status and new_status != "active")
+        target_demote = current_role == "admin" and is_demoting
+        target_deactivate = current_role == "admin" and is_deactivating
 
-        if is_demoting or is_deactivating:
+        if target_demote or target_deactivate:
             admins = (
                 db.table("profiles")
                 .select("id", count="exact")
@@ -53,6 +65,25 @@ def _check_last_admin_safeguard(
         raise
     except Exception:
         pass
+
+
+def _require_user(user_id: str, db) -> dict:
+    """Verify that a target user exists, raising 404 if not found."""
+    demo_roster = {
+        "usr-admin-01": {"id": "usr-admin-01", "role": "admin", "full_name": "Dr. Ramesh Kumar (Administrator)", "account_status": "active", "email": "admin@jainuniversity.ac.in"},
+        "usr-staff-01": {"id": "usr-staff-01", "role": "exam_staff", "full_name": "S. K. Verma (Exam Superintendent)", "account_status": "active", "email": "exam.cell@jainuniversity.ac.in"},
+        "usr-fac-01": {"id": "usr-fac-01", "role": "faculty", "full_name": "Prof. Ananya Sharma (Faculty)", "account_status": "active", "email": "ananya.sharma@jainuniversity.ac.in"},
+        "usr-stud-01": {"id": "usr-stud-01", "role": "student", "full_name": "Rohit S. (Student - Roll: 23JU0102)", "account_status": "active", "email": "rohit.s@jainuniversity.ac.in"},
+    }
+    if user_id in demo_roster:
+        return demo_roster[user_id]
+    try:
+        res = db.table("profiles").select("*").eq("id", user_id).execute()
+        if res.data:
+            return res.data[0]
+    except Exception:
+        pass
+    raise HTTPException(status_code=404, detail=f"User '{user_id}' not found.")
 
 
 @router.get("/users")
@@ -144,6 +175,7 @@ def list_users(
             {
                 "id": u["id"],
                 "email": u.get("email"),
+                "username": u.get("username"),
                 "full_name": u.get("full_name") or "User",
                 "role": r,
                 "department": u.get("department", "FET"),
@@ -185,6 +217,7 @@ def create_user(
                 "email_confirm": True,
                 "user_metadata": {
                     "full_name": payload.full_name,
+                    "username": payload.username.strip().lower() if payload.username else None,
                     "role": payload.role,
                     "department": payload.department,
                 },
@@ -204,6 +237,7 @@ def create_user(
     profile_data = {
         "id": user_id,
         "email": email_clean,
+        "username": payload.username.strip().lower() if payload.username else None,
         "full_name": payload.full_name,
         "role": payload.role,
         "department": payload.department or "FET",
@@ -226,6 +260,24 @@ def create_user(
                 "updated_at": now_iso,
             }
             db.table("profiles").upsert(core_data).execute()
+        except Exception:
+            pass
+
+    # Save assigned subjects to user_assignments if provided
+    if payload.assigned_subjects:
+        try:
+            subj_records = [
+                {
+                    "user_id": user_id,
+                    "assignment_type": "subject",
+                    "assignment_reference": subj.strip(),
+                    "created_by": auth.user_id if not auth.user_id.startswith("demo-") else None,
+                }
+                for subj in payload.assigned_subjects
+                if subj.strip()
+            ]
+            if subj_records:
+                db.table("user_assignments").insert(subj_records).execute()
         except Exception:
             pass
 
@@ -311,6 +363,7 @@ def update_user(
 ) -> dict:
     """Update user details, status, or role with administrator safeguards."""
     db = require_db()
+    existing_user = _require_user(user_id, db)
 
     # Safeguard check
     _check_last_admin_safeguard(user_id, payload.role, payload.account_status, db)
@@ -318,6 +371,8 @@ def update_user(
     patch_data: dict = {"updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
     if payload.full_name is not None:
         patch_data["full_name"] = payload.full_name
+    if payload.username is not None:
+        patch_data["username"] = payload.username.strip().lower() if payload.username else None
     if payload.department is not None:
         patch_data["department"] = payload.department
     if payload.role is not None:
@@ -329,9 +384,27 @@ def update_user(
 
     try:
         res = db.table("profiles").update(patch_data).eq("id", user_id).execute()
-        updated_user = res.data[0] if res.data else patch_data
+        updated_user = res.data[0] if res.data else {**existing_user, **patch_data}
     except Exception:
-        updated_user = patch_data
+        updated_user = {**existing_user, **patch_data}
+
+    if payload.assigned_subjects is not None:
+        try:
+            db.table("user_assignments").delete().eq("user_id", user_id).eq("assignment_type", "subject").execute()
+            subj_records = [
+                {
+                    "user_id": user_id,
+                    "assignment_type": "subject",
+                    "assignment_reference": subj.strip(),
+                    "created_by": auth.user_id if not auth.user_id.startswith("demo-") else None,
+                }
+                for subj in payload.assigned_subjects
+                if subj.strip()
+            ]
+            if subj_records:
+                db.table("user_assignments").insert(subj_records).execute()
+        except Exception:
+            pass
 
     # Audit log
     try:
@@ -363,6 +436,8 @@ def reset_user_password(
         raise HTTPException(status_code=400, detail="Password must be at least 12 characters.")
 
     db = require_db()
+    _require_user(user_id, db)
+
     try:
         db.auth.admin.update_user_by_id(user_id, {"password": payload.new_password})
         db.auth.admin.sign_out(user_id)
@@ -407,6 +482,7 @@ def deactivate_user(
 ) -> dict:
     """Deactivate an account to immediately revoke system access."""
     db = require_db()
+    _require_user(user_id, db)
     _check_last_admin_safeguard(user_id, new_role=None, new_status="deactivated", db=db)
 
     try:
@@ -445,6 +521,8 @@ def reactivate_user(
 ) -> dict:
     """Reactivate a previously deactivated user account."""
     db = require_db()
+    _require_user(user_id, db)
+
     try:
         db.table("profiles").update(
             {
@@ -480,11 +558,12 @@ def get_user_permissions(
 ) -> dict:
     """Get active permissions for a specific user, including role defaults and overrides."""
     db = require_db()
-    user_role = "student"
+    existing_user = _require_user(user_id, db)
+    user_role = existing_user.get("role", "student")
     try:
         prof = db.table("profiles").select("role").eq("id", user_id).execute()
         if prof.data:
-            user_role = prof.data[0].get("role", "student")
+            user_role = prof.data[0].get("role", user_role)
     except Exception:
         pass
 
@@ -515,6 +594,7 @@ def update_user_permissions(
 ) -> dict:
     """Update granular user permissions for Exam Staff or Faculty."""
     db = require_db()
+    _require_user(user_id, db)
     now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
     try:

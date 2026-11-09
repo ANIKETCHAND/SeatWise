@@ -16,12 +16,30 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { StudentExam, StudentSeatInfo } from '../types';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 
 export const StudentDashboardPage: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'today' | 'find-seat' | 'upcoming' | 'history'>('find-seat');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const getInitialTab = (): 'today' | 'find-seat' | 'upcoming' | 'history' => {
+    if (location.pathname.includes('/student/examinations')) return 'today';
+    if (location.pathname.includes('/student/seat-lookup')) return 'find-seat';
+    if (location.pathname.includes('/student/history')) return 'history';
+    return 'find-seat';
+  };
+
+  const [activeTab, setActiveTab] = useState<'today' | 'find-seat' | 'upcoming' | 'history'>(getInitialTab);
+
+  useEffect(() => {
+    if (location.pathname.includes('/student/examinations')) setActiveTab('today');
+    else if (location.pathname.includes('/student/seat-lookup')) setActiveTab('find-seat');
+    else if (location.pathname.includes('/student/history')) setActiveTab('history');
+  }, [location.pathname]);
+
   const [loading, setLoading] = useState<boolean>(true);
 
   // Student profile data
@@ -140,7 +158,10 @@ export const StudentDashboardPage: React.FC = () => {
       {/* Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-zinc-200 pb-2">
         <button
-          onClick={() => setActiveTab('find-seat')}
+          onClick={() => {
+            setActiveTab('find-seat');
+            navigate('/student/seat-lookup');
+          }}
           className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'find-seat'
               ? 'bg-black text-white shadow-xs'
@@ -157,7 +178,10 @@ export const StudentDashboardPage: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab('today')}
+          onClick={() => {
+            setActiveTab('today');
+            navigate('/student/examinations');
+          }}
           className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'today'
               ? 'bg-black text-white shadow-xs'
@@ -186,7 +210,10 @@ export const StudentDashboardPage: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab('history')}
+          onClick={() => {
+            setActiveTab('history');
+            navigate('/student/history');
+          }}
           className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'history'
               ? 'bg-black text-white shadow-xs'

@@ -106,6 +106,7 @@ def test_rbac_and_auth_migration_defined():
     assert "system_settings" in sql
     assert "must_change_password" in sql
     assert "account_status" in sql
+    assert "username" in sql
     assert "role_permissions_admin_write" in sql
     assert "user_permissions_admin_write" in sql
 

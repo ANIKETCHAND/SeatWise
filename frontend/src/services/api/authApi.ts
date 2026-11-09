@@ -17,6 +17,14 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify({ old_password, new_password }),
     }),
+  resolveIdentifier: (identifier: string) =>
+    request<{ found: boolean; type?: string; identifier?: string; full_name?: string; email: string; masked_email: string }>(
+      '/auth/resolve-identifier',
+      {
+        method: 'POST',
+        body: JSON.stringify({ identifier }),
+      }
+    ),
   bootstrapAdmin: (payload: { bootstrap_secret: string; email: string; password: string; full_name?: string }) =>
     request<{ status: string; message: string; user_id?: string; email?: string; role?: string }>(
       '/auth/bootstrap-admin',

@@ -217,11 +217,39 @@ export const App: React.FC = () => {
                   }
                 />
 
-                {/* Shared Accessible Routes (Scoped internally) */}
-                <Route path="timetable" element={<TimetablePage />} />
-                <Route path="reports" element={<ReportsPage />} />
-                <Route path="seat-lookup" element={<StudentSeatLookupPage />} />
-                <Route path="history" element={<HistoryPage />} />
+                {/* Operational Staff & Faculty Routes */}
+                <Route
+                  path="timetable"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin', 'exam_staff', 'faculty']}>
+                      <TimetablePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="reports"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin', 'exam_staff', 'faculty']}>
+                      <ReportsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="seat-lookup"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin', 'exam_staff']}>
+                      <StudentSeatLookupPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="history"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin', 'exam_staff']}>
+                      <HistoryPage />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Catch-all */}
                 <Route path="*" element={<Navigate to="/" replace />} />

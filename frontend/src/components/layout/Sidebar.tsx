@@ -18,9 +18,12 @@ import {
   Search,
   LogOut,
   UserCheck,
-  ShieldAlert,
   ClipboardCheck,
   UserRound,
+  UserPlus,
+  KeyRound,
+  Sliders,
+  Clock,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
@@ -51,8 +54,15 @@ export const Sidebar: React.FC = () => {
           {
             sectionTitle: 'User & Access Management',
             items: [
-              { name: 'All Users Directory', path: '/admin/users', icon: Users },
-              { name: 'Security Audit Logs', path: '/admin/audit-logs', icon: History },
+              { name: 'All Users', path: '/admin/users', icon: Users },
+              { name: 'Administrators', path: '/admin/users?role=admin', icon: ShieldCheck },
+              { name: 'Exam Staff', path: '/admin/users?role=exam_staff', icon: ClipboardCheck },
+              { name: 'Faculty', path: '/admin/users?role=faculty', icon: GraduationCap },
+              { name: 'Students', path: '/admin/users?role=student', icon: UserRound },
+              { name: 'Create Account', path: '/admin/users?action=create', icon: UserPlus },
+              { name: 'Password Management', path: '/admin/users?action=passwords', icon: KeyRound },
+              { name: 'Role & Permission Management', path: '/admin/users?tab=permissions', icon: Sliders },
+              { name: 'Account Activity', path: '/admin/audit-logs', icon: History },
             ],
           },
           {
@@ -115,10 +125,12 @@ export const Sidebar: React.FC = () => {
       case 'student':
         return [
           {
-            sectionTitle: 'Student Portal',
+            sectionTitle: 'Student Examination Portal',
             items: [
               { name: 'Student Dashboard', path: '/student-dashboard', icon: LayoutDashboard },
-              { name: 'Find My Seat', path: '/seat-lookup', icon: Search },
+              { name: "Today's Examinations", path: '/student/examinations', icon: Clock },
+              { name: 'Find My Seat', path: '/student/seat-lookup', icon: Armchair },
+              { name: 'Examination History', path: '/student/history', icon: History },
             ],
           },
         ];

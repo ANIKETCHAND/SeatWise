@@ -126,10 +126,28 @@ class TestAdministratorRole:
         assert data["user"]["role"] == "student"
 
     def test_admin_safeguard_prevents_removing_last_active_admin(self, client, admin_headers):
-        # Attempting to deactivate or demote non-existent or lone admin triggers safeguard check
-        resp = client.post("/api/admin/users/fake-admin-id/deactivate", headers=admin_headers)
-        # Should either be 400 (prevented by safeguard) or 200 (if handled)
-        assert resp.status_code in (400, 200)
+        # Attempting to deactivate the lone/last active admin triggers safeguard check with 400
+        resp = client.post("/api/admin/users/usr-admin-01/deactivate", headers=admin_headers)
+        assert resp.status_code == 400
+        assert "Cannot demote or deactivate the last active system administrator" in resp.json()["detail"]
+
+    def test_admin_safeguard_prevents_demoting_last_active_admin(self, client, admin_headers):
+        # Attempting to demote the lone active admin to faculty triggers safeguard check with 400
+        resp = client.patch("/api/admin/users/usr-admin-01", json={"role": "faculty"}, headers=admin_headers)
+        assert resp.status_code == 400
+        assert "Cannot demote or deactivate the last active system administrator" in resp.json()["detail"]
+
+    def test_admin_operations_on_nonexistent_user_returns_404(self, client, admin_headers):
+        resp = client.post("/api/admin/users/non-existent-user-id/deactivate", headers=admin_headers)
+        assert resp.status_code == 404
+        assert "not found" in resp.json()["detail"].lower()
+
+        resp_reset = client.post(
+            "/api/admin/users/non-existent-user-id/reset-password",
+            json={"new_password": "NewSecurePassword123!"},
+            headers=admin_headers,
+        )
+        assert resp_reset.status_code == 404
 
 
 # ==============================================================================
@@ -248,6 +266,20 @@ class TestStudentRollResolution:
         resp = client.post("/api/auth/resolve-roll", json={"roll_number": ""})
         assert resp.status_code == 422
 
+    def test_resolve_identifier_for_username_and_roll_number(self, client):
+        # Roll number lookup
+        resp = client.post("/api/auth/resolve-identifier", json={"identifier": "23JU0102"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["found"] is True
+        assert "email" in data
+        assert "@" in data["email"]
+
+        # Assigned username lookup
+        resp_admin = client.post("/api/auth/resolve-identifier", json={"identifier": "admin"})
+        assert resp_admin.status_code == 200
+        assert resp_admin.json()["type"] == "admin"
+
 
 # ==============================================================================
 # 6. Security Tests & Tamper Resistance
@@ -286,3 +318,21 @@ class TestSecurityInvariants:
         }
         resp = client.post("/api/auth/bootstrap-admin", json=payload)
         assert resp.status_code == 403
+
+    def test_rate_limiting_enforcement_returns_429(self, client):
+        # Rapidly sending requests exceeding limit must trigger HTTP 429
+        # Action 'bootstrap' max_requests is 3 in a 60s window
+        last_status = None
+        for i in range(5):
+            resp = client.post(
+                "/api/auth/bootstrap-admin",
+                json={
+                    "bootstrap_secret": f"test-attempt-{i}",
+                    "email": "test@jainuniversity.ac.in",
+                    "password": "Password123456!",
+                },
+                headers={"X-Forwarded-For": "198.51.100.42"},
+            )
+            last_status = resp.status_code
+
+        assert last_status == 429
