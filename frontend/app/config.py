@@ -34,7 +34,12 @@ class Settings(BaseSettings):
 
     # Application Routing & Security
     api_v1_prefix: str = "/api"
-    backend_cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:8000,http://localhost:8080,https://frontend-lyart-nu-63.vercel.app"
+    backend_cors_origins: str = (
+        "http://localhost:5173,http://127.0.0.1:5173,http://localhost:8000,http://localhost:8080,"
+        "https://seatwise.vercel.app,https://seatwise-portal.vercel.app,https://seatwise-ju.vercel.app,"
+        "https://seatwise-exam.vercel.app,https://seatwise-fet.vercel.app,https://seatwise-ctl8.vercel.app,"
+        "https://frontend-lyart-nu-63.vercel.app"
+    )
     solver_time_limit_seconds: float = 20.0
 
     @property
