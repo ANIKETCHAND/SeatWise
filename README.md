@@ -1,5 +1,7 @@
 # SeatWise — Smart Classroom & Examination Seating Management System
 
+> **Production Application:** [https://seatwise-fet.vercel.app](https://seatwise-fet.vercel.app)
+
 **SeatWise** is an enterprise-grade full-stack web application designed for **Jain (Deemed-to-be University)**, Faculty of Engineering and Technology (FET), to mathematically generate, validate, and manage conflict-free seating arrangements for both **daily academic classroom sessions** and **large-scale university examinations**.
 
 ---
