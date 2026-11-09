@@ -9,6 +9,7 @@ from ..database.client import require_db
 from ..schemas.index import ExamSeatingGenerateRequest, ManualMoveRequest
 from ..services import seating_service as svc
 from ..utils.errors import ApiError
+from ..utils.uuid_helper import ensure_uuid, safe_user_uuid
 
 router = APIRouter(prefix="/seating/examination", tags=["examination-seating"])
 
@@ -81,7 +82,7 @@ def generate(
         ).execute().data
         db.table("audit_logs").insert(
             {
-                "user_id": auth.user_id,
+                "user_id": safe_user_uuid(auth.user_id),
                 "action": "seating_plan.save",
                 "entity_type": "seating_plans",
                 "entity_id": plan_id,
@@ -459,7 +460,7 @@ def publish(plan_id: str, auth: AuthContext = Depends(require_staff)) -> dict:
     )
     db.table("audit_logs").insert(
         {
-            "user_id": auth.user_id,
+            "user_id": safe_user_uuid(auth.user_id),
             "action": "seating_plan.publish",
             "entity_type": "seating_plans",
             "entity_id": plan_id,

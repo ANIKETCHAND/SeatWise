@@ -23,3 +23,18 @@ def ensure_uuid(val: str | None, prefix: str = "seatwise") -> str | None:
         return val_str
     except (ValueError, TypeError, AttributeError):
         return str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{prefix}:{val_str}"))
+
+
+def safe_user_uuid(val: str | None) -> str | None:
+    """Return val if it is a valid UUID string, otherwise return None.
+    
+    Prevents database type/foreign-key errors when user is authenticated
+    via demo token or non-UUID identity that is not in auth.users.
+    """
+    if not val:
+        return None
+    try:
+        uuid.UUID(str(val).strip())
+        return str(val).strip()
+    except (ValueError, TypeError, AttributeError):
+        return None

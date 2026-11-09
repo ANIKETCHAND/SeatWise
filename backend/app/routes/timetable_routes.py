@@ -11,6 +11,7 @@ from ..auth import AuthContext, require_admin, require_authenticated
 from ..database.client import require_db
 from ..services.timetable_parser import parse_timetable_workbook
 from ..utils.errors import ApiError
+from ..utils.uuid_helper import safe_user_uuid
 
 router = APIRouter(prefix="/timetable", tags=["timetable"])
 
@@ -51,7 +52,7 @@ async def import_preview(
                 "valid_rows": report.stats["entries"] - report.stats["errors"],
                 "error_rows": report.stats["errors"],
                 "report": {"stats": report.stats},
-                "created_by": auth.user_id,
+                "created_by": safe_user_uuid(auth.user_id),
             }
         )
         .execute()
@@ -121,7 +122,7 @@ async def import_commit(
     ).eq("id", job_id).execute()
     db.table("audit_logs").insert(
         {
-            "user_id": auth.user_id,
+            "user_id": safe_user_uuid(auth.user_id),
             "action": "timetable.import",
             "entity_type": "timetable_entries",
             "details": {"job_id": job_id, "result": result},

@@ -15,6 +15,7 @@ from ..schemas.index import (
     PolicyCreate,
 )
 from ..utils.errors import ApiError
+from ..utils.uuid_helper import safe_user_uuid
 
 router = APIRouter(prefix="/examinations", tags=["examinations"])
 
@@ -59,7 +60,7 @@ def create_exam(payload: ExamCreate, auth: AuthContext = Depends(require_staff))
                 "name": payload.name,
                 "exam_date": payload.exam_date,
                 "session": payload.session,
-                "created_by": auth.user_id,
+                "created_by": safe_user_uuid(auth.user_id),
                 "policy_id": default_policy["id"] if default_policy else None,
             }
         )
@@ -287,7 +288,7 @@ def set_exam_subjects(
         raise ApiError(404, "not_found", "Examination not found.")
     db.table("audit_logs").insert(
         {
-            "user_id": auth.user_id,
+            "user_id": safe_user_uuid(auth.user_id),
             "action": "examination.set_subjects",
             "entity_type": "examinations",
             "entity_id": exam_id,
