@@ -2,12 +2,14 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile, UserRole } from '../types';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
 import { setAuthToken } from '../services/api';
+import { parseGoogleJwt } from '../services/googleAuth';
 
 interface AuthContextType {
   user: UserProfile | null;
   role: UserRole;
   isLoading: boolean;
   login: (email: string, role?: UserRole) => Promise<void>;
+  loginWithGoogle: (credential: string, preferredRole?: UserRole) => Promise<UserProfile>;
   logout: () => Promise<void>;
   switchRole: (role: UserRole) => void;
   isAdmin: boolean;
@@ -169,14 +171,76 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginWithGoogle = async (credential: string, preferredRole?: UserRole): Promise<UserProfile> => {
+    setIsLoading(true);
+    try {
+      const payload = parseGoogleJwt(credential);
+      if (!payload) {
+        throw new Error('Could not parse Google ID token credential.');
+      }
+
+      // Determine initial role: use override if specified, otherwise deduce from email or current role
+      let targetRole: UserRole = preferredRole || currentRole || 'admin';
+      const email = (payload.email || '').toLowerCase();
+      if (!preferredRole) {
+        if (email.includes('admin') || email.includes('dean')) {
+          targetRole = 'admin';
+        } else if (email.includes('faculty') || email.includes('prof')) {
+          targetRole = 'faculty';
+        } else if (email.includes('exam') || email.includes('staff')) {
+          targetRole = 'exam_staff';
+        } else if (email.includes('student') || /\d{2}[a-z]{2}\d{4}/.test(email)) {
+          targetRole = 'student';
+        }
+      }
+
+      const googleProfile: UserProfile = {
+        id: `usr-google-${payload.sub}`,
+        email: payload.email,
+        role: targetRole,
+        full_name: payload.name || 'Google User',
+        avatar_url: payload.picture,
+        department: 'School of Engineering and Technology',
+      };
+
+      setCurrentRole(targetRole);
+      setUser(googleProfile);
+      localStorage.setItem('seatwise_role', targetRole);
+      localStorage.setItem('seatwise_user', JSON.stringify(googleProfile));
+      localStorage.setItem('seatwise_google_credential', credential);
+      setAuthToken(`demo-token-${targetRole}`);
+
+      if (isSupabaseConfigured && supabase) {
+        try {
+          await supabase.auth.signInWithIdToken({
+            provider: 'google',
+            token: credential,
+          });
+        } catch (err) {
+          // Non-blocking in demo/offline Supabase environments
+        }
+      }
+
+      return googleProfile;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async () => {
     if (isSupabaseConfigured && supabase) {
       try {
         await supabase.auth.signOut();
       } catch {}
     }
+    if (window.google?.accounts?.id) {
+      try {
+        window.google.accounts.id.disableAutoSelect();
+      } catch {}
+    }
     // Clear auth and reset to guest/student safely
     localStorage.removeItem('seatwise_user');
+    localStorage.removeItem('seatwise_google_credential');
     localStorage.setItem('seatwise_role', 'student');
     setAuthToken('demo-token-student');
     setUser(ROLE_PROFILES.student);
@@ -209,6 +273,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: activeRole,
         isLoading,
         login,
+        loginWithGoogle,
         logout,
         switchRole,
         isAdmin: activeRole === 'admin',

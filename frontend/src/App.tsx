@@ -20,6 +20,7 @@ import { HistoryPage } from './pages/HistoryPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { StudentSeatLookupPage } from './pages/StudentSeatLookupPage';
 import { LandingPage } from './pages/LandingPage';
+import { LoginPage } from './pages/LoginPage';
 
 export const App: React.FC = () => {
   return (
@@ -28,8 +29,9 @@ export const App: React.FC = () => {
         <SeatingProvider>
           <BrowserRouter>
             <Routes>
-              {/* Public Landing Page */}
+              {/* Public Routes */}
               <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
 
               {/* Authenticated Application Layout */}
               <Route element={<AppLayout />}>

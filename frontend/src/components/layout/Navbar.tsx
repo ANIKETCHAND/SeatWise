@@ -81,9 +81,18 @@ export const Navbar: React.FC = () => {
         {/* User preview & Sign Out Action */}
         <div className="flex items-center gap-3 pl-2 border-l border-zinc-200">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs">
-              <UserCheck className="w-4 h-4" />
-            </div>
+            {user?.avatar_url ? (
+              <img
+                src={user.avatar_url}
+                alt={user.full_name}
+                className="w-8 h-8 rounded-full border border-zinc-300 object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs">
+                <UserCheck className="w-4 h-4" />
+              </div>
+            )}
             <div className="hidden lg:block text-left">
               <p className="text-xs font-semibold text-zinc-900 leading-tight truncate max-w-[140px]">
                 {user?.full_name?.split(' ')[0]}

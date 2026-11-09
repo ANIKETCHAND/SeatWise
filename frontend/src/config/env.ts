@@ -9,6 +9,7 @@ interface AppEnvironment {
   apiBaseUrl: string;
   supabaseUrl: string;
   supabaseAnonKey: string;
+  googleClientId: string;
   mode: string;
   isDev: boolean;
   isProd: boolean;
@@ -28,6 +29,10 @@ export const env: AppEnvironment = {
   apiBaseUrl: getEnvVar('VITE_API_BASE_URL', '/api'),
   supabaseUrl: getEnvVar('VITE_SUPABASE_URL', ''),
   supabaseAnonKey: getEnvVar('VITE_SUPABASE_ANON_KEY', ''),
+  googleClientId: getEnvVar(
+    'VITE_GOOGLE_CLIENT_ID',
+    '583335952268-dlt9d2nqr43ord4tkgdmotqd4103lumq.apps.googleusercontent.com'
+  ),
   mode: getEnvVar('MODE', 'development'),
   isDev: import.meta.env.DEV ?? true,
   isProd: import.meta.env.PROD ?? false,

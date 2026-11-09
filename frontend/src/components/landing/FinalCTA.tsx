@@ -16,8 +16,8 @@ export const LandingFinalCTA: React.FC = () => {
         </p>
         <div className="pt-2">
           <Link
-            to="/dashboard"
-            className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl bg-black hover:bg-zinc-800 text-white font-bold text-base shadow-xl shadow-black/10 hover:shadow-black/20 hover:scale-[1.02] active:scale-[0.98] transition-all group border border-black"
+            to="/login"
+            className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl bg-black hover:bg-zinc-800 text-white font-bold text-base shadow-xl shadow-black/10 hover:shadow-black/20 hover:scale-[1.02] active:scale-[0.98] transition-all group border border-black cursor-pointer"
           >
             <span>Sign In to SeatWise</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

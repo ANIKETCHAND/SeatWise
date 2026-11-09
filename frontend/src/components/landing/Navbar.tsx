@@ -87,8 +87,8 @@ export const LandingNavbar: React.FC = () => {
           {/* Right: Sign In / Portal CTA */}
           <div className="hidden md:flex items-center gap-3">
             <Link
-              to="/dashboard"
-              className="px-5 py-2.5 rounded-xl bg-black hover:bg-zinc-800 text-white text-sm font-semibold shadow-sm hover:shadow transition-all flex items-center gap-2 group border border-black"
+              to="/login"
+              className="px-5 py-2.5 rounded-xl bg-black hover:bg-zinc-800 text-white text-sm font-semibold shadow-sm hover:shadow transition-all flex items-center gap-2 group border border-black cursor-pointer"
             >
               <span>Sign In to Portal</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -146,9 +146,9 @@ export const LandingNavbar: React.FC = () => {
           </button>
           <div className="pt-3 border-t border-zinc-200">
             <Link
-              to="/dashboard"
+              to="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full py-2.5 rounded-xl bg-black hover:bg-zinc-800 text-white text-sm font-semibold flex items-center justify-center gap-2 border border-black"
+              className="w-full py-2.5 rounded-xl bg-black hover:bg-zinc-800 text-white text-sm font-semibold flex items-center justify-center gap-2 border border-black cursor-pointer"
             >
               <span>Sign In to Portal</span>
               <ArrowRight className="w-4 h-4" />

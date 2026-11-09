@@ -7,6 +7,7 @@ export interface UserProfile {
   full_name: string;
   roll_number?: string;
   department?: string;
+  avatar_url?: string;
 }
 
 export interface Program {
