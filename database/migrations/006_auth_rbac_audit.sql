@@ -23,13 +23,13 @@ create or replace view public.user_roles as
     id as user_id,
     role,
     full_name,
+    created_at,
+    updated_at,
     email,
     username,
     department,
     account_status,
-    must_change_password,
-    created_at,
-    updated_at
+    must_change_password
   from public.profiles;
 
 -- ---------- Role Permissions (default permissions per role) ----------
