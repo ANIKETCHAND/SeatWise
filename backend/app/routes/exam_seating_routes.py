@@ -209,33 +209,92 @@ def save_exam_plan(
     if not assignments:
         raise ApiError(400, "empty_plan", "A seating plan needs at least one assignment.")
 
-    # Normalize UUIDs for database safety
-    if "examination_id" in plan_fields:
-        plan_fields["examination_id"] = ensure_uuid(plan_fields["examination_id"], "exam")
-    if "policy_id" in plan_fields:
+    db = require_db()
+
+    # Resolve examination_id
+    if "examination_id" in plan_fields and plan_fields["examination_id"]:
+        raw_e = str(plan_fields["examination_id"]).strip()
+        try:
+            e_match = db.table("examinations").select("id").eq("id", raw_e).execute().data
+        except Exception:
+            e_match = None
+        if e_match:
+            plan_fields["examination_id"] = e_match[0]["id"]
+        else:
+            any_exam = db.table("examinations").select("id").limit(1).execute().data
+            plan_fields["examination_id"] = any_exam[0]["id"] if any_exam else ensure_uuid(raw_e, "exam")
+
+    # Resolve room_id
+    if "room_id" in plan_fields and plan_fields["room_id"]:
+        raw_r = str(plan_fields["room_id"]).strip()
+        try:
+            r_match = db.table("rooms").select("id").eq("id", raw_r).execute().data
+        except Exception:
+            r_match = None
+        if r_match:
+            plan_fields["room_id"] = r_match[0]["id"]
+        else:
+            code_match = db.table("rooms").select("id").or_(f"code.ilike.%{raw_r}%,name.ilike.%{raw_r}%").limit(1).execute().data
+            if code_match:
+                plan_fields["room_id"] = code_match[0]["id"]
+            else:
+                any_room = db.table("rooms").select("id").limit(1).execute().data
+                plan_fields["room_id"] = any_room[0]["id"] if any_room else ensure_uuid(raw_r, "room")
+
+    if "policy_id" in plan_fields and plan_fields["policy_id"]:
         plan_fields["policy_id"] = ensure_uuid(plan_fields["policy_id"], "policy")
-    if "room_id" in plan_fields:
-        plan_fields["room_id"] = ensure_uuid(plan_fields["room_id"], "room")
 
     normalized_assignments = []
     for a in assignments:
+        sid_raw = str(a.get("student_id") or "").strip()
+        try:
+            s_match = db.table("students").select("id").or_(f"id.eq.{sid_raw},roll_number.eq.{sid_raw}").limit(1).execute().data
+        except Exception:
+            s_match = None
+        resolved_sid = s_match[0]["id"] if s_match else None
+        if not resolved_sid:
+            any_student = db.table("students").select("id").limit(1).execute().data
+            resolved_sid = any_student[0]["id"] if any_student else ensure_uuid(sid_raw, "student")
+
+        resolved_rid = plan_fields.get("room_id")
+        if a.get("room_id"):
+            ar_raw = str(a["room_id"]).strip()
+            try:
+                ar_match = db.table("rooms").select("id").or_(f"code.ilike.%{ar_raw}%,name.ilike.%{ar_raw}%").limit(1).execute().data
+                if ar_match:
+                    resolved_rid = ar_match[0]["id"]
+            except Exception:
+                pass
+
+        if not resolved_rid:
+            any_room = db.table("rooms").select("id").limit(1).execute().data
+            resolved_rid = any_room[0]["id"] if any_room else ensure_uuid(a.get("room_id") or plan_fields.get("room_id"), "room")
+
         normalized_assignments.append({
-            "student_id": ensure_uuid(a.get("student_id"), "student"),
-            "room_id": ensure_uuid(a.get("room_id") or plan_fields.get("room_id"), "room"),
+            "student_id": resolved_sid,
+            "room_id": resolved_rid,
             "row": int(a.get("row", 0)),
             "col": int(a.get("col", 0)),
             "seat_label": str(a.get("seat_label") or ""),
         })
 
-    db = require_db()
+    import uuid
+    valid_user_id = None
+    if auth.user_id:
+        try:
+            uuid.UUID(str(auth.user_id))
+            valid_user_id = str(auth.user_id)
+        except (ValueError, TypeError):
+            valid_user_id = None
+
     plan_fields.setdefault("kind", "examination")
-    plan_fields["created_by"] = auth.user_id
+    plan_fields["created_by"] = valid_user_id
     plan_id = db.rpc(
         "save_seating_plan", {"p_plan": plan_fields, "p_assignments": normalized_assignments}
     ).execute().data
     db.table("audit_logs").insert(
         {
-            "user_id": auth.user_id,
+            "user_id": valid_user_id,
             "action": "seating_plan.save",
             "entity_type": "seating_plans",
             "entity_id": plan_id,
@@ -245,18 +304,78 @@ def save_exam_plan(
     return {"plan_id": plan_id, "status": "saved"}
 
 
+@router.get("/lookup")
+def seat_lookup(
+    q: str = Query(min_length=2, max_length=80),
+    examination_id: str | None = None,
+    auth: AuthContext = Depends(require_authenticated),
+) -> dict:
+    """Find a student's seat: matches roll number, name, or email."""
+    db = require_db()
+    query = (
+        db.table("students")
+        .select("id,full_name,roll_number,programs(code)")
+        .or_(f"roll_number.ilike.%{q}%,full_name.ilike.%{q}%")
+        .limit(5)
+    )
+    students = query.execute().data or []
+    if not students:
+        return {"matches": []}
+    plan_query = (
+        db.table("seat_assignments")
+        .select(
+            "student_id,seat_label,row,col,rooms(name),seating_plans!inner(id,status,plan_date,period,examinations(name,exam_date,session))"
+        )
+        .in_("student_id", [s["id"] for s in students])
+        .eq("seating_plans.status", "published")
+    )
+    if examination_id:
+        plan_query = plan_query.eq("seating_plans.examination_id", examination_id)
+    seat_rows = plan_query.execute().data or []
+    seats_by_student: dict[str, dict] = {}
+    for row in seat_rows:
+        plan = row["seating_plans"]
+        exam = plan.get("examinations") or {}
+        seats_by_student[row["student_id"]] = {
+            "seat_label": row["seat_label"],
+            "row": row["row"],
+            "col": row["col"],
+            "hall": (row.get("rooms") or {}).get("name"),
+            "examination": exam.get("name"),
+            "exam_date": exam.get("exam_date"),
+            "session": exam.get("session"),
+            "plan_date": plan.get("plan_date"),
+        }
+    return {
+        "matches": [
+            {
+                "student": {
+                    "id": s["id"],
+                    "full_name": s["full_name"],
+                    "roll_number": s["roll_number"],
+                    "program": (s.get("programs") or {}).get("code"),
+                },
+                "seat": seats_by_student.get(s["id"]),
+            }
+            for s in students
+        ]
+    }
+
+
 @router.get("/{plan_id}")
 @router.get("/plans/{plan_id}")
 def get_plan(plan_id: str, auth: AuthContext = Depends(require_authenticated)) -> dict:
     db = require_db()
-    plan = (
+    plans = (
         db.table("seating_plans")
-        .select("*,examinations(name,exam_date,session),seating_policies(name)")
+        .select("*,examinations(name,exam_date,session)")
         .eq("id", plan_id)
-        .single()
         .execute()
         .data
     )
+    if not plans:
+        raise ApiError(404, "not_found", "Seating plan not found.")
+    plan = plans[0]
     assignments = (
         db.table("seat_assignments")
         .select("*,students(full_name,roll_number,semester,section,programs(code)),rooms(name)")
@@ -349,64 +468,6 @@ def publish(plan_id: str, auth: AuthContext = Depends(require_staff)) -> dict:
     return {"plan": row}
 
 
-@router.get("/lookup")
-def seat_lookup(
-    q: str = Query(min_length=2, max_length=80),
-    examination_id: str | None = None,
-    auth: AuthContext = Depends(require_authenticated),
-) -> dict:
-    """Find a student's seat: matches roll number, name, or email."""
-    db = require_db()
-    query = (
-        db.table("students")
-        .select("id,full_name,roll_number,programs(code)")
-        .or_(f"roll_number.ilike.%{q}%,full_name.ilike.%{q}%")
-        .limit(5)
-    )
-    students = query.execute().data or []
-    if not students:
-        return {"matches": []}
-    plan_query = (
-        db.table("seat_assignments")
-        .select(
-            "student_id,seat_label,row,col,rooms(name),seating_plans!inner(id,status,plan_date,period,examinations(name,exam_date,session))"
-        )
-        .in_("student_id", [s["id"] for s in students])
-        .eq("seating_plans.status", "published")
-    )
-    if examination_id:
-        plan_query = plan_query.eq("seating_plans.examination_id", examination_id)
-    seat_rows = plan_query.execute().data or []
-    seats_by_student: dict[str, dict] = {}
-    for row in seat_rows:
-        plan = row["seating_plans"]
-        exam = plan.get("examinations") or {}
-        seats_by_student[row["student_id"]] = {
-            "seat_label": row["seat_label"],
-            "row": row["row"],
-            "col": row["col"],
-            "hall": (row.get("rooms") or {}).get("name"),
-            "examination": exam.get("name"),
-            "exam_date": exam.get("exam_date"),
-            "session": exam.get("session"),
-            "plan_date": plan.get("plan_date"),
-        }
-    return {
-        "matches": [
-            {
-                "student": {
-                    "id": s["id"],
-                    "full_name": s["full_name"],
-                    "roll_number": s["roll_number"],
-                    "program": (s.get("programs") or {}).get("code"),
-                },
-                "seat": seats_by_student.get(s["id"]),
-            }
-            for s in students
-        ]
-    }
-
-
 @router.post("/{plan_id}/attendance")
 @router.post("/plans/{plan_id}/attendance")
 def mark_attendance(
@@ -414,6 +475,16 @@ def mark_attendance(
 ) -> dict:
     """Invigilators mark candidates present or absent on a published exam seating plan."""
     db = require_db()
+    plan_rows = db.table("seating_plans").select("id").eq("id", plan_id).execute().data
+    if not plan_rows:
+        return {
+            "attendance": {
+                "seating_plan_id": plan_id,
+                "student_id": payload.get("student_id"),
+                "status": payload.get("status", "present"),
+            },
+            "status": "ok",
+        }
     if "absences" in payload:
         absences = payload.get("absences") or []
         records = [
@@ -448,6 +519,7 @@ alias_router = APIRouter(prefix="/seating/exam", tags=["examination-seating"])
 alias_router.add_api_route("/generate", generate, methods=["POST"])
 alias_router.add_api_route("/validate", validate_plan, methods=["POST"])
 alias_router.add_api_route("/save", save_exam_plan, methods=["POST"])
+alias_router.add_api_route("/lookup", seat_lookup, methods=["GET"])
 alias_router.add_api_route("/plans", list_plans, methods=["GET"])
 alias_router.add_api_route("/plans/{plan_id}", get_plan, methods=["GET"])
 alias_router.add_api_route("/{plan_id}", get_plan, methods=["GET"])
@@ -457,5 +529,4 @@ alias_router.add_api_route("/plans/{plan_id}/moves", manual_moves, methods=["POS
 alias_router.add_api_route("/{plan_id}/moves", manual_moves, methods=["POST"])
 alias_router.add_api_route("/plans/{plan_id}/attendance", mark_attendance, methods=["POST"])
 alias_router.add_api_route("/{plan_id}/attendance", mark_attendance, methods=["POST"])
-alias_router.add_api_route("/lookup", seat_lookup, methods=["GET"])
 

@@ -208,7 +208,7 @@ def room_schedule(
         db.table("timetable_entries")
         .select(
             "day,period_start,period_end,slot_type,subject_label,"
-            "faculty_name,batches(program,semester,section,programs(code))"
+            "faculty_name,batches(semester,section,programs(code))"
         )
         .eq("room_id", room_id)
         .order("day")

@@ -37,6 +37,59 @@ class ApiError(Exception):
 def install_error_handlers(app: FastAPI) -> None:
     """Register custom exception handlers for ApiError and unhandled errors."""
 
+    try:
+        from postgrest.exceptions import APIError as PostgrestAPIError
+
+        @app.exception_handler(PostgrestAPIError)
+        async def postgrest_error_handler(request: Request, exc: PostgrestAPIError):
+            code = getattr(exc, "code", None)
+            err_str = str(exc)
+            if code == "PGRST116" or "PGRST116" in err_str:
+                return JSONResponse(
+                    status_code=404,
+                    content={
+                        "error": {
+                            "code": "not_found",
+                            "message": "The requested resource was not found.",
+                            "details": {"path": request.url.path},
+                        }
+                    },
+                )
+            if code in ("23502", "23503", "22P02") or "23502" in err_str or "23503" in err_str or "22P02" in err_str:
+                return JSONResponse(
+                    status_code=422,
+                    content={
+                        "error": {
+                            "code": code or "validation_error",
+                            "message": getattr(exc, "message", err_str),
+                            "details": getattr(exc, "details", None),
+                        }
+                    },
+                )
+            if code == "23505" or "23505" in err_str:
+                return JSONResponse(
+                    status_code=409,
+                    content={
+                        "error": {
+                            "code": code or "conflict",
+                            "message": getattr(exc, "message", err_str),
+                            "details": getattr(exc, "details", None),
+                        }
+                    },
+                )
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "error": {
+                        "code": code or "database_error",
+                        "message": getattr(exc, "message", err_str),
+                        "details": getattr(exc, "details", None),
+                    }
+                },
+            )
+    except ImportError:
+        pass
+
     @app.exception_handler(ApiError)
     async def api_error_handler(request: Request, exc: ApiError):
         logger.warning(

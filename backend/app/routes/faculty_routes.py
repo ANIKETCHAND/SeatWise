@@ -84,7 +84,7 @@ def faculty_timetable(
         db.table("timetable_entries")
         .select(
             "day,period_start,period_end,slot_type,subject_label,is_multi_period,"
-            "room_name,batches(program,semester,section,programs(code))"
+            "room_name,batches(semester,section,programs(code))"
         )
         .eq("faculty_id", faculty_id)
         .in_("slot_type", ["class", "lab", "sametime"])

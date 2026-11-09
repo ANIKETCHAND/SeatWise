@@ -243,7 +243,7 @@ def conflicts(auth: AuthContext = Depends(require_admin)) -> dict:
     db = require_db()
     rows = (
         db.table("timetable_entries")
-        .select("room_name,day,period_start,period_end,slot_type,subject_label,batches(program,semester,section,programs(code))")
+        .select("room_name,day,period_start,period_end,slot_type,subject_label,batches(semester,section,programs(code))")
         .not_.is_("room_name", "null")
         .in_("slot_type", ["class", "lab", "sametime"])
         .execute()

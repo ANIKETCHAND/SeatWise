@@ -26,7 +26,7 @@ begin
   -- Sanity: assignments must not exceed one per seat or per student; the
   -- unique constraints below are the hard guarantee, this check gives a
   -- clearer error message.
-  if (select count(*) from (select student_id from jsonb_array_elements(p_assignments) a group by 1 having count(*) > 1) d) > 0 then
+  if (select count(*) from (select a->>'student_id' as student_id from jsonb_array_elements(p_assignments) a group by 1 having count(*) > 1) d) > 0 then
     raise exception 'duplicate student in assignments';
   end if;
   if (select count(*) from (
@@ -56,7 +56,7 @@ begin
   )
   returning id into v_plan_id;
 
-  for v_assignment in select * from jsonb_array_elements(p_assignments) loop
+  for v_assignment in select value from jsonb_array_elements(p_assignments) loop
     v_room_id := (v_assignment->>'room_id')::uuid;
     v_row := (v_assignment->>'row')::int;
     v_col := (v_assignment->>'col')::int;

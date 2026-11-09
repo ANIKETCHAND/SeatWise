@@ -22,7 +22,7 @@ def list_seating_plans(
     db = require_db()
     query = (
         db.table("seating_plans")
-        .select("*,rooms(name),batches(program,semester,section,programs(code)),examinations(name,exam_date,session)")
+        .select("*,rooms(name),batches(semester,section,programs(code)),examinations(name,exam_date,session)")
         .order("created_at", desc=True)
         .limit(limit)
     )
