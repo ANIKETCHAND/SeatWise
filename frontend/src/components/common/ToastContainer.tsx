@@ -6,14 +6,14 @@ const icons = {
   success: <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />,
   error: <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />,
   warning: <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />,
-  info: <Info className="w-5 h-5 text-blue-600 shrink-0" />,
+  info: <Info className="w-5 h-5 text-zinc-700 shrink-0" />,
 };
 
 const borderClasses = {
   success: 'border-emerald-200 bg-emerald-50/90 text-emerald-900',
   error: 'border-rose-200 bg-rose-50/90 text-rose-900',
   warning: 'border-amber-200 bg-amber-50/90 text-amber-900',
-  info: 'border-blue-200 bg-blue-50/90 text-blue-900',
+  info: 'border-zinc-300 bg-zinc-100/90 text-zinc-900',
 };
 
 export const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: (id: string) => void }> = ({
@@ -34,7 +34,7 @@ export const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: (id: string) 
       </div>
       <button
         onClick={() => onDismiss(toast.id)}
-        className="text-slate-400 hover:text-slate-600 p-0.5 rounded transition"
+        className="text-zinc-400 hover:text-zinc-600 p-0.5 rounded transition"
         aria-label="Dismiss notification"
       >
         <X className="w-4 h-4" />

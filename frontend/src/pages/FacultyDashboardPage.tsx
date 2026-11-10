@@ -55,13 +55,13 @@ export const FacultyDashboardPage: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 text-[10px] font-mono border border-zinc-200 mb-1">
               <CheckCircle2 className="w-3 h-3 text-black" />
-              Faculty Academic Operations
+              Faculty
             </div>
             <h1 className="text-xl font-bold tracking-tight text-zinc-950">
-              {user?.full_name || 'Faculty Member'} — Academic Portal
+              Faculty Dashboard
             </h1>
             <p className="text-xs text-zinc-500">
-              Department of {user?.department || 'Engineering & Technology'} • Academic Year 2026-2027
+              {user?.full_name ? `${user.full_name} • ` : ''}Department of {user?.department || 'Engineering & Technology'}
             </p>
           </div>
         </div>
@@ -72,7 +72,7 @@ export const FacultyDashboardPage: React.FC = () => {
             className="px-4 py-2 rounded-xl bg-black hover:bg-zinc-800 text-white text-xs font-semibold shadow-xs flex items-center gap-2 transition-all cursor-pointer"
           >
             <Armchair className="w-3.5 h-3.5" />
-            <span>Classroom Seating Planner</span>
+            <span>Classroom Seating</span>
           </Link>
         </div>
       </div>
@@ -148,8 +148,8 @@ export const FacultyDashboardPage: React.FC = () => {
         {/* Right Col: Quick Actions */}
         <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-xs space-y-4">
           <div className="border-b border-zinc-100 pb-3">
-            <h3 className="text-sm font-bold text-zinc-950">Faculty Actions</h3>
-            <p className="text-[11px] text-zinc-500">Shortcuts for academic operations.</p>
+            <h3 className="text-sm font-bold text-zinc-950">Quick Actions</h3>
+            <p className="text-[11px] text-zinc-500">Common faculty tasks.</p>
           </div>
 
           <div className="space-y-2">
@@ -163,7 +163,7 @@ export const FacultyDashboardPage: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="text-xs font-semibold text-zinc-900">Classroom Seating</h4>
-                  <p className="text-[10px] text-zinc-500">Arrange students for lecture sessions</p>
+                  <p className="text-[10px] text-zinc-500">Arrange student seating for lectures</p>
                 </div>
               </div>
               <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-black group-hover:translate-x-0.5 transition-transform" />
@@ -178,8 +178,8 @@ export const FacultyDashboardPage: React.FC = () => {
                   <CalendarDays className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-zinc-900">Academic Timetable</h4>
-                  <p className="text-[10px] text-zinc-500">View weekly schedules & period slots</p>
+                  <h4 className="text-xs font-semibold text-zinc-900">Timetable</h4>
+                  <p className="text-[10px] text-zinc-500">View weekly period schedule</p>
                 </div>
               </div>
               <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-black group-hover:translate-x-0.5 transition-transform" />
@@ -194,8 +194,8 @@ export const FacultyDashboardPage: React.FC = () => {
                   <FileSpreadsheet className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-zinc-900">Attendance Reports</h4>
-                  <p className="text-[10px] text-zinc-500">Export student attendance & seating charts</p>
+                  <h4 className="text-xs font-semibold text-zinc-900">Reports</h4>
+                  <p className="text-[10px] text-zinc-500">View attendance and seating reports</p>
                 </div>
               </div>
               <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-black group-hover:translate-x-0.5 transition-transform" />

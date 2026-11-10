@@ -267,13 +267,13 @@ export const LoginPage: React.FC = () => {
           <div className="text-center space-y-1.5">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 text-[11px] font-medium border border-zinc-200 font-mono">
               <CheckCircle2 className="w-3 h-3 text-black" />
-              Jain University Institutional Access
+              Jain University FET
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-zinc-950">
               Sign In to SeatWise
             </h1>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              Smart examination seating, hall allocation, and student desk lookup portal.
+              Smart examination seating, hall allocation, and student desk lookup.
             </p>
           </div>
 
@@ -289,10 +289,10 @@ export const LoginPage: React.FC = () => {
             <div className="space-y-4 pt-1">
               <div className="text-center">
                 <span className="text-xs font-bold text-zinc-800 uppercase tracking-wider">
-                  Select Your Account Type
+                  Select Role
                 </span>
                 <p className="text-[11px] text-zinc-500 mt-0.5">
-                  Choose your university role to proceed to the secure credential verification form.
+                  Choose your university role to sign in.
                 </p>
               </div>
 
@@ -341,10 +341,10 @@ export const LoginPage: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">
-                      Portal Sign In
+                      Sign In
                     </span>
                     <h2 className="text-base font-bold text-zinc-950">
-                      {currentRoleDef.title} Login
+                      {currentRoleDef.title}
                     </h2>
                   </div>
                 </div>
@@ -352,7 +352,7 @@ export const LoginPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleBackToRoles}
-                  className="text-xs font-medium text-zinc-600 hover:text-black flex items-center gap-1 transition-colors px-2.5 py-1 rounded-lg border border-zinc-200 hover:border-zinc-400"
+                  className="text-xs font-medium text-zinc-600 hover:text-black flex items-center gap-1 transition-colors px-2.5 py-1 rounded-lg border border-zinc-200 hover:border-zinc-400 cursor-pointer"
                 >
                   <ArrowLeft className="w-3 h-3" />
                   Change Role

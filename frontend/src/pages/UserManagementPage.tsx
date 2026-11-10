@@ -320,13 +320,13 @@ export const UserManagementPage: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 text-[10px] font-mono border border-zinc-200 mb-1">
               <ShieldCheck className="w-3 h-3 text-black" />
-              Administrator Control Center
+              Administration
             </div>
             <h1 className="text-xl font-bold tracking-tight text-zinc-950">
-              User & Access Management
+              User Management
             </h1>
             <p className="text-xs text-zinc-500">
-              Manage all campus user roles, provision credentials, enforce password resets, and configure RBAC policies.
+              Manage user accounts, roles, and permissions.
             </p>
           </div>
         </div>
@@ -342,7 +342,7 @@ export const UserManagementPage: React.FC = () => {
             className="px-4 py-2 rounded-xl bg-black hover:bg-zinc-800 text-white text-xs font-semibold shadow-xs flex items-center gap-2 transition-all cursor-pointer"
           >
             <UserPlus className="w-4 h-4" />
-            <span>Create New User</span>
+            <span>Add User</span>
           </button>
         </div>
       </div>
@@ -379,7 +379,7 @@ export const UserManagementPage: React.FC = () => {
             <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
               <div className="flex items-center gap-2 text-zinc-950 font-bold text-sm">
                 <KeyRound className="w-4 h-4 text-emerald-600" />
-                Temporary Access Credentials Generated
+                Account Credentials
               </div>
               <button
                 onClick={() => setRevealedCreds(null)}
@@ -390,9 +390,9 @@ export const UserManagementPage: React.FC = () => {
             </div>
 
             <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs">
-              <p className="font-semibold">Deliver these temporary credentials securely.</p>
+              <p className="font-semibold">Save these temporary credentials.</p>
               <p className="text-[11px] text-amber-800 mt-0.5">
-                For security reasons, plaintext passwords are never stored in the database and cannot be retrieved again.
+                Passwords cannot be retrieved after closing this window.
               </p>
             </div>
 
@@ -420,7 +420,7 @@ export const UserManagementPage: React.FC = () => {
                 className="px-4 py-2 rounded-xl bg-black hover:bg-zinc-800 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer"
               >
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Copied to Clipboard' : 'Copy Credentials'}</span>
+                <span>{copied ? 'Copied' : 'Copy Credentials'}</span>
               </button>
             </div>
           </div>
@@ -491,7 +491,7 @@ export const UserManagementPage: React.FC = () => {
             }`}
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span>Role & Permissions Matrix</span>
+            <span>Permissions Matrix</span>
           </button>
         </div>
 

@@ -48,46 +48,46 @@ export const Sidebar: React.FC = () => {
       case 'admin':
         return [
           {
-            sectionTitle: 'Core Administration',
-            items: [{ name: 'Executive Dashboard', path: '/dashboard', icon: LayoutDashboard }],
+            sectionTitle: 'Administration',
+            items: [{ name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard }],
           },
           {
-            sectionTitle: 'User & Access Management',
+            sectionTitle: 'User Management',
             items: [
               { name: 'All Users', path: '/admin/users', icon: Users },
               { name: 'Administrators', path: '/admin/users?role=admin', icon: ShieldCheck },
               { name: 'Exam Staff', path: '/admin/users?role=exam_staff', icon: ClipboardCheck },
               { name: 'Faculty', path: '/admin/users?role=faculty', icon: GraduationCap },
               { name: 'Students', path: '/admin/users?role=student', icon: UserRound },
-              { name: 'Create Account', path: '/admin/users?action=create', icon: UserPlus },
-              { name: 'Password Management', path: '/admin/users?action=passwords', icon: KeyRound },
-              { name: 'Role & Permission Management', path: '/admin/users?tab=permissions', icon: Sliders },
-              { name: 'Account Activity', path: '/admin/audit-logs', icon: History },
+              { name: 'Add User', path: '/admin/users?action=create', icon: UserPlus },
+              { name: 'Passwords', path: '/admin/users?action=passwords', icon: KeyRound },
+              { name: 'Permissions', path: '/admin/users?tab=permissions', icon: Sliders },
+              { name: 'Audit Logs', path: '/admin/audit-logs', icon: History },
             ],
           },
           {
-            sectionTitle: 'Examination Planning',
+            sectionTitle: 'Examinations',
             items: [
               { name: 'Examinations', path: '/examinations', icon: FileCheck2 },
               { name: 'Seating Planner', path: '/seating-planner', icon: Binary },
-              { name: 'Classrooms & Halls', path: '/rooms', icon: DoorClosed },
-              { name: 'Student Directory', path: '/students', icon: Users },
+              { name: 'Halls & Rooms', path: '/rooms', icon: DoorClosed },
+              { name: 'Students', path: '/students', icon: Users },
             ],
           },
           {
-            sectionTitle: 'University Curriculum',
+            sectionTitle: 'Curriculum',
             items: [
               { name: 'Programs & Batches', path: '/university', icon: GraduationCap },
-              { name: 'Academic Timetable', path: '/timetable', icon: CalendarDays },
-              { name: 'Reports & Notices', path: '/reports', icon: FileSpreadsheet },
+              { name: 'Timetable', path: '/timetable', icon: CalendarDays },
+              { name: 'Reports', path: '/reports', icon: FileSpreadsheet },
             ],
           },
           {
-            sectionTitle: 'System & Analytics',
+            sectionTitle: 'System',
             items: [
-              { name: 'Mathematical Analysis', path: '/math-analysis', icon: Sigma },
+              { name: 'Algorithm Analysis', path: '/math-analysis', icon: Sigma },
               { name: 'Seating History', path: '/history', icon: History },
-              { name: 'System Settings', path: '/settings', icon: Settings },
+              { name: 'Settings', path: '/settings', icon: Settings },
             ],
           },
         ];
@@ -95,15 +95,15 @@ export const Sidebar: React.FC = () => {
       case 'exam_staff':
         return [
           {
-            sectionTitle: 'Exam Operations',
+            sectionTitle: 'Operations',
             items: [
-              { name: 'Operations Dashboard', path: '/exam-dashboard', icon: LayoutDashboard },
+              { name: 'Dashboard', path: '/exam-dashboard', icon: LayoutDashboard },
               { name: 'Examinations', path: '/examinations', icon: FileCheck2 },
               { name: 'Seating Planner', path: '/seating-planner', icon: Binary },
-              { name: 'Halls & Room Grids', path: '/rooms', icon: DoorClosed },
-              { name: 'Student Registrations', path: '/students', icon: Users },
-              { name: 'Exam Timetable', path: '/timetable', icon: CalendarDays },
-              { name: 'Attendance & Reports', path: '/reports', icon: FileSpreadsheet },
+              { name: 'Halls & Rooms', path: '/rooms', icon: DoorClosed },
+              { name: 'Students', path: '/students', icon: Users },
+              { name: 'Timetable', path: '/timetable', icon: CalendarDays },
+              { name: 'Reports', path: '/reports', icon: FileSpreadsheet },
               { name: 'Seating History', path: '/history', icon: History },
             ],
           },
@@ -112,12 +112,12 @@ export const Sidebar: React.FC = () => {
       case 'faculty':
         return [
           {
-            sectionTitle: 'Faculty Workspace',
+            sectionTitle: 'Faculty Portal',
             items: [
-              { name: 'Faculty Dashboard', path: '/faculty-dashboard', icon: LayoutDashboard },
-              { name: 'Academic Timetable', path: '/timetable', icon: CalendarDays },
+              { name: 'Dashboard', path: '/faculty-dashboard', icon: LayoutDashboard },
+              { name: 'Timetable', path: '/timetable', icon: CalendarDays },
               { name: 'Classroom Seating', path: '/classroom-seating', icon: Armchair },
-              { name: 'Reports & Attendance', path: '/reports', icon: FileSpreadsheet },
+              { name: 'Reports', path: '/reports', icon: FileSpreadsheet },
             ],
           },
         ];
@@ -125,12 +125,12 @@ export const Sidebar: React.FC = () => {
       case 'student':
         return [
           {
-            sectionTitle: 'Student Examination Portal',
+            sectionTitle: 'Student Portal',
             items: [
-              { name: 'Student Dashboard', path: '/student-dashboard', icon: LayoutDashboard },
-              { name: "Today's Examinations", path: '/student/examinations', icon: Clock },
-              { name: 'Find My Seat', path: '/student/seat-lookup', icon: Armchair },
-              { name: 'Examination History', path: '/student/history', icon: History },
+              { name: 'Dashboard', path: '/student-dashboard', icon: LayoutDashboard },
+              { name: "Today's Exams", path: '/student/examinations', icon: Clock },
+              { name: 'Find Seat', path: '/student/seat-lookup', icon: Armchair },
+              { name: 'Exam History', path: '/student/history', icon: History },
             ],
           },
         ];

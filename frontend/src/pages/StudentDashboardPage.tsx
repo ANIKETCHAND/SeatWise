@@ -127,10 +127,10 @@ export const StudentDashboardPage: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 text-[10px] font-mono border border-zinc-200 mb-1">
               <CheckCircle2 className="w-3 h-3 text-black" />
-              Verified Student Account
+              Student
             </div>
             <h1 className="text-xl font-bold tracking-tight text-zinc-950">
-              {studentInfo?.full_name || user?.full_name || 'University Student'}
+              {studentInfo?.full_name || user?.full_name || 'Student Portal'}
             </h1>
             <p className="text-xs text-zinc-500 flex flex-wrap items-center gap-2 mt-0.5">
               <span className="font-mono font-semibold text-zinc-800">
@@ -169,7 +169,7 @@ export const StudentDashboardPage: React.FC = () => {
           }`}
         >
           <Armchair className="w-4 h-4" />
-          <span>Find My Seat</span>
+          <span>Find Seat</span>
           {seatAllocations.length > 0 && (
             <span className="px-1.5 py-0.2 rounded-full bg-zinc-800 text-white text-[10px] font-mono">
               {seatAllocations.length}
@@ -189,7 +189,7 @@ export const StudentDashboardPage: React.FC = () => {
           }`}
         >
           <Clock className="w-4 h-4" />
-          <span>Today's Examinations</span>
+          <span>Today's Exams</span>
           {todayExams.length > 0 && (
             <span className="px-1.5 py-0.2 rounded-full bg-emerald-500 text-white text-[10px] font-mono">
               {todayExams.length}
@@ -206,7 +206,7 @@ export const StudentDashboardPage: React.FC = () => {
           }`}
         >
           <CalendarDays className="w-4 h-4" />
-          <span>Upcoming Schedule</span>
+          <span>Upcoming Exams</span>
         </button>
 
         <button
@@ -221,7 +221,7 @@ export const StudentDashboardPage: React.FC = () => {
           }`}
         >
           <History className="w-4 h-4" />
-          <span>Examination History</span>
+          <span>Exam History</span>
         </button>
       </div>
 
@@ -233,10 +233,9 @@ export const StudentDashboardPage: React.FC = () => {
               <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center mx-auto text-zinc-500">
                 <Armchair className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-zinc-900">No Published Seating Plans Yet</h3>
+              <h3 className="text-sm font-bold text-zinc-900">No Seating Plans Found</h3>
               <p className="text-xs text-zinc-500 max-w-md mx-auto">
-                Your examination seating arrangement is currently being processed by the Exam Cell.
-                Seat numbers will appear here immediately once officially published.
+                Seat assignments will appear here once the seating plan is published.
               </p>
             </div>
           ) : (
@@ -266,7 +265,7 @@ export const StudentDashboardPage: React.FC = () => {
                   <div className="lg:col-span-1 bg-white border border-zinc-200 rounded-2xl p-6 shadow-xs space-y-5">
                     <div className="border-b border-zinc-100 pb-3 flex items-center justify-between">
                       <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider">
-                        Assigned Seat Desk Ticket
+                        Seat Assignment
                       </span>
                       <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
                         Published
@@ -324,10 +323,10 @@ export const StudentDashboardPage: React.FC = () => {
                       <div>
                         <h3 className="text-sm font-bold text-zinc-950 flex items-center gap-2">
                           <Armchair className="w-4 h-4 text-black" />
-                          Visual Hall Desk Locator
+                          Hall Layout
                         </h3>
                         <p className="text-[11px] text-zinc-500">
-                          Hall layout representation for {activeSeat.hall_name}. Your assigned seat is highlighted.
+                          Hall layout for {activeSeat.hall_name}. Your assigned seat is highlighted.
                         </p>
                       </div>
 
@@ -343,7 +342,7 @@ export const StudentDashboardPage: React.FC = () => {
 
                     {/* Teacher/Invigilator Stage Podium */}
                     <div className="w-full py-2 bg-zinc-100 border border-zinc-300 rounded-lg text-center text-[10px] font-mono text-zinc-600 font-semibold uppercase tracking-wider">
-                      [ Front of Hall / Invigilator Podium ]
+                      [ Front of Hall / Board ]
                     </div>
 
                     {/* Interactive Seat Matrix */}
@@ -380,7 +379,7 @@ export const StudentDashboardPage: React.FC = () => {
                     </div>
 
                     <div className="text-center text-[11px] text-zinc-500 font-mono">
-                      Please occupy your designated desk at least 15 minutes before exam commencement.
+                      Please occupy your designated seat at least 15 minutes before the exam starts.
                     </div>
                   </div>
                 </div>
@@ -394,14 +393,14 @@ export const StudentDashboardPage: React.FC = () => {
       {activeTab === 'today' && (
         <div className="space-y-4">
           <div className="text-xs font-bold text-zinc-900 uppercase tracking-wider">
-            Examinations Scheduled for Today
+            Today's Examinations
           </div>
 
           {todayExams.length === 0 ? (
             <div className="bg-white border border-zinc-200 rounded-2xl p-8 text-center space-y-2">
               <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-              <h3 className="text-sm font-bold text-zinc-900">No Examinations Scheduled Today</h3>
-              <p className="text-xs text-zinc-500">You do not have any exams scheduled for today's date.</p>
+              <h3 className="text-sm font-bold text-zinc-900">No Examinations Today</h3>
+              <p className="text-xs text-zinc-500">You have no examinations scheduled for today.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -440,14 +439,14 @@ export const StudentDashboardPage: React.FC = () => {
       {activeTab === 'upcoming' && (
         <div className="space-y-4">
           <div className="text-xs font-bold text-zinc-900 uppercase tracking-wider">
-            Future Examination Schedule
+            Upcoming Examinations
           </div>
 
           {upcomingExams.length === 0 ? (
             <div className="bg-white border border-zinc-200 rounded-2xl p-8 text-center space-y-2">
               <CalendarDays className="w-8 h-8 text-zinc-400 mx-auto" />
-              <h3 className="text-sm font-bold text-zinc-900">No Upcoming Exams Found</h3>
-              <p className="text-xs text-zinc-500">No future examinations published at this time.</p>
+              <h3 className="text-sm font-bold text-zinc-900">No Upcoming Examinations</h3>
+              <p className="text-xs text-zinc-500">No upcoming examinations scheduled at this time.</p>
             </div>
           ) : (
             <div className="bg-white border border-zinc-200 rounded-2xl divide-y divide-zinc-100 overflow-hidden shadow-xs">
@@ -474,14 +473,14 @@ export const StudentDashboardPage: React.FC = () => {
       {activeTab === 'history' && (
         <div className="space-y-4">
           <div className="text-xs font-bold text-zinc-900 uppercase tracking-wider">
-            Past Examination Attendance & Seating History
+            Examination History
           </div>
 
           {examHistory.length === 0 ? (
             <div className="bg-white border border-zinc-200 rounded-2xl p-8 text-center space-y-2">
               <History className="w-8 h-8 text-zinc-400 mx-auto" />
-              <h3 className="text-sm font-bold text-zinc-900">No Previous Examination History</h3>
-              <p className="text-xs text-zinc-500">Prior examination records will be archived here.</p>
+              <h3 className="text-sm font-bold text-zinc-900">No Examination History</h3>
+              <p className="text-xs text-zinc-500">Previous examination records will appear here.</p>
             </div>
           ) : (
             <div className="bg-white border border-zinc-200 rounded-2xl divide-y divide-zinc-100 overflow-hidden shadow-xs">

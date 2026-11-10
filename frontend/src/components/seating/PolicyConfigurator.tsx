@@ -60,9 +60,9 @@ export const PolicyConfigurator: React.FC<PolicyConfiguratorProps> = ({
 
   if (compact) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
-        <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-          <Sliders className="w-4 h-4 text-primary-600" />
+      <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-xs">
+        <h2 className="text-xs font-bold text-zinc-900 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+          <Sliders className="w-4 h-4 text-zinc-700" />
           {title || 'Seating Policy Constraints'}
         </h2>
         <div className="space-y-2 text-xs">
@@ -71,20 +71,20 @@ export const PolicyConfigurator: React.FC<PolicyConfiguratorProps> = ({
               key={opt.key}
               className={`flex items-center justify-between p-2 rounded-lg border transition cursor-pointer select-none ${
                 policy[opt.key]
-                  ? 'bg-primary-50/40 border-primary-200 text-slate-800'
-                  : 'bg-slate-50/50 border-slate-200 text-slate-500'
-              } ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-primary-300'}`}
+                  ? 'bg-zinc-100 border-zinc-900 text-zinc-900'
+                  : 'bg-zinc-50 border-zinc-200 text-zinc-500'
+              } ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-zinc-400'}`}
             >
               <div>
                 <span className="text-xs font-semibold block">{opt.title}</span>
-                <span className="text-[10px] text-slate-400 block">{opt.desc}</span>
+                <span className="text-[10px] text-zinc-500 block">{opt.desc}</span>
               </div>
               <input
                 type="checkbox"
                 checked={Boolean(policy[opt.key])}
                 onChange={() => toggle(opt.key)}
                 disabled={disabled}
-                className="rounded text-primary-600 focus:ring-primary-500 shrink-0 ml-2"
+                className="rounded text-zinc-900 focus:ring-zinc-900 shrink-0 ml-2"
               />
             </label>
           ))}
@@ -94,10 +94,10 @@ export const PolicyConfigurator: React.FC<PolicyConfiguratorProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
-      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-        <Sliders className="w-5 h-5 text-indigo-600" />
-        <h3 className="text-sm font-semibold text-slate-800">{title || 'Mathematical Optimization Policies'}</h3>
+    <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs">
+      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-zinc-200">
+        <Sliders className="w-5 h-5 text-zinc-700" />
+        <h3 className="text-sm font-semibold text-zinc-900">{title || 'Mathematical Optimization Policies'}</h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -106,20 +106,20 @@ export const PolicyConfigurator: React.FC<PolicyConfiguratorProps> = ({
             key={opt.key}
             className={`flex items-start gap-3 p-3 rounded-lg border transition cursor-pointer select-none ${
               policy[opt.key]
-                ? 'bg-indigo-50/50 border-indigo-200 text-slate-800'
-                : 'bg-slate-50/50 border-slate-200 text-slate-500'
-            } ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-indigo-300'}`}
+                ? 'bg-zinc-100 border-zinc-900 text-zinc-900'
+                : 'bg-zinc-50 border-zinc-200 text-zinc-500'
+            } ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-zinc-400'}`}
           >
             <input
               type="checkbox"
               checked={Boolean(policy[opt.key])}
               onChange={() => toggle(opt.key)}
               disabled={disabled}
-              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
             />
             <div className="flex-1">
               <span className="text-xs font-semibold block">{opt.title}</span>
-              <span className="text-[11px] leading-tight text-slate-500 block mt-0.5">{opt.desc}</span>
+              <span className="text-[11px] leading-tight text-zinc-500 block mt-0.5">{opt.desc}</span>
             </div>
           </label>
         ))}

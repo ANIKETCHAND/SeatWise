@@ -124,14 +124,13 @@ export const DashboardPage: React.FC = () => {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 text-zinc-300 text-xs font-semibold mb-3 border border-zinc-700/80 font-mono">
             <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-            Jain University • FET Campus Seating Operations
+            Jain University FET
           </div>
           <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-white">
-            SeatWise Allocation Console
+            Dashboard
           </h1>
           <p className="text-zinc-400 text-sm mt-1 max-w-2xl leading-relaxed">
-            Smart Classroom & Examination Seating Management System. Powered by bipartite graph theory,
-            checkerboard coloring partitions, and CP-SAT constraint satisfaction.
+            Overview of examinations, student enrollments, and seating allocations.
           </p>
         </div>
 
@@ -141,13 +140,13 @@ export const DashboardPage: React.FC = () => {
             className="px-4 py-2.5 bg-white hover:bg-zinc-200 text-black rounded-lg text-xs font-bold shadow-sm transition-all flex items-center gap-2 border border-white cursor-pointer"
           >
             <Armchair className="w-4 h-4 text-black" />
-            Generate Exam Seating
+            Generate Seating
           </Link>
           <Link
             to="/math-analysis"
             className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded-lg text-xs font-semibold border border-zinc-700 transition-all flex items-center gap-2 cursor-pointer"
           >
-            Mathematical Engine
+            Algorithm Analysis
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -292,8 +291,8 @@ export const DashboardPage: React.FC = () => {
             ) : (
               <EmptyState
                 icon={FileCheck2}
-                title="No scheduled examinations found"
-                description="Use Examination Management to create upcoming exam sessions."
+                title="No examinations found"
+                description="Create examinations in the Examinations section."
               />
             )}
           </div>
@@ -303,10 +302,10 @@ export const DashboardPage: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold text-zinc-950 flex items-center gap-2">
               <Armchair className="w-4 h-4 text-black" />
-              Classroom & Examination Allocations
+              Recent Seating Plans
             </h2>
             <Link to="/history" className="text-xs font-semibold text-zinc-900 hover:underline">
-              Seating history
+              View history
             </Link>
           </div>
 
@@ -336,8 +335,8 @@ export const DashboardPage: React.FC = () => {
             ) : (
               <EmptyState
                 icon={Armchair}
-                title="No seating plans generated yet"
-                description="Generate seating via Classroom Seating (Mode A) or Exam Seating (Mode B)."
+                title="No seating plans found"
+                description="Generate seating plans from the Seating Planner."
               />
             )}
           </div>

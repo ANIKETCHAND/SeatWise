@@ -251,10 +251,10 @@ export const RoomsPage: React.FC = () => {
             </span>
             <div>
               <h1 className="text-xl font-bold text-zinc-950 tracking-tight flex items-center gap-2">
-                Classrooms, Examination Halls & Floor Visualizer
+                Halls & Classrooms
               </h1>
               <p className="text-xs text-zinc-500">
-                JU - School of Engineering and Technology (FET Campus) • Architectural Floor Plans & Venues Management
+                Campus floor plans, examination hall capacities, and desk layouts.
               </p>
             </div>
           </div>
@@ -283,14 +283,14 @@ export const RoomsPage: React.FC = () => {
           <div className="flex items-center gap-3">
             <span className="p-2 bg-white text-zinc-950 rounded-lg font-bold text-xs flex items-center gap-1 shrink-0">
               <Award className="w-4 h-4 text-zinc-950" />
-              CONFIDENTIAL
+              SECURE
             </span>
             <div>
               <h3 className="text-sm font-bold tracking-tight text-white flex items-center gap-2">
-                Official Examination & Valuation Centers (3rd Floor)
+                Examination & Valuation Centers
               </h3>
               <p className="text-xs text-zinc-400">
-                Authorized wings for paper custody, confidential valuations, and secure controller operations.
+                Paper custody, valuations, and controller operations.
               </p>
             </div>
           </div>

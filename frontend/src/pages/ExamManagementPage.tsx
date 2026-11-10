@@ -384,40 +384,40 @@ export const ExamManagementPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-            <FileCheck2 className="w-5 h-5 text-primary-600" />
-            University Examination Management
+          <h1 className="text-xl font-bold text-zinc-950 tracking-tight flex items-center gap-2">
+            <FileCheck2 className="w-5 h-5 text-black" />
+            Examinations
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Configure examination schedules, participating academic batches, certified halls, and prevent double-bookings.
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Manage examination schedules, participating batches, and halls.
           </p>
         </div>
 
         {isStaff && (
           <button
             onClick={handleOpenCreate}
-            className="px-3.5 py-2 bg-primary-600 hover:bg-primary-500 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+            className="px-3.5 py-2 bg-black hover:bg-zinc-800 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            Create Examination
+            Add Examination
           </button>
         )}
       </div>
 
       {/* Filters Toolbar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-bold text-slate-600 flex items-center gap-1 mr-1">
+          <span className="text-xs font-bold text-zinc-600 flex items-center gap-1 mr-1">
             <Filter className="w-3.5 h-3.5" /> Filter:
           </span>
           {(['all', 'draft', 'allocated', 'published', 'archived'] as const).map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1 text-xs rounded-lg font-semibold uppercase tracking-wider transition-all ${
+              className={`px-3 py-1 text-xs rounded-lg font-semibold uppercase tracking-wider transition-all cursor-pointer ${
                 statusFilter === st
-                  ? 'bg-primary-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-black text-white shadow-xs'
+                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
               }`}
             >
               {st}
@@ -426,13 +426,13 @@ export const ExamManagementPage: React.FC = () => {
         </div>
 
         <div className="relative w-64">
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+          <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-2.5" />
           <input
             type="text"
-            placeholder="Search exam, subject, hall..."
+            placeholder="Search examinations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full text-xs pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg"
+            className="w-full text-xs pl-8 pr-3 py-1.5 border border-zinc-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-black"
           />
         </div>
       </div>
@@ -442,11 +442,11 @@ export const ExamManagementPage: React.FC = () => {
         {filteredExams.map((exam) => (
           <div
             key={exam.id}
-            className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between"
+            className="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs hover:border-zinc-300 transition-all flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-100 text-zinc-700">
                   {exam.id}
                 </span>
                 <span
@@ -454,9 +454,9 @@ export const ExamManagementPage: React.FC = () => {
                     exam.status === 'published'
                       ? 'bg-emerald-100 text-emerald-800'
                       : exam.status === 'allocated'
-                      ? 'bg-blue-100 text-blue-800'
+                      ? 'bg-zinc-200 text-zinc-800'
                       : exam.status === 'archived'
-                      ? 'bg-slate-100 text-slate-600'
+                      ? 'bg-zinc-100 text-zinc-600'
                       : 'bg-amber-100 text-amber-800'
                   }`}
                 >
@@ -464,53 +464,53 @@ export const ExamManagementPage: React.FC = () => {
                 </span>
               </div>
 
-              <h2 className="text-sm font-bold text-slate-800 line-clamp-2">{exam.name}</h2>
+              <h2 className="text-sm font-bold text-zinc-900 line-clamp-2">{exam.name}</h2>
 
               {exam.subject_name && (
-                <p className="text-xs text-primary-700 font-semibold mt-1 flex items-center gap-1.5">
-                  <BookOpen className="w-3.5 h-3.5 text-primary-500" />
+                <p className="text-xs text-zinc-700 font-semibold mt-1 flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-zinc-500" />
                   {exam.subject_name} {exam.subject_code ? `(${exam.subject_code})` : ''}
                 </p>
               )}
 
-              <div className="space-y-1.5 mt-3 pt-3 border-t border-slate-100 text-xs text-slate-500">
+              <div className="space-y-1.5 mt-3 pt-3 border-t border-zinc-100 text-xs text-zinc-500">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <Calendar className="w-3.5 h-3.5 text-zinc-400" />
                   <span>{exam.exam_date}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-3.5 h-3.5 text-slate-400" />
+                  <Clock className="w-3.5 h-3.5 text-zinc-400" />
                   <span className="capitalize">{exam.session} Session ({exam.session === 'afternoon' ? '01:30 PM – 04:30 PM' : '09:30 AM – 12:30 PM'})</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <DoorClosed className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="font-semibold text-slate-700">{exam.halls.join(', ')}</span>
+                  <DoorClosed className="w-3.5 h-3.5 text-zinc-400" />
+                  <span className="font-semibold text-zinc-700">{exam.halls.join(', ')}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Layers className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="font-mono text-[11px] text-slate-700">{exam.batches.join(' • ')}</span>
+                  <Layers className="w-3.5 h-3.5 text-zinc-400" />
+                  <span className="font-mono text-[11px] text-zinc-700">{exam.batches.join(' • ')}</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-5 pt-3 border-t border-slate-100 flex flex-col gap-2">
+            <div className="mt-5 pt-3 border-t border-zinc-100 flex flex-col gap-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-500">
-                  Est. Candidates: <strong className="text-slate-800">{exam.total_candidates}</strong>
+                <span className="text-zinc-500">
+                  Est. Candidates: <strong className="text-zinc-800">{exam.total_candidates}</strong>
                 </span>
                 <Link
                   to={`/seating-planner?exam_id=${exam.id}`}
-                  className="inline-flex items-center gap-1 font-semibold text-primary-600 hover:text-primary-800"
+                  className="inline-flex items-center gap-1 font-semibold text-zinc-950 hover:underline"
                 >
-                  Seating Planner <ArrowRight className="w-3.5 h-3.5" />
+                  Plan Seating <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
 
               {isStaff && (
-                <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-slate-50">
+                <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-zinc-100">
                   <button
                     onClick={() => handleOpenEdit(exam)}
-                    className="p-1.5 text-slate-500 hover:text-primary-600 hover:bg-slate-100 rounded text-xs flex items-center gap-1"
+                    className="p-1.5 text-zinc-500 hover:text-black hover:bg-zinc-100 rounded text-xs flex items-center gap-1 cursor-pointer"
                     title="Edit Examination"
                   >
                     <Edit2 className="w-3 h-3" />
@@ -519,7 +519,7 @@ export const ExamManagementPage: React.FC = () => {
                   {exam.status !== 'archived' && (
                     <button
                       onClick={() => handleArchive(exam.id, exam.name)}
-                      className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded text-xs flex items-center gap-1"
+                      className="p-1.5 text-zinc-500 hover:text-amber-700 hover:bg-amber-50 rounded text-xs flex items-center gap-1 cursor-pointer"
                       title="Safely Archive Examination"
                     >
                       <Archive className="w-3 h-3" />
@@ -528,7 +528,7 @@ export const ExamManagementPage: React.FC = () => {
                   )}
                   <button
                     onClick={() => handleDelete(exam.id, exam.name, exam.status)}
-                    className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded text-xs flex items-center gap-1"
+                    className="p-1.5 text-zinc-500 hover:text-rose-600 hover:bg-zinc-100 rounded text-xs flex items-center gap-1 cursor-pointer"
                     title="Delete Examination"
                   >
                     <Trash2 className="w-3 h-3" />
@@ -558,8 +558,8 @@ export const ExamManagementPage: React.FC = () => {
             )}
 
             {hallConflicts.length > 0 && (
-              <div className="mb-3 p-2.5 bg-amber-50 border border-amber-300 text-amber-900 text-xs rounded-lg flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              <div className="mb-3 p-2.5 bg-zinc-100 border border-zinc-300 text-zinc-900 text-xs rounded-lg flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-zinc-700 shrink-0" />
                 <span>
                   <strong>Hall Conflict Warning:</strong> Hall <em>{hallConflicts[0].hall}</em> is already booked for examination "{hallConflicts[0].examName}" on this date and session.
                 </span>
@@ -568,54 +568,54 @@ export const ExamManagementPage: React.FC = () => {
 
             <form onSubmit={handleSave} className="space-y-3.5">
               <div>
-                <label className="text-xs font-semibold text-slate-700">Exam Title *</label>
+                <label className="text-xs font-semibold text-zinc-700">Exam Title *</label>
                 <input
                   required
                   placeholder="e.g. End Semester Theory Exams - December 2026"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
+                  className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 text-zinc-900 bg-white"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-700">Subject Name</label>
+                  <label className="text-xs font-semibold text-zinc-700">Subject Name</label>
                   <input
                     placeholder="e.g. Data Structures & Algorithms"
                     value={formData.subject_name}
                     onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
-                    className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
+                    className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 text-zinc-900 bg-white"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-700">Subject Code</label>
+                  <label className="text-xs font-semibold text-zinc-700">Subject Code</label>
                   <input
                     placeholder="e.g. CS201"
                     value={formData.subject_code}
                     onChange={(e) => setFormData({ ...formData, subject_code: e.target.value })}
-                    className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 font-mono uppercase"
+                    className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 font-mono uppercase text-zinc-900 bg-white"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-700">Exam Date *</label>
+                  <label className="text-xs font-semibold text-zinc-700">Exam Date *</label>
                   <input
                     type="date"
                     required
                     value={formData.exam_date}
                     onChange={(e) => setFormData({ ...formData, exam_date: e.target.value })}
-                    className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
+                    className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 text-zinc-900 bg-white"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-700">Session *</label>
+                  <label className="text-xs font-semibold text-zinc-700">Session *</label>
                   <select
                     value={formData.session}
                     onChange={(e) => setFormData({ ...formData, session: e.target.value as any })}
-                    className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 bg-white"
+                    className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 bg-white text-zinc-900"
                   >
                     <option value="morning">Morning (09:30 AM – 12:30 PM)</option>
                     <option value="afternoon">Afternoon (01:30 PM – 04:30 PM)</option>
@@ -625,10 +625,10 @@ export const ExamManagementPage: React.FC = () => {
 
               {/* Participating Batches Picker */}
               <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1">
+                <label className="text-xs font-semibold text-zinc-700 block mb-1">
                   Participating Batches ({formData.batches.length} selected)
                 </label>
-                <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50">
+                <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-2 border border-zinc-200 rounded-lg bg-zinc-50">
                   {batchesList.map((batch) => {
                     const isSelected = formData.batches.includes(batch);
                     return (
@@ -638,8 +638,8 @@ export const ExamManagementPage: React.FC = () => {
                         onClick={() => toggleBatch(batch)}
                         className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all font-mono ${
                           isSelected
-                            ? 'bg-primary-600 text-white shadow-2xs'
-                            : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-100'
+                            ? 'bg-black text-white shadow-2xs'
+                            : 'bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100'
                         }`}
                       >
                         {isSelected ? '✓ ' : '+ '}
@@ -652,10 +652,10 @@ export const ExamManagementPage: React.FC = () => {
 
               {/* Examination Halls Picker */}
               <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1">
+                <label className="text-xs font-semibold text-zinc-700 block mb-1">
                   Examination Venue Halls ({formData.halls.length} selected)
                 </label>
-                <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50">
+                <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 border border-zinc-200 rounded-lg bg-zinc-50">
                   {hallsList.map((hall) => {
                     const isSelected = formData.halls.includes(hall);
                     const isExamCenter = hall === 'A-313' || hall === 'A-314' || hall === 'C-327';
@@ -666,10 +666,10 @@ export const ExamManagementPage: React.FC = () => {
                         onClick={() => toggleHall(hall)}
                         className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all font-mono ${
                           isSelected
-                            ? 'bg-zinc-950 text-white shadow-2xs'
+                            ? 'bg-black text-white shadow-2xs'
                             : isExamCenter
                             ? 'bg-zinc-200 border border-zinc-400 text-zinc-900 font-bold hover:bg-zinc-300'
-                            : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-100'
+                            : 'bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100'
                         }`}
                       >
                         <DoorClosed className="w-3 h-3 inline mr-1" />
@@ -683,11 +683,11 @@ export const ExamManagementPage: React.FC = () => {
 
               {editingExamId && (
                 <div>
-                  <label className="text-xs font-semibold text-slate-700">Status</label>
+                  <label className="text-xs font-semibold text-zinc-700">Status</label>
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                    className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 bg-white uppercase font-semibold"
+                    className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 bg-white uppercase font-semibold"
                   >
                     <option value="draft">Draft</option>
                     <option value="allocated">Allocated</option>
@@ -697,20 +697,20 @@ export const ExamManagementPage: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-3 border-t border-zinc-100">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg"
+                  className="px-3 py-1.5 text-xs text-zinc-600 hover:bg-zinc-100 rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={hallConflicts.length > 0}
-                  className="px-4 py-1.5 text-xs bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white font-semibold rounded-lg shadow-xs"
+                  className="px-4 py-1.5 text-xs bg-black hover:bg-zinc-800 disabled:opacity-50 text-white font-semibold rounded-lg shadow-xs cursor-pointer"
                 >
-                  {editingExamId ? 'Save Changes' : 'Create Examination'}
+                  {editingExamId ? 'Save Changes' : 'Add Examination'}
                 </button>
               </div>
             </form>

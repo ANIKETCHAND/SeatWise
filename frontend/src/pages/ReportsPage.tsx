@@ -169,19 +169,19 @@ export const ReportsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-            <FileSpreadsheet className="w-5 h-5 text-primary-600" />
-            Official University Examination Reports
+          <h1 className="text-xl font-bold text-zinc-950 tracking-tight flex items-center gap-2">
+            <FileSpreadsheet className="w-5 h-5 text-zinc-900" />
+            Reports
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Hall-wise seating charts, student seat locators, batch allocations, empty seat audits, and PDF/CSV downloads.
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Export seating charts, student seat locators, attendance sheets, and room occupancy reports.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => window.print()}
-            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-300 transition-colors flex items-center gap-1.5"
+            className="px-3.5 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold rounded-lg border border-zinc-300 transition-colors flex items-center gap-1.5"
           >
             <Printer className="w-3.5 h-3.5" />
             Print Report
@@ -190,14 +190,14 @@ export const ReportsPage: React.FC = () => {
             href={api.getExamLocatorPdfUrl(selectedExam)}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-300 transition-colors flex items-center gap-1.5"
+            className="px-3.5 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold rounded-lg border border-zinc-300 transition-colors flex items-center gap-1.5"
           >
             <FileText className="w-3.5 h-3.5" />
             Export PDF
           </a>
           <button
             onClick={() => downloadCsv(`seatwise_${reportType}_${new Date().toISOString().split('T')[0]}`)}
-            className="px-3.5 py-2 bg-primary-600 hover:bg-primary-500 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+            className="px-3.5 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex items-center gap-1.5"
           >
             <Download className="w-3.5 h-3.5" />
             Export CSV
@@ -205,16 +205,16 @@ export const ReportsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Report Types Tabs (Full Section 2G Coverage) */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
+      {/* Report Types Tabs */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-zinc-200 pb-3">
         {[
-          { id: 'hall_seating', label: 'Hall-wise Seating Chart', icon: Building },
+          { id: 'hall_seating', label: 'Hall Seating Chart', icon: Building },
           { id: 'locator', label: 'Student Seat Locator', icon: Search },
-          { id: 'batch_wise', label: 'Batch-wise Allocation', icon: Layers },
-          { id: 'attendance', label: 'Invigilator Attendance Sheet', icon: UserCheck },
+          { id: 'batch_wise', label: 'Batch Allocation', icon: Layers },
+          { id: 'attendance', label: 'Attendance Sheet', icon: UserCheck },
           { id: 'empty_seats', label: 'Empty & Blocked Desks', icon: Armchair },
           { id: 'unallocated', label: 'Unallocated Students', icon: Users },
-          { id: 'validation', label: 'Mathematical Validation Report', icon: CheckCircle2 },
+          { id: 'validation', label: 'Validation Report', icon: CheckCircle2 },
         ].map((tab) => {
           const Icon = tab.icon;
           return (
@@ -223,8 +223,8 @@ export const ReportsPage: React.FC = () => {
               onClick={() => setReportType(tab.id as any)}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
                 reportType === tab.id
-                  ? 'bg-primary-600 text-white shadow-xs'
-                  : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                  ? 'bg-zinc-900 text-white shadow-xs'
+                  : 'bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-100'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -235,14 +235,14 @@ export const ReportsPage: React.FC = () => {
       </div>
 
       {/* Report Filters */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-2xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-semibold text-slate-600">Examination:</span>
+            <span className="text-xs font-semibold text-zinc-600">Examination:</span>
             <select
               value={selectedExam}
               onChange={(e) => setSelectedExam(e.target.value)}
-              className="text-xs font-medium border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white max-w-xs truncate"
+              className="text-xs font-medium border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-white max-w-xs truncate"
             >
               {examsList.map((ex) => (
                 <option key={ex.id} value={ex.id}>{ex.name}</option>
@@ -252,11 +252,11 @@ export const ReportsPage: React.FC = () => {
 
           {(reportType === 'hall_seating' || reportType === 'attendance' || reportType === 'empty_seats') && (
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-slate-600">Venue Hall:</span>
+              <span className="text-xs font-semibold text-zinc-600">Venue Hall:</span>
               <select
                 value={selectedHall}
                 onChange={(e) => setSelectedHall(e.target.value)}
-                className="text-xs font-medium border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white"
+                className="text-xs font-medium border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-white"
               >
                 {hallsList.map((h) => (
                   <option key={h.id} value={h.id}>{h.name}</option>
@@ -267,24 +267,24 @@ export const ReportsPage: React.FC = () => {
         </div>
 
         <div className="relative w-64">
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+          <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-2.5" />
           <input
             type="text"
-            placeholder="Search candidate roll, batch or hall..."
+            placeholder="Search roll, batch, or hall..."
             value={searchStudent}
             onChange={(e) => setSearchStudent(e.target.value)}
-            className="w-full text-xs pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg"
+            className="w-full text-xs pl-8 pr-3 py-1.5 border border-zinc-300 rounded-lg"
           />
         </div>
       </div>
 
       {/* TAB 1: Hall-wise Seating Chart */}
       {reportType === 'hall_seating' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-4">
-          <div className="text-center pb-4 border-b border-slate-200">
-            <h2 className="text-base font-bold text-slate-900">JAIN (DEEMED-TO-BE UNIVERSITY)</h2>
-            <p className="text-xs text-slate-600 font-medium">FACULTY OF ENGINEERING & TECHNOLOGY — EXAMINATION SEATING PLAN</p>
-            <p className="text-[11px] text-slate-500 mt-1">
+        <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs p-6 space-y-4">
+          <div className="text-center pb-4 border-b border-zinc-200">
+            <h2 className="text-base font-bold text-zinc-950">JAIN UNIVERSITY</h2>
+            <p className="text-xs text-zinc-600 font-medium">FACULTY OF ENGINEERING & TECHNOLOGY — EXAMINATION SEATING PLAN</p>
+            <p className="text-[11px] text-zinc-500 mt-1">
               Venue: <strong>{selectedHall}</strong> • Session: Morning (09:30 AM – 12:30 PM) • Generated: {new Date().toLocaleDateString('en-US', { dateStyle: 'full' })}
             </p>
           </div>
@@ -297,12 +297,12 @@ export const ReportsPage: React.FC = () => {
               const isEven = (Math.floor(i / 6) + (i % 6)) % 2 === 0;
 
               return (
-                <div key={i} className={`p-2.5 rounded border text-center ${isEven ? 'bg-blue-50 border-blue-200' : 'bg-indigo-50 border-indigo-200'}`}>
-                  <span className="font-mono text-[10px] font-bold text-slate-500">{seatLabel}</span>
-                  <p className="font-mono text-xs font-bold text-slate-800 mt-0.5">
+                <div key={i} className={`p-2.5 rounded border text-center ${isEven ? 'bg-zinc-50 border-zinc-300' : 'bg-white border-zinc-200'}`}>
+                  <span className="font-mono text-[10px] font-bold text-zinc-500">{seatLabel}</span>
+                  <p className="font-mono text-xs font-bold text-zinc-900 mt-0.5">
                     {isEven ? `23JU01${(i + 1).toString().padStart(2, '0')}` : `23JU02${(i + 1).toString().padStart(2, '0')}`}
                   </p>
-                  <span className={`text-[9px] font-semibold px-1 rounded ${isEven ? 'bg-blue-200 text-blue-900' : 'bg-indigo-200 text-indigo-900'}`}>
+                  <span className={`text-[9px] font-semibold px-1 rounded ${isEven ? 'bg-zinc-200 text-zinc-800' : 'bg-zinc-100 text-zinc-700'}`}>
                     {isEven ? 'AIML' : 'CSE-GEN'}
                   </span>
                 </div>
@@ -310,7 +310,7 @@ export const ReportsPage: React.FC = () => {
             })}
           </div>
 
-          <div className="pt-6 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+          <div className="pt-6 border-t border-zinc-200 flex items-center justify-between text-xs text-zinc-500">
             <span>Room Superintendent Signature: _________________________</span>
             <span>Chief Superintendent Signature: _________________________</span>
           </div>
@@ -319,43 +319,43 @@ export const ReportsPage: React.FC = () => {
 
       {/* TAB 2: Student Seat Locator */}
       {reportType === 'locator' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs overflow-hidden">
+          <div className="p-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-bold text-slate-800">
-                Candidate Seat Locator Directory (Student-wise Allocation)
+              <h2 className="text-sm font-bold text-zinc-900">
+                Student Seat Locator
               </h2>
-              <p className="text-xs text-slate-500">
-                Official student lookup list for campus notice boards, digital screens, and student self-service.
+              <p className="text-xs text-zinc-500">
+                Student seat allocation directory for notice boards and lookup.
               </p>
             </div>
-            <span className="text-xs font-mono font-bold text-primary-700 bg-primary-50 px-2.5 py-1 rounded border border-primary-200">
+            <span className="text-xs font-mono font-bold text-zinc-900 bg-zinc-100 px-2.5 py-1 rounded border border-zinc-300">
               {filteredLocators.length} Matches
             </span>
           </div>
 
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+              <tr className="bg-zinc-50/80 border-b border-zinc-200 text-[11px] font-bold text-zinc-600 uppercase tracking-wider">
                 <th className="p-3 pl-4">Roll Number</th>
                 <th className="p-3">Candidate Name</th>
                 <th className="p-3">Batch</th>
                 <th className="p-3">Exam Hall</th>
-                <th className="p-3">Desk Number</th>
+                <th className="p-3">Desk</th>
                 <th className="p-3">Session</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
+            <tbody className="divide-y divide-zinc-100 text-xs">
               {filteredLocators.map((s, idx) => (
-                <tr key={idx} className="hover:bg-slate-50/60">
-                  <td className="p-3 pl-4 font-mono font-bold text-slate-900">{s.roll}</td>
-                  <td className="p-3 font-semibold text-slate-800">{s.name}</td>
-                  <td className="p-3 font-mono text-[11px] text-slate-600">{s.batch}</td>
-                  <td className="p-3 font-bold text-primary-700">{s.hall}</td>
-                  <td className="p-3 font-mono font-bold text-emerald-700 bg-emerald-50/50">
+                <tr key={idx} className="hover:bg-zinc-50/60">
+                  <td className="p-3 pl-4 font-mono font-bold text-zinc-900">{s.roll}</td>
+                  <td className="p-3 font-semibold text-zinc-800">{s.name}</td>
+                  <td className="p-3 font-mono text-[11px] text-zinc-600">{s.batch}</td>
+                  <td className="p-3 font-bold text-zinc-900">{s.hall}</td>
+                  <td className="p-3 font-mono font-bold text-zinc-900 bg-zinc-100">
                     Seat {s.seat}
                   </td>
-                  <td className="p-3 text-slate-500">{s.session}</td>
+                  <td className="p-3 text-zinc-500">{s.session}</td>
                 </tr>
               ))}
             </tbody>
@@ -365,38 +365,38 @@ export const ReportsPage: React.FC = () => {
 
       {/* TAB 3: Batch-wise Report */}
       {reportType === 'batch_wise' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-5 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs p-5 space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
             <div>
-              <h2 className="text-sm font-bold text-slate-800">Batch-wise Seat Allocation Report</h2>
-              <p className="text-xs text-slate-500">Candidate distribution categorized by academic program and batch section.</p>
+              <h2 className="text-sm font-bold text-zinc-900">Batch Allocation Report</h2>
+              <p className="text-xs text-zinc-500">Student allocations grouped by academic program and section.</p>
             </div>
           </div>
 
           {['AIML-S3A', 'CSE-GEN-S3B', 'AIDE-S3A'].map((batchName) => {
             const batchStudents = allocatedList.filter((s) => s.batch === batchName);
             return (
-              <div key={batchName} className="border border-slate-200 rounded-lg overflow-hidden">
-                <div className="bg-slate-50 px-4 py-2.5 border-b border-slate-200 flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-slate-800">{batchName}</span>
-                  <span className="text-[11px] font-semibold text-primary-700">{batchStudents.length} Candidates Allocated</span>
+              <div key={batchName} className="border border-zinc-200 rounded-lg overflow-hidden">
+                <div className="bg-zinc-50 px-4 py-2.5 border-b border-zinc-200 flex items-center justify-between">
+                  <span className="font-mono text-xs font-bold text-zinc-900">{batchName}</span>
+                  <span className="text-[11px] font-semibold text-zinc-700">{batchStudents.length} Students Allocated</span>
                 </div>
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] uppercase text-slate-500">
+                    <tr className="bg-zinc-50/50 border-b border-zinc-100 text-[10px] uppercase text-zinc-500">
                       <th className="p-2.5 pl-4">Roll Number</th>
                       <th className="p-2.5">Candidate Name</th>
                       <th className="p-2.5">Assigned Hall</th>
                       <th className="p-2.5">Seat</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-zinc-100">
                     {batchStudents.map((s, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/40">
-                        <td className="p-2.5 pl-4 font-mono font-semibold">{s.roll}</td>
-                        <td className="p-2.5">{s.name}</td>
-                        <td className="p-2.5 font-bold text-primary-700">{s.hall}</td>
-                        <td className="p-2.5 font-mono font-bold text-emerald-700">Seat {s.seat}</td>
+                      <tr key={idx} className="hover:bg-zinc-50/40">
+                        <td className="p-2.5 pl-4 font-mono font-semibold text-zinc-900">{s.roll}</td>
+                        <td className="p-2.5 text-zinc-800">{s.name}</td>
+                        <td className="p-2.5 font-bold text-zinc-900">{s.hall}</td>
+                        <td className="p-2.5 font-mono font-bold text-zinc-900">Seat {s.seat}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -407,34 +407,34 @@ export const ReportsPage: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 4: Invigilator Attendance Sheet */}
+      {/* TAB 4: Attendance Sheet */}
       {reportType === 'attendance' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-4">
-          <div className="text-center pb-4 border-b border-slate-200">
-            <h2 className="text-base font-bold text-slate-900">JAIN UNIVERSITY — INVIGILATOR ATTENDANCE & ANSWER BOOKLET SHEET</h2>
-            <p className="text-xs text-slate-500">Hall: {selectedHall} • Date: November 20, 2026</p>
+        <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs p-6 space-y-4">
+          <div className="text-center pb-4 border-b border-zinc-200">
+            <h2 className="text-base font-bold text-zinc-950">JAIN UNIVERSITY — ATTENDANCE & BOOKLET SHEET</h2>
+            <p className="text-xs text-zinc-500">Hall: {selectedHall} • Date: November 20, 2026</p>
           </div>
 
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-100 border-b border-slate-300 font-bold text-slate-700">
+              <tr className="bg-zinc-100 border-b border-zinc-300 font-bold text-zinc-800">
                 <th className="p-2 w-12">S.No</th>
                 <th className="p-2">Roll Number</th>
                 <th className="p-2">Student Name</th>
                 <th className="p-2">Seat</th>
-                <th className="p-2">Main Booklet No.</th>
-                <th className="p-2">Student Signature</th>
+                <th className="p-2">Booklet No.</th>
+                <th className="p-2">Signature</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-zinc-200">
               {allocatedList.map((s, idx) => (
                 <tr key={idx} className="h-10">
-                  <td className="p-2 text-slate-500">{idx + 1}</td>
-                  <td className="p-2 font-mono font-bold">{s.roll}</td>
-                  <td className="p-2 font-medium">{s.name}</td>
-                  <td className="p-2 font-mono font-bold text-primary-700">{s.seat}</td>
-                  <td className="p-2 text-slate-300">____________</td>
-                  <td className="p-2 text-slate-300">____________</td>
+                  <td className="p-2 text-zinc-500">{idx + 1}</td>
+                  <td className="p-2 font-mono font-bold text-zinc-900">{s.roll}</td>
+                  <td className="p-2 font-medium text-zinc-800">{s.name}</td>
+                  <td className="p-2 font-mono font-bold text-zinc-900">{s.seat}</td>
+                  <td className="p-2 text-zinc-300">____________</td>
+                  <td className="p-2 text-zinc-300">____________</td>
                 </tr>
               ))}
             </tbody>
@@ -444,20 +444,20 @@ export const ReportsPage: React.FC = () => {
 
       {/* TAB 5: Empty & Blocked Desks */}
       {reportType === 'empty_seats' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs overflow-hidden">
+          <div className="p-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-bold text-slate-800">Empty & Blocked Seat Report</h2>
-              <p className="text-xs text-slate-500">Unoccupied capacity and maintenance-blocked desks across examination halls.</p>
+              <h2 className="text-sm font-bold text-zinc-900">Empty & Blocked Desks</h2>
+              <p className="text-xs text-zinc-500">Unoccupied capacity and maintenance-blocked desks across halls.</p>
             </div>
-            <span className="text-xs font-mono font-bold text-slate-700 bg-slate-200 px-2.5 py-1 rounded">
+            <span className="text-xs font-mono font-bold text-zinc-800 bg-zinc-200 px-2.5 py-1 rounded">
               {DEFAULT_EMPTY_SEATS.length} Desks Identified
             </span>
           </div>
 
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase">
+              <tr className="bg-zinc-50 border-b border-zinc-200 text-[11px] font-bold text-zinc-600 uppercase">
                 <th className="p-3 pl-4">Examination Hall</th>
                 <th className="p-3">Seat Label</th>
                 <th className="p-3">Row</th>
@@ -465,18 +465,18 @@ export const ReportsPage: React.FC = () => {
                 <th className="p-3">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-zinc-100">
               {DEFAULT_EMPTY_SEATS.map((seat, idx) => (
-                <tr key={idx} className="hover:bg-slate-50/60">
-                  <td className="p-3 pl-4 font-semibold text-slate-800">{seat.hall}</td>
-                  <td className="p-3 font-mono font-bold text-primary-700">{seat.seat}</td>
-                  <td className="p-3">{seat.row}</td>
-                  <td className="p-3">{seat.col}</td>
+                <tr key={idx} className="hover:bg-zinc-50/60">
+                  <td className="p-3 pl-4 font-semibold text-zinc-900">{seat.hall}</td>
+                  <td className="p-3 font-mono font-bold text-zinc-900">{seat.seat}</td>
+                  <td className="p-3 text-zinc-700">{seat.row}</td>
+                  <td className="p-3 text-zinc-700">{seat.col}</td>
                   <td className="p-3">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                       seat.status.includes('Empty')
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-rose-100 text-rose-800'
+                        ? 'bg-zinc-100 text-zinc-800 border border-zinc-300'
+                        : 'bg-zinc-900 text-white'
                     }`}>
                       {seat.status}
                     </span>
@@ -490,44 +490,44 @@ export const ReportsPage: React.FC = () => {
 
       {/* TAB 6: Unallocated Students */}
       {reportType === 'unallocated' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs overflow-hidden">
+          <div className="p-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-bold text-slate-800">Unallocated Student Report</h2>
-              <p className="text-xs text-slate-500">
-                Eligible examination candidates who could not be accommodated due to hall capacity or strict non-adjacency limits.
+              <h2 className="text-sm font-bold text-zinc-900">Unallocated Students</h2>
+              <p className="text-xs text-zinc-500">
+                Eligible students who could not be accommodated due to capacity or adjacency rules.
               </p>
             </div>
-            <span className="text-xs font-mono font-bold text-amber-800 bg-amber-100 px-2.5 py-1 rounded">
-              {unallocatedList.length} Candidates Pending
+            <span className="text-xs font-mono font-bold text-zinc-900 bg-zinc-100 px-2.5 py-1 rounded border border-zinc-300">
+              {unallocatedList.length} Pending
             </span>
           </div>
 
           {unallocatedList.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-xs">
-              <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
-              <p className="font-bold text-slate-800">All Candidates Allocated</p>
+            <div className="p-8 text-center text-zinc-500 text-xs">
+              <CheckCircle2 className="w-8 h-8 text-zinc-900 mx-auto mb-2" />
+              <p className="font-bold text-zinc-900">All Students Allocated</p>
               <p className="mt-1">Zero unallocated students. Seating plan accommodates 100% of enrolled candidates.</p>
             </div>
           ) : (
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase">
+                <tr className="bg-zinc-50 border-b border-zinc-200 text-[11px] font-bold text-zinc-600 uppercase">
                   <th className="p-3 pl-4">Roll Number</th>
                   <th className="p-3">Candidate Name</th>
                   <th className="p-3">Batch</th>
-                  <th className="p-3">Assigned Examination</th>
-                  <th className="p-3">Resolution Action Required</th>
+                  <th className="p-3">Examination</th>
+                  <th className="p-3">Action Required</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-zinc-100">
                 {unallocatedList.map((s, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/60">
-                    <td className="p-3 pl-4 font-mono font-bold text-slate-800">{s.roll}</td>
-                    <td className="p-3 font-medium">{s.name}</td>
-                    <td className="p-3 font-mono">{s.batch}</td>
-                    <td className="p-3 text-slate-600">{s.exam}</td>
-                    <td className="p-3 text-amber-700 font-medium">Add additional hall or enable empty desks</td>
+                  <tr key={idx} className="hover:bg-zinc-50/60">
+                    <td className="p-3 pl-4 font-mono font-bold text-zinc-900">{s.roll}</td>
+                    <td className="p-3 font-medium text-zinc-800">{s.name}</td>
+                    <td className="p-3 font-mono text-zinc-700">{s.batch}</td>
+                    <td className="p-3 text-zinc-600">{s.exam}</td>
+                    <td className="p-3 text-zinc-800 font-medium">Assign additional hall or enable desks</td>
                   </tr>
                 ))}
               </tbody>
@@ -536,14 +536,14 @@ export const ReportsPage: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 7: Mathematical Validation Report */}
+      {/* TAB 7: Validation Report */}
       {reportType === 'validation' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-4">
-          <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-            Mathematical Allocation & Set Theory Audit Certificate
+        <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs p-6 space-y-4">
+          <h2 className="text-base font-bold text-zinc-900 flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5 text-zinc-900" />
+            Constraint Validation Report
           </h2>
-          <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-2 text-xs text-slate-700 font-mono">
+          <div className="p-4 bg-zinc-50 rounded-lg border border-zinc-200 space-y-2 text-xs text-zinc-800 font-mono">
             <p>PLAN_ID: PLAN-EX-9921</p>
             <p>EXAMINATION: Mid-Term Examinations - Computer Science & AI (Nov 2026)</p>
             <p>TOTAL_STUDENTS_ENROLLED: 52</p>

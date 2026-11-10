@@ -821,19 +821,19 @@ export const ExamSeatingPage: React.FC = () => {
       {/* Top Header & Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-            <Binary className="w-5 h-5 text-primary-600" />
-            Automated Examination Seating Planner
+          <h1 className="text-xl font-bold text-zinc-950 tracking-tight flex items-center gap-2">
+            <Binary className="w-5 h-5 text-black" />
+            Seating Planner
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Interactive university desk allocator with constraint validation, seat locking, swapping, and invigilator attendance.
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Generate, validate, and manage examination seating plans.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={exportCsv}
-            className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-300 transition-colors flex items-center gap-1.5"
+            className="px-3 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold rounded-lg border border-zinc-300 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             Export CSV
@@ -842,7 +842,7 @@ export const ExamSeatingPage: React.FC = () => {
             href={api.getExamLocatorPdfUrl(selectedExamId)}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-300 transition-colors flex items-center gap-1.5"
+            className="px-3 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold rounded-lg border border-zinc-300 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
             PDF Report
@@ -850,15 +850,15 @@ export const ExamSeatingPage: React.FC = () => {
           <button
             onClick={runAllocation}
             disabled={isGenerating}
-            className="px-3.5 py-2 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg shadow-xs transition-all flex items-center gap-1.5"
+            className="px-3.5 py-2 bg-black hover:bg-zinc-800 disabled:opacity-50 text-white text-xs font-semibold rounded-lg shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
-            {isGenerating ? 'Solving...' : 'Generate Plan'}
+            {isGenerating ? 'Generating...' : 'Generate Seating'}
           </button>
           <button
             onClick={regenerateUnlockedSeats}
             disabled={isGenerating}
-            className="px-3 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5"
+            className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
             title="Preserves locked seats and re-solves remaining desks"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isGenerating ? 'animate-spin' : ''}`} />
@@ -867,29 +867,29 @@ export const ExamSeatingPage: React.FC = () => {
           <button
             onClick={runValidation}
             disabled={isValidating}
-            className={`px-3 py-2 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-2 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer ${
               validationStatus === 'valid'
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
                 : validationStatus === 'invalid'
                 ? 'bg-rose-50 text-rose-800 border-rose-300 hover:bg-rose-100'
-                : 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100'
+                : 'bg-zinc-100 text-zinc-800 border-zinc-300 hover:bg-zinc-200'
             }`}
           >
             <ShieldCheck className="w-3.5 h-3.5" />
-            {isValidating ? 'Validating...' : validationStatus === 'valid' ? 'Validated (Valid)' : validationStatus === 'invalid' ? 'Invalid (Conflicts)' : 'Validate Plan'}
+            {isValidating ? 'Validating...' : validationStatus === 'valid' ? 'Validated' : validationStatus === 'invalid' ? 'Invalid (Conflicts)' : 'Validate'}
           </button>
           {hasGenerated && (
             <button
               onClick={handlePublish}
               disabled={validationStatus === 'invalid' || conflictKeys.size > 0}
-              className={`px-3.5 py-2 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed ${
+              className={`px-3.5 py-2 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
                 isPublished
                   ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs'
+                  : 'bg-black hover:bg-zinc-800 text-white shadow-xs'
               }`}
             >
               <Share2 className="w-3.5 h-3.5" />
-              {isPublished ? 'Published' : 'Publish Seating Plan'}
+              {isPublished ? 'Published' : 'Publish Plan'}
             </button>
           )}
         </div>
@@ -898,56 +898,56 @@ export const ExamSeatingPage: React.FC = () => {
       {/* SECTION 5 MANDATORY KPI BANNER: Selected Examination, Hall, Total Students, Available Seats, Allocated, Unallocated, Validation Status */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
         {/* 1. Selected Examination & Session */}
-        <div className="bg-white rounded-xl p-3.5 border border-slate-200/90 shadow-xs flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Examination</span>
+        <div className="bg-white rounded-xl p-3.5 border border-zinc-200 shadow-xs flex flex-col justify-between">
+          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Examination</span>
           <div className="mt-1">
-            <p className="text-xs font-bold text-slate-800 truncate" title={activeExam.name}>
+            <p className="text-xs font-bold text-zinc-900 truncate" title={activeExam.name}>
               {activeExam.name}
             </p>
-            <span className="text-[10px] text-primary-600 font-semibold uppercase tracking-wider">
+            <span className="text-[10px] text-zinc-600 font-semibold uppercase tracking-wider">
               {activeExam.session || 'Morning'} Session
             </span>
           </div>
         </div>
 
         {/* 2. Selected Hall */}
-        <div className="bg-white rounded-xl p-3.5 border border-slate-200/90 shadow-xs flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Selected Hall</span>
+        <div className="bg-white rounded-xl p-3.5 border border-zinc-200 shadow-xs flex flex-col justify-between">
+          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Selected Hall</span>
           <div className="mt-1 flex items-center justify-between">
-            <span className="text-lg font-bold text-slate-800">{activeHall}</span>
-            <DoorClosed className="w-4 h-4 text-slate-400" />
+            <span className="text-lg font-bold text-zinc-900">{activeHall}</span>
+            <DoorClosed className="w-4 h-4 text-zinc-400" />
           </div>
-          <span className="text-[10px] text-slate-500 font-medium">{currentHallConfig.rows}R × {currentHallConfig.cols}C Layout</span>
+          <span className="text-[10px] text-zinc-500 font-medium">{currentHallConfig.rows}R × {currentHallConfig.cols}C Layout</span>
         </div>
 
         {/* 3. Total Students */}
-        <div className="bg-white rounded-xl p-3.5 border border-slate-200/90 shadow-xs flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Candidates</span>
+        <div className="bg-white rounded-xl p-3.5 border border-zinc-200 shadow-xs flex flex-col justify-between">
+          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Total Candidates</span>
           <div className="mt-1 flex items-center justify-between">
-            <span className="text-lg font-bold text-slate-800">{totalStudentsCount}</span>
-            <Users className="w-4 h-4 text-indigo-500" />
+            <span className="text-lg font-bold text-zinc-900">{totalStudentsCount}</span>
+            <Users className="w-4 h-4 text-zinc-700" />
           </div>
-          <span className="text-[10px] text-slate-500 font-medium">Across {Object.keys(batchCounts).length} batches</span>
+          <span className="text-[10px] text-zinc-500 font-medium">Across {Object.keys(batchCounts).length} batches</span>
         </div>
 
         {/* 4. Available Seats */}
-        <div className="bg-white rounded-xl p-3.5 border border-slate-200/90 shadow-xs flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Available Desks</span>
+        <div className="bg-white rounded-xl p-3.5 border border-zinc-200 shadow-xs flex flex-col justify-between">
+          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Available Desks</span>
           <div className="mt-1 flex items-center justify-between">
-            <span className="text-lg font-bold text-slate-800">{availableSeatsCount}</span>
+            <span className="text-lg font-bold text-zinc-900">{availableSeatsCount}</span>
             <Armchair className="w-4 h-4 text-emerald-500" />
           </div>
-          <span className="text-[10px] text-slate-500 font-medium">{blockedSeatsCount} blocked unavailable</span>
+          <span className="text-[10px] text-zinc-500 font-medium">{blockedSeatsCount} blocked unavailable</span>
         </div>
 
         {/* 5. Allocated Students */}
-        <div className="bg-white rounded-xl p-3.5 border border-slate-200/90 shadow-xs flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Allocated Desks</span>
+        <div className="bg-white rounded-xl p-3.5 border border-zinc-200 shadow-xs flex flex-col justify-between">
+          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Allocated Desks</span>
           <div className="mt-1 flex items-center justify-between">
             <span className="text-lg font-bold text-emerald-700">{allocatedStudentsCount}</span>
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
           </div>
-          <span className="text-[10px] text-slate-500 font-medium">{lockedSeatsCount} pinned / locked</span>
+          <span className="text-[10px] text-zinc-500 font-medium">{lockedSeatsCount} pinned / locked</span>
         </div>
 
         {/* 6. Unallocated Students & Validation Status */}
@@ -959,7 +959,7 @@ export const ExamSeatingPage: React.FC = () => {
             : 'bg-amber-50/60 border-amber-200'
         }`}>
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600">Unallocated</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Unallocated</span>
             <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded uppercase ${
               validationStatus === 'valid'
                 ? 'bg-emerald-600 text-white'
@@ -971,12 +971,12 @@ export const ExamSeatingPage: React.FC = () => {
             </span>
           </div>
           <div className="mt-1 flex items-center justify-between">
-            <span className="text-lg font-bold text-slate-800">{unallocatedStudentsCount}</span>
+            <span className="text-lg font-bold text-zinc-900">{unallocatedStudentsCount}</span>
             <ShieldCheck className={`w-4 h-4 ${
               validationStatus === 'valid' ? 'text-emerald-600' : validationStatus === 'invalid' ? 'text-rose-600' : 'text-amber-600'
             }`} />
           </div>
-          <span className="text-[10px] font-medium text-slate-600">
+          <span className="text-[10px] font-medium text-zinc-600">
             {unallocatedStudentsCount === 0 ? 'Full allocation' : `${unallocatedStudentsCount} pending desks`}
           </span>
         </div>
@@ -1028,7 +1028,7 @@ export const ExamSeatingPage: React.FC = () => {
               setIsSwapMode(false);
               setSwapSourceKey(null);
             }}
-            className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded text-xs font-semibold"
+            className="px-2.5 py-1 bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-300 rounded text-xs font-semibold cursor-pointer"
           >
             Cancel
           </button>
@@ -1048,31 +1048,31 @@ export const ExamSeatingPage: React.FC = () => {
         />
 
         {/* Participating Batches & Candidates */}
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
-          <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-            <Users className="w-4 h-4 text-primary-600" />
+        <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-xs">
+          <h2 className="text-xs font-bold text-zinc-900 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <Users className="w-4 h-4 text-zinc-700" />
             Participating Batches ({totalStudentsCount} Candidates)
           </h2>
           <div className="space-y-2">
             {Object.entries(batchCounts).map(([batch, count]) => {
-              const theme = batchColors[batch] || { badge: 'bg-slate-600 text-white' };
+              const theme = batchColors[batch] || { badge: 'bg-zinc-800 text-white' };
               return (
                 <div
                   key={batch}
-                  className="p-2.5 rounded-lg border border-slate-200 flex items-center justify-between text-xs"
+                  className="p-2.5 rounded-lg border border-zinc-200 flex items-center justify-between text-xs"
                 >
                   <div className="flex items-center gap-2">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono ${theme.badge}`}>
                       {batch}
                     </span>
-                    <span className="text-slate-600 font-medium">University Examination</span>
+                    <span className="text-zinc-600 font-medium">University Examination</span>
                   </div>
-                  <span className="font-mono font-bold text-slate-800">{count} Candidates</span>
+                  <span className="font-mono font-bold text-zinc-900">{count} Candidates</span>
                 </div>
               );
             })}
           </div>
-          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+          <div className="mt-3 pt-2 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-500">
             <span>Pigeonhole Feasibility |S| ≤ |T|:</span>
             <span className="font-mono font-bold text-emerald-600">
               {allocatedStudentsCount} allocated ≤ {availableSeatsCount} usable (Feasible)
@@ -1081,11 +1081,11 @@ export const ExamSeatingPage: React.FC = () => {
         </div>
 
         {/* Mathematical Proof Validation Box */}
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-col justify-between">
+        <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                <Sigma className="w-4 h-4 text-primary-600" />
+              <h2 className="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
+                <Sigma className="w-4 h-4 text-zinc-700" />
                 Mathematical Verification
               </h2>
               <span
@@ -1103,47 +1103,47 @@ export const ExamSeatingPage: React.FC = () => {
             </div>
 
             <div className="space-y-2 text-xs">
-              <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Injective Function f: S → T:</span>
+              <div className="flex items-center justify-between py-1 border-b border-zinc-100">
+                <span className="text-zinc-500">Injective Function f: S → T:</span>
                 <span className="font-bold text-emerald-700">Verified (No collisions)</span>
               </div>
-              <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Adjacency Violations:</span>
-                <span className={`font-mono font-bold ${conflictKeys.size > 0 ? 'text-rose-600' : 'text-slate-800'}`}>
+              <div className="flex items-center justify-between py-1 border-b border-zinc-100">
+                <span className="text-zinc-500">Adjacency Violations:</span>
+                <span className={`font-mono font-bold ${conflictKeys.size > 0 ? 'text-rose-600' : 'text-zinc-900'}`}>
                   {conflictKeys.size} edge conflicts
                 </span>
               </div>
-              <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Blocked Desks Assigned:</span>
+              <div className="flex items-center justify-between py-1 border-b border-zinc-100">
+                <span className="text-zinc-500">Blocked Desks Assigned:</span>
                 <span className="font-bold text-emerald-700">0 (Strictly respected)</span>
               </div>
               <div className="flex items-center justify-between py-1">
-                <span className="text-slate-500">Locked Seat Constraints:</span>
-                <span className="font-mono font-bold text-slate-800">{lockedSeatsCount} desks pinned</span>
+                <span className="text-zinc-500">Locked Seat Constraints:</span>
+                <span className="font-mono font-bold text-zinc-900">{lockedSeatsCount} desks pinned</span>
               </div>
             </div>
           </div>
 
-          <p className="text-[10px] text-slate-400 mt-2 font-mono">
+          <p className="text-[10px] text-zinc-400 mt-2 font-mono">
             Solver: CP-SAT &amp; Checkerboard • Status: {validationStatus.toUpperCase()}
           </p>
         </div>
       </div>
 
       {/* Hall Tabs, Controls & Grid */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
+      <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs space-y-4">
         {/* Hall Selection & Legend Toolbar */}
-        <div className="flex flex-wrap items-center justify-between border-b border-slate-100 pb-3 gap-3">
+        <div className="flex flex-wrap items-center justify-between border-b border-zinc-100 pb-3 gap-3">
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5 mr-2">
-              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Exam:</span>
+              <span className="text-xs font-bold text-zinc-700 uppercase tracking-wider">Exam:</span>
               <select
                 value={selectedExamId}
                 onChange={(e) => {
                   setSelectedExamId(e.target.value);
                   setValidationStatus('needs_validation');
                 }}
-                className="text-xs font-semibold border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-slate-800 max-w-xs truncate"
+                className="text-xs font-semibold border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-white text-zinc-900 max-w-xs truncate"
               >
                 {availableExams.map((ex) => (
                   <option key={ex.id} value={ex.id}>{ex.name}</option>
@@ -1277,10 +1277,10 @@ export const ExamSeatingPage: React.FC = () => {
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => setAttendanceMode(!attendanceMode)}
-              className={`px-3 py-1.5 text-xs rounded-lg font-semibold border transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 text-xs rounded-lg font-semibold border transition-colors flex items-center gap-1.5 cursor-pointer ${
                 attendanceMode
                   ? 'bg-emerald-600 text-white border-emerald-700'
-                  : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                  : 'bg-zinc-100 text-zinc-700 border-zinc-300 hover:bg-zinc-200'
               }`}
             >
               <UserCheck className="w-3.5 h-3.5" />
@@ -1290,7 +1290,7 @@ export const ExamSeatingPage: React.FC = () => {
             {attendanceMode && (
               <button
                 onClick={markAllPresent}
-                className="px-2.5 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300 font-medium"
+                className="px-2.5 py-1.5 text-xs bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-lg border border-zinc-300 font-medium cursor-pointer"
               >
                 Mark All Present
               </button>
@@ -1300,16 +1300,16 @@ export const ExamSeatingPage: React.FC = () => {
             <SeatingLegend
               compact
               batches={[
-                { name: 'AIML', color: 'bg-blue-100 border border-blue-400' },
-                { name: 'CSE-GEN', color: 'bg-indigo-100 border border-indigo-400' },
-                { name: 'AIDE', color: 'bg-emerald-100 border border-emerald-400' },
+                { name: 'AIML', color: 'bg-zinc-900 border border-zinc-900 text-white' },
+                { name: 'CSE-GEN', color: 'bg-zinc-100 border border-zinc-400 text-zinc-900' },
+                { name: 'AIDE', color: 'bg-zinc-200 border border-zinc-500 text-zinc-900' },
               ]}
             />
           </div>
         </div>
 
         {/* Podium Indicator */}
-        <div className="w-full py-1.5 bg-slate-200 rounded text-center text-[10px] font-bold text-slate-700 uppercase tracking-widest border border-slate-300">
+        <div className="w-full py-1.5 bg-zinc-100 rounded text-center text-[10px] font-bold text-zinc-700 uppercase tracking-widest border border-zinc-300">
           [ Invigilator Desk / Examination Hall Podium — {activeHall} ]
         </div>
 
@@ -1339,7 +1339,7 @@ export const ExamSeatingPage: React.FC = () => {
                       key={key}
                       onClick={() => handleSeatClick(key)}
                       className={`h-22 rounded-lg border-2 border-dashed border-rose-300 bg-rose-50/50 p-2 flex flex-col items-center justify-center text-center opacity-70 cursor-pointer hover:opacity-100 transition-all ${
-                        isSelected ? 'ring-2 ring-primary-500' : ''
+                        isSelected ? 'ring-2 ring-zinc-900' : ''
                       }`}
                     >
                       <span className="font-mono text-[10px] font-bold text-rose-500">{seatLabel}</span>
@@ -1357,12 +1357,12 @@ export const ExamSeatingPage: React.FC = () => {
                     <div
                       key={key}
                       onClick={() => handleSeatClick(key)}
-                      className={`h-22 rounded-lg border-2 border-dashed border-slate-200 bg-slate-50/60 p-2 flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary-400 hover:bg-primary-50/30 transition-all ${
-                        isSelected ? 'ring-2 ring-primary-500' : ''
-                      } ${isMoveMode ? 'border-primary-400 bg-primary-50/40 animate-pulse' : ''}`}
+                      className={`h-22 rounded-lg border-2 border-dashed border-zinc-200 bg-zinc-50/60 p-2 flex flex-col items-center justify-center text-center cursor-pointer hover:border-zinc-400 hover:bg-zinc-100 transition-all ${
+                        isSelected ? 'ring-2 ring-zinc-900' : ''
+                      } ${isMoveMode ? 'border-zinc-500 bg-zinc-100 animate-pulse' : ''}`}
                     >
-                      <span className="font-mono text-[10px] font-bold text-slate-400">{seatLabel}</span>
-                      <span className="text-[9px] text-slate-400 font-medium mt-0.5">
+                      <span className="font-mono text-[10px] font-bold text-zinc-400">{seatLabel}</span>
+                      <span className="text-[9px] text-zinc-400 font-medium mt-0.5">
                         {isMoveMode ? 'Click to Place' : 'Empty Desk'}
                       </span>
                     </div>
@@ -1372,9 +1372,9 @@ export const ExamSeatingPage: React.FC = () => {
                 // Occupied Desk
                 const theme = batchColors[seat.batch || ''] || {
                   bg: 'bg-white',
-                  border: 'border-slate-300',
-                  text: 'text-slate-800',
-                  badge: 'bg-slate-600 text-white',
+                  border: 'border-zinc-300',
+                  text: 'text-zinc-900',
+                  badge: 'bg-zinc-800 text-white',
                 };
 
                 return (
@@ -1387,7 +1387,7 @@ export const ExamSeatingPage: React.FC = () => {
                       isConflict
                         ? 'border-2 border-rose-500 ring-2 ring-rose-300 bg-rose-50'
                         : isSelected
-                        ? 'border-2 border-primary-600 ring-2 ring-primary-300'
+                        ? 'border-2 border-zinc-900 ring-2 ring-zinc-400'
                         : isMoveSource || isSwapSource
                         ? 'border-2 border-amber-500 ring-2 ring-amber-300'
                         : theme.border
@@ -1396,7 +1396,7 @@ export const ExamSeatingPage: React.FC = () => {
                     {/* Top Row: Seat Label & Batch / Lock / Attendance */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1">
-                        <span className="font-mono font-bold text-[10px] text-slate-600">{seatLabel}</span>
+                        <span className="font-mono font-bold text-[10px] text-zinc-600">{seatLabel}</span>
                         {seat.is_locked && (
                           <span title="Pinned/Locked seat assignment">
                             <Lock className="w-2.5 h-2.5 text-amber-600" />
@@ -1425,7 +1425,7 @@ export const ExamSeatingPage: React.FC = () => {
                       <p className={`text-[10px] font-bold leading-tight truncate ${theme.text}`}>
                         {seat.student_name}
                       </p>
-                      <p className="font-mono text-[9px] text-slate-500 font-semibold">{seat.roll_number}</p>
+                      <p className="font-mono text-[9px] text-zinc-500 font-semibold">{seat.roll_number}</p>
                     </div>
 
                     {/* Conflict Badge */}
@@ -1442,17 +1442,17 @@ export const ExamSeatingPage: React.FC = () => {
         </div>
 
         {/* Footer Grid Summary */}
-        <div className="flex flex-wrap items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-600 gap-2">
+        <div className="flex flex-wrap items-center justify-between pt-3 border-t border-zinc-100 text-xs text-zinc-600 gap-2">
           <div className="flex items-center gap-4">
-            <span>Total Hall Desks: <strong className="text-slate-800">{totalHallSeats}</strong></span>
-            <span>Available Desks: <strong className="text-slate-800">{availableSeatsCount}</strong></span>
+            <span>Total Hall Desks: <strong className="text-zinc-900">{totalHallSeats}</strong></span>
+            <span>Available Desks: <strong className="text-zinc-900">{availableSeatsCount}</strong></span>
             <span>Allocated: <strong className="text-emerald-700">{allocatedStudentsCount}</strong></span>
             <span>Locked: <strong className="text-amber-700">{lockedSeatsCount}</strong></span>
             {attendanceMode && (
               <span>Attendance: <strong className="text-emerald-700">{presentCount} Present</strong> • <strong className="text-rose-700">{absentCount} Absent</strong></span>
             )}
           </div>
-          <span className="text-[11px] text-slate-400 font-mono">
+          <span className="text-[11px] text-zinc-400 font-mono">
             Click any seat to inspect, lock, move, or swap candidates.
           </span>
         </div>
@@ -1460,22 +1460,22 @@ export const ExamSeatingPage: React.FC = () => {
 
       {/* Seat Detail Modal / Popover */}
       {activeSeatDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full border border-slate-200 overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/40 backdrop-blur-xs p-4 animate-fade-in">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full border border-zinc-200 overflow-hidden">
             {/* Modal Header */}
-            <div className="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+            <div className="px-5 py-4 bg-zinc-900 text-white flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold flex items-center gap-2">
-                  <DoorClosed className="w-4 h-4 text-primary-400" />
+                  <DoorClosed className="w-4 h-4 text-zinc-300" />
                   Examination Seat {activeSeatDetail.seat_label} ({activeHall})
                 </h3>
-                <p className="text-[10px] text-slate-400 mt-0.5">
+                <p className="text-[10px] text-zinc-400 mt-0.5">
                   Grid Position: Row {activeSeatDetail.row + 1}, Desk {activeSeatDetail.col + 1}
                 </p>
               </div>
               <button
                 onClick={() => setSelectedSeatKey(null)}
-                className="text-slate-400 hover:text-white"
+                className="text-zinc-400 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1495,17 +1495,17 @@ export const ExamSeatingPage: React.FC = () => {
                 </div>
               ) : activeSeatDetail.student_name ? (
                 <div className="space-y-3">
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                  <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-lg space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase">Assigned Candidate</span>
-                      <span className="px-2 py-0.5 bg-primary-100 text-primary-800 font-mono font-bold text-[10px] rounded">
+                      <span className="text-[10px] font-bold text-zinc-500 uppercase">Assigned Candidate</span>
+                      <span className="px-2 py-0.5 bg-zinc-100 text-zinc-900 border border-zinc-200 font-mono font-bold text-[10px] rounded">
                         {activeSeatDetail.batch}
                       </span>
                     </div>
-                    <p className="text-sm font-bold text-slate-800">{activeSeatDetail.student_name}</p>
-                    <p className="font-mono text-xs font-semibold text-slate-600">Roll No: {activeSeatDetail.roll_number}</p>
+                    <p className="text-sm font-bold text-zinc-900">{activeSeatDetail.student_name}</p>
+                    <p className="font-mono text-xs font-semibold text-zinc-600">Roll No: {activeSeatDetail.roll_number}</p>
                     <div className="pt-2 flex items-center justify-between text-xs">
-                      <span className="text-slate-500">Attendance:</span>
+                      <span className="text-zinc-500">Attendance:</span>
                       <span className={`font-bold ${activeSeatDetail.attendance === 'absent' ? 'text-rose-600' : 'text-emerald-600'}`}>
                         {activeSeatDetail.attendance === 'absent' ? 'Absent' : 'Present'}
                       </span>
@@ -1520,42 +1520,42 @@ export const ExamSeatingPage: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-600 text-xs">
+                <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-600 text-xs">
                   <p className="font-bold">Unassigned Desk</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
+                  <p className="text-[11px] text-zinc-500 mt-0.5">
                     No candidate is currently assigned to this seat.
                   </p>
                 </div>
               )}
 
               {/* Action Buttons */}
-              <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">
+              <div className="space-y-2 pt-2 border-t border-zinc-100 text-xs">
                 {activeSeatDetail.student_name && !activeSeatDetail.is_blocked && (
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => selectedSeatKey && startMove(selectedSeatKey)}
-                      className="px-3 py-2 bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg font-semibold flex items-center justify-center gap-1.5 border border-primary-200 transition-colors"
+                      className="px-3 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 rounded-lg font-semibold flex items-center justify-center gap-1.5 border border-zinc-300 transition-colors"
                     >
                       <Move className="w-3.5 h-3.5" />
                       Move Seat
                     </button>
                     <button
                       onClick={() => selectedSeatKey && startSwap(selectedSeatKey)}
-                      className="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg font-semibold flex items-center justify-center gap-1.5 border border-indigo-200 transition-colors"
+                      className="px-3 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 rounded-lg font-semibold flex items-center justify-center gap-1.5 border border-zinc-300 transition-colors"
                     >
                       <ArrowLeftRight className="w-3.5 h-3.5" />
                       Swap Student
                     </button>
                     <button
                       onClick={() => selectedSeatKey && toggleLockSeat(selectedSeatKey)}
-                      className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold flex items-center justify-center gap-1.5 border border-slate-300 transition-colors"
+                      className="px-3 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-lg font-semibold flex items-center justify-center gap-1.5 border border-zinc-300 transition-colors"
                     >
                       {activeSeatDetail.is_locked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
                       {activeSeatDetail.is_locked ? 'Unlock Seat' : 'Lock Seat'}
                     </button>
                     <button
                       onClick={() => selectedSeatKey && unassignStudent(selectedSeatKey)}
-                      className="px-3 py-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 rounded-lg font-semibold flex items-center justify-center gap-1.5 border border-slate-300 transition-colors"
+                      className="px-3 py-2 bg-zinc-100 hover:bg-rose-50 hover:text-rose-700 text-zinc-700 rounded-lg font-semibold flex items-center justify-center gap-1.5 border border-zinc-300 transition-colors"
                     >
                       <X className="w-3.5 h-3.5" />
                       Unassign

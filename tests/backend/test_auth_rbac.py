@@ -252,6 +252,22 @@ class TestStudentRole:
         resp = client.get("/api/admin/audit-logs", headers=student_headers)
         assert resp.status_code == 403
 
+    def test_staff_can_lookup_student_seat(self, client, staff_headers):
+        resp = client.get("/api/student/seat-lookup?roll_number=23JU0101", headers=staff_headers)
+        assert resp.status_code == 200
+        assert "allocations" in resp.json()
+
+    def test_staff_lookup_without_roll_requires_parameter(self, client, staff_headers):
+        resp = client.get("/api/student/seat-lookup", headers=staff_headers)
+        assert resp.status_code == 400
+
+    def test_staff_lookup_nonexistent_roll_returns_empty_allocations(self, client, staff_headers):
+        resp = client.get("/api/student/seat-lookup?roll_number=NONEXISTENT_999", headers=staff_headers)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "allocations" in data
+        assert len(data["allocations"]) == 0
+
 
 # ==============================================================================
 # 5. Roll Number Resolution & Student Login Flow

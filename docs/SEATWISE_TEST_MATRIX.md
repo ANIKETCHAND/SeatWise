@@ -158,26 +158,30 @@
 
 ## 5. Automated Test Suite Execution Summary
 
-```
+`
 ============================= test session starts =============================
 platform win32 -- Python 3.14.6, pytest-9.1.1, pluggy-1.6.0
 rootdir: E:\maths project
 plugins: anyio-4.14.1, asyncio-1.4.0
-collected 127 items
+collected 130 items
 
-tests\algorithms\test_engine.py .................................        [ 25%]
-tests\backend\test_api.py .....................................          [ 55%]
-tests\backend\test_auth_rbac.py ........................................ [ 86%]
-......                                                                   [ 91%]
-tests\database\test_migrations.py ......                                 [ 96%]
-tests\frontend\test_build.py .....                                       [100%]
+testslgorithms	est_engine.py .................................        [ 25%]
+testsackend	est_api.py .....................................          [ 53%]
+testsackend	est_auth_rbac.py ........................................ [ 84%]
+.........                                                                [ 91%]
+tests\database	est_migrations.py ......                                 [ 96%]
+testsrontend	est_build.py .....                                       [100%]
 
-======================= 127 passed, 2 warnings in 9.44s =======================
-```
+====================== 130 passed, 2 warnings in 12.96s =======================
+`
 
-**Total Tests:** 127  
-**Passed:** 127  
+**Total Tests:** 130  
+**Passed:** 130  
 **Failed:** 0  
 **Blocked:** 0  
 **Pass Rate:** 100.0%
 
+### Newly Added RBAC & Seat Lookup Test Cases
+1. 	est_staff_can_lookup_student_seat: Enforces HTTP 200 and valid payload structure when an administrator/staff queries a student roll number.
+2. 	est_staff_lookup_without_roll_requires_parameter: Enforces HTTP 400 Bad Request when staff queries without ?roll_number=....
+3. 	est_staff_lookup_nonexistent_roll_returns_empty_allocations: Enforces HTTP 200 with len(allocations) == 0 when querying an unknown/non-existent student roll number (preventing false confirmation synthesis).

@@ -63,13 +63,13 @@ export const ExamDashboardPage: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 text-[10px] font-mono border border-zinc-200 mb-1">
               <CheckCircle2 className="w-3 h-3 text-black" />
-              Examination Staff Operations
+              Exam Staff
             </div>
             <h1 className="text-xl font-bold tracking-tight text-zinc-950">
-              Exam Cell Operations Dashboard
+              Exam Operations Dashboard
             </h1>
             <p className="text-xs text-zinc-500">
-              Schedule examinations, allocate examination halls, generate seating plans, and validate arrangements.
+              Manage examinations, hall allocations, and seating plans.
             </p>
           </div>
         </div>
@@ -80,7 +80,7 @@ export const ExamDashboardPage: React.FC = () => {
             className="px-4 py-2 rounded-xl bg-black hover:bg-zinc-800 text-white text-xs font-semibold shadow-xs flex items-center gap-2 transition-all cursor-pointer"
           >
             <Binary className="w-3.5 h-3.5" />
-            <span>Open Seating Planner</span>
+            <span>Seating Planner</span>
           </Link>
         </div>
       </div>
@@ -173,8 +173,8 @@ export const ExamDashboardPage: React.FC = () => {
         {/* Right Col: Quick Operational Links */}
         <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-xs space-y-4">
           <div className="border-b border-zinc-100 pb-3">
-            <h3 className="text-sm font-bold text-zinc-950">Staff Operational Modules</h3>
-            <p className="text-[11px] text-zinc-500">Direct shortcuts to examination workflows.</p>
+            <h3 className="text-sm font-bold text-zinc-950">Quick Actions</h3>
+            <p className="text-[11px] text-zinc-500">Common examination tasks.</p>
           </div>
 
           <div className="space-y-2">
@@ -188,7 +188,7 @@ export const ExamDashboardPage: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="text-xs font-semibold text-zinc-900">Seating Planner</h4>
-                  <p className="text-[10px] text-zinc-500">Run mathematical seat optimization</p>
+                  <p className="text-[10px] text-zinc-500">Generate examination seating plans</p>
                 </div>
               </div>
               <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-black group-hover:translate-x-0.5 transition-transform" />
@@ -204,7 +204,7 @@ export const ExamDashboardPage: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="text-xs font-semibold text-zinc-900">Examination Halls</h4>
-                  <p className="text-[10px] text-zinc-500">Manage seating grids & blocked desks</p>
+                  <p className="text-[10px] text-zinc-500">Manage hall layouts and seating grids</p>
                 </div>
               </div>
               <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-black group-hover:translate-x-0.5 transition-transform" />
@@ -219,8 +219,8 @@ export const ExamDashboardPage: React.FC = () => {
                   <FileSpreadsheet className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-zinc-900">Reports & Notices</h4>
-                  <p className="text-[10px] text-zinc-500">Hall-wise attendance sheets & PDF exports</p>
+                  <h4 className="text-xs font-semibold text-zinc-900">Reports</h4>
+                  <p className="text-[10px] text-zinc-500">Export attendance sheets and seating charts</p>
                 </div>
               </div>
               <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-black group-hover:translate-x-0.5 transition-transform" />
@@ -235,8 +235,8 @@ export const ExamDashboardPage: React.FC = () => {
                   <Users className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-zinc-900">Student Directory</h4>
-                  <p className="text-[10px] text-zinc-500">Import student lists & verify enrollments</p>
+                  <h4 className="text-xs font-semibold text-zinc-900">Students</h4>
+                  <p className="text-[10px] text-zinc-500">View enrolled students and batches</p>
                 </div>
               </div>
               <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-black group-hover:translate-x-0.5 transition-transform" />

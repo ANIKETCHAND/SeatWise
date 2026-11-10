@@ -42,21 +42,21 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/50 backdrop-blur-xs animate-in fade-in"
       role="dialog"
       aria-modal="true"
     >
       <div
-        className={`bg-white rounded-2xl shadow-xl border border-slate-200 w-full ${maxWidthMap[maxWidth]} overflow-hidden flex flex-col max-h-[90vh]`}
+        className={`bg-white rounded-2xl shadow-xl border border-zinc-200 w-full ${maxWidthMap[maxWidth]} overflow-hidden flex flex-col max-h-[90vh]`}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
           <div>
-            <h3 className="text-base font-semibold text-slate-800">{title}</h3>
-            {description && <p className="text-xs text-slate-500 mt-0.5">{description}</p>}
+            <h3 className="text-base font-semibold text-zinc-900">{title}</h3>
+            {description && <p className="text-xs text-zinc-500 mt-0.5">{description}</p>}
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+            className="p-1 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -65,7 +65,7 @@ export const Modal: React.FC<ModalProps> = ({
 
         <div className="p-6 overflow-y-auto flex-1">{children}</div>
 
-        {footer && <div className="px-6 py-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-end gap-3">{footer}</div>}
+        {footer && <div className="px-6 py-4 bg-zinc-50 border-t border-zinc-100 flex items-center justify-end gap-3">{footer}</div>}
       </div>
     </div>
   );

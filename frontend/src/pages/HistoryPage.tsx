@@ -72,45 +72,45 @@ export const HistoryPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-            <History className="w-5 h-5 text-primary-600" />
-            Seating Plan History & Audit Archive
+          <h1 className="text-xl font-bold text-zinc-950 tracking-tight flex items-center gap-2">
+            <History className="w-5 h-5 text-black" />
+            Seating History
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Immutable log of previously generated, validated, and published seating arrangements.
+          <p className="text-xs text-zinc-500 mt-0.5">
+            View previously generated and published seating plans.
           </p>
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setFilterKind('all')}
-            className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-colors cursor-pointer ${
               filterKind === 'all'
-                ? 'bg-slate-900 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-black text-white'
+                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
             }`}
           >
             All Plans
           </button>
           <button
             onClick={() => setFilterKind('examination')}
-            className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-colors cursor-pointer ${
               filterKind === 'examination'
-                ? 'bg-slate-900 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-black text-white'
+                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
             }`}
           >
             Examination Seating
           </button>
           <button
             onClick={() => setFilterKind('classroom')}
-            className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-colors cursor-pointer ${
               filterKind === 'classroom'
-                ? 'bg-slate-900 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-black text-white'
+                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
             }`}
           >
             Classroom Seating
@@ -118,43 +118,43 @@ export const HistoryPage: React.FC = () => {
         </div>
 
         <div className="relative w-64">
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+          <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-2.5" />
           <input
             type="text"
-            placeholder="Search plan ID, venue, or name..."
+            placeholder="Search plans, venues, or exams..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full text-xs pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg"
+            className="w-full text-xs pl-8 pr-3 py-1.5 border border-zinc-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-black"
           />
         </div>
       </div>
 
       {/* History Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-xl border border-zinc-200 shadow-xs overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
-              <th className="p-3 pl-4">Plan Identifier</th>
-              <th className="p-3">Plan Title</th>
-              <th className="p-3">Category</th>
-              <th className="p-3">Allocated Venues</th>
+            <tr className="bg-zinc-50 border-b border-zinc-200 text-[11px] font-bold text-zinc-600 uppercase tracking-wider">
+              <th className="p-3 pl-4">Plan ID</th>
+              <th className="p-3">Title</th>
+              <th className="p-3">Type</th>
+              <th className="p-3">Venues</th>
               <th className="p-3">Students</th>
               <th className="p-3">Solver Time</th>
-              <th className="p-3">Generated At</th>
+              <th className="p-3">Date</th>
               <th className="p-3 text-right pr-4">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 text-xs">
+          <tbody className="divide-y divide-zinc-100 text-xs">
             {filteredHistory.map((h) => (
-              <tr key={h.id} className="hover:bg-slate-50/60">
-                <td className="p-3 pl-4 font-mono font-bold text-slate-900">{h.id}</td>
-                <td className="p-3 font-semibold text-slate-800">{h.name}</td>
+              <tr key={h.id} className="hover:bg-zinc-50/60">
+                <td className="p-3 pl-4 font-mono font-bold text-zinc-900">{h.id}</td>
+                <td className="p-3 font-semibold text-zinc-800">{h.name}</td>
                 <td className="p-3">
                   <span
                     className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
                       h.kind === 'examination'
-                        ? 'bg-purple-100 text-purple-800'
-                        : 'bg-blue-100 text-blue-800'
+                        ? 'bg-zinc-200 text-zinc-800'
+                        : 'bg-zinc-100 text-zinc-700 border border-zinc-200'
                     }`}
                   >
                     {h.kind === 'examination' ? (
@@ -165,24 +165,24 @@ export const HistoryPage: React.FC = () => {
                     {h.kind}
                   </span>
                 </td>
-                <td className="p-3 font-medium text-slate-600">{h.room_or_halls}</td>
-                <td className="p-3 font-mono font-bold text-slate-800">{h.students_count} seats</td>
-                <td className="p-3 font-mono text-[11px] text-slate-500">{h.solver_time_ms} ms</td>
-                <td className="p-3 text-slate-400 text-[11px]">{h.created_at}</td>
+                <td className="p-3 font-medium text-zinc-600">{h.room_or_halls}</td>
+                <td className="p-3 font-mono font-bold text-zinc-800">{h.students_count} seats</td>
+                <td className="p-3 font-mono text-[11px] text-zinc-500">{h.solver_time_ms} ms</td>
+                <td className="p-3 text-zinc-400 text-[11px]">{h.created_at}</td>
                 <td className="p-3 text-right pr-4">
                   <div className="flex items-center justify-end gap-2">
                     <a
                       href={api.getPlanPdfUrl(h.id)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-1 text-slate-500 hover:text-primary-600"
+                      className="p-1 text-zinc-500 hover:text-black cursor-pointer"
                       title="Download PDF Chart"
                     >
                       <Download className="w-4 h-4" />
                     </a>
                     <Link
                       to={h.kind === 'examination' ? `/exam-seating?plan_id=${h.id}` : `/classroom-seating?plan_id=${h.id}`}
-                      className="p-1 text-slate-500 hover:text-primary-600"
+                      className="p-1 text-zinc-500 hover:text-black cursor-pointer"
                       title="Reopen Plan"
                     >
                       <Eye className="w-4 h-4" />

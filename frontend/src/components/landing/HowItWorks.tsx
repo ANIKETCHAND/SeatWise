@@ -40,7 +40,7 @@ export const LandingHowItWorks: React.FC = () => {
             From Examination Setup to Final Seating Plan
           </h2>
           <p className="text-zinc-600 text-sm sm:text-base leading-relaxed">
-            A structured four-step process built to handle multi-hall examination logistics seamlessly.
+            A structured four-step process to manage multi-hall examination seating.
           </p>
         </div>
 

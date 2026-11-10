@@ -149,17 +149,17 @@ export const StudentPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-            <Users className="w-5 h-5 text-primary-600" />
-            Student Roster Management
+          <h1 className="text-xl font-bold text-zinc-950 tracking-tight flex items-center gap-2">
+            <Users className="w-5 h-5 text-zinc-900" />
+            Students
           </h1>
           <div className="flex items-center gap-2 mt-0.5">
-            <p className="text-xs text-slate-500">
-              Registered student records, program enrollments, and examination candidate directories.
+            <p className="text-xs text-zinc-500">
+              Manage student enrollment records and academic batch allocations.
             </p>
             {isSampleMode && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-300">
-                Sample Data Mode
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-100 text-zinc-700 border border-zinc-300">
+                Sample Data
               </span>
             )}
           </div>
@@ -168,7 +168,7 @@ export const StudentPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={exportCsv}
-            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-300 transition-colors flex items-center gap-1.5"
+            className="px-3.5 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold rounded-lg border border-zinc-300 transition-colors flex items-center gap-1.5"
           >
             <Download className="w-3.5 h-3.5" />
             Export CSV
@@ -176,7 +176,7 @@ export const StudentPage: React.FC = () => {
           {isStaff && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-3.5 py-2 bg-primary-600 hover:bg-primary-500 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+              className="px-3.5 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex items-center gap-1.5"
             >
               <Plus className="w-4 h-4" />
               Add Student
@@ -186,15 +186,15 @@ export const StudentPage: React.FC = () => {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-2xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <Filter className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-xs font-semibold text-slate-600">Program:</span>
+            <Filter className="w-3.5 h-3.5 text-zinc-400" />
+            <span className="text-xs font-semibold text-zinc-600">Program:</span>
             <select
               value={filterProgram}
               onChange={(e) => setFilterProgram(e.target.value)}
-              className="text-xs font-medium border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white"
+              className="text-xs font-medium border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-white"
             >
               <option value="all">All Programs</option>
               {INITIAL_PROGRAMS.map((p) => (
@@ -206,11 +206,11 @@ export const StudentPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-semibold text-slate-600">Semester:</span>
+            <span className="text-xs font-semibold text-zinc-600">Semester:</span>
             <select
               value={filterSemester}
               onChange={(e) => setFilterSemester(e.target.value)}
-              className="text-xs font-medium border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white"
+              className="text-xs font-medium border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-white"
             >
               <option value="all">All Semesters</option>
               {[1, 3, 5, 7].map((s) => (
@@ -222,11 +222,11 @@ export const StudentPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-semibold text-slate-600">Section:</span>
+            <span className="text-xs font-semibold text-zinc-600">Section:</span>
             <select
               value={filterSection}
               onChange={(e) => setFilterSection(e.target.value)}
-              className="text-xs font-medium border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white"
+              className="text-xs font-medium border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-white"
             >
               <option value="all">All Sections</option>
               {['A', 'B', 'C', 'D'].map((sec) => (
@@ -239,22 +239,22 @@ export const StudentPage: React.FC = () => {
         </div>
 
         <div className="relative w-64">
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+          <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-2.5" />
           <input
             type="text"
             placeholder="Search roll number or name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full text-xs pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg"
+            className="w-full text-xs pl-8 pr-3 py-1.5 border border-zinc-300 rounded-lg"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+            <tr className="bg-zinc-50 border-b border-zinc-200 text-[11px] font-bold text-zinc-600 uppercase tracking-wider">
               <th className="p-3 pl-4">Roll Number</th>
               <th className="p-3">Full Name</th>
               <th className="p-3">Program & Batch</th>
@@ -263,37 +263,37 @@ export const StudentPage: React.FC = () => {
               {isStaff && <th className="p-3 text-right pr-4">Actions</th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 text-xs">
+          <tbody className="divide-y divide-zinc-100 text-xs">
             {filteredStudents.length === 0 ? (
               <tr>
-                <td colSpan={6} className="p-6 text-center text-slate-400">
+                <td colSpan={6} className="p-6 text-center text-zinc-400">
                   No student records found matching the filter criteria.
                 </td>
               </tr>
             ) : (
               filteredStudents.map((s) => (
-                <tr key={s.id} className="hover:bg-slate-50/60 transition-colors">
-                  <td className="p-3 pl-4 font-mono font-bold text-slate-900">{s.roll_number}</td>
-                  <td className="p-3 font-semibold text-slate-800">{s.full_name}</td>
+                <tr key={s.id} className="hover:bg-zinc-50/60 transition-colors">
+                  <td className="p-3 pl-4 font-mono font-bold text-zinc-900">{s.roll_number}</td>
+                  <td className="p-3 font-semibold text-zinc-800">{s.full_name}</td>
                   <td className="p-3">
-                    <span className="font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium">
+                    <span className="font-mono px-2 py-0.5 rounded bg-zinc-100 text-zinc-800 font-medium">
                       {s.program_code} - Sem {s.semester} ({s.section})
                     </span>
                   </td>
-                  <td className="p-3 text-slate-500">
+                  <td className="p-3 text-zinc-500">
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-1.5 text-[11px]">
-                        <Mail className="w-3 h-3 text-slate-400" />
+                        <Mail className="w-3 h-3 text-zinc-400" />
                         <span>{s.email}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-[11px]">
-                        <Phone className="w-3 h-3 text-slate-400" />
+                        <Phone className="w-3 h-3 text-zinc-400" />
                         <span>{s.phone}</span>
                       </div>
                     </div>
                   </td>
                   <td className="p-3">
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 uppercase">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-100 text-zinc-800 border border-zinc-300 uppercase">
                       {s.enrollment_status}
                     </span>
                   </td>
@@ -304,7 +304,7 @@ export const StudentPage: React.FC = () => {
                           setStudents(students.filter((item) => item.id !== s.id));
                           showNotification('info', `Student ${s.roll_number} deactivated.`);
                         }}
-                        className="text-xs text-rose-600 hover:text-rose-800 font-medium"
+                        className="text-xs text-zinc-600 hover:text-zinc-950 font-medium cursor-pointer"
                       >
                         Deactivate
                       </button>
@@ -316,9 +316,9 @@ export const StudentPage: React.FC = () => {
           </tbody>
         </table>
 
-        <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex items-center justify-between">
+        <div className="p-3 bg-zinc-50 border-t border-zinc-200 text-xs text-zinc-500 flex items-center justify-between">
           <span>Showing {filteredStudents.length} enrolled students</span>
-          <span className="font-mono text-[11px]">Verified Jain University Student Scope</span>
+          <span className="font-mono text-[11px]">Jain University</span>
         </div>
       </div>
 
@@ -333,34 +333,34 @@ export const StudentPage: React.FC = () => {
         <form onSubmit={handleAddStudent} className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-700">Roll Number *</label>
+              <label className="text-xs font-semibold text-zinc-700">Roll Number *</label>
               <input
                 required
                 placeholder="23JU0199"
                 value={newStudent.roll_number}
                 onChange={(e) => setNewStudent({ ...newStudent, roll_number: e.target.value })}
-                className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 font-mono uppercase"
+                className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 font-mono uppercase text-zinc-900 bg-white"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-700">Full Name *</label>
+              <label className="text-xs font-semibold text-zinc-700">Full Name *</label>
               <input
                 required
                 placeholder="Aditya Sharma"
                 value={newStudent.full_name}
                 onChange={(e) => setNewStudent({ ...newStudent, full_name: e.target.value })}
-                className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
+                className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 text-zinc-900 bg-white"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-700">Program *</label>
+              <label className="text-xs font-semibold text-zinc-700">Program *</label>
               <select
                 value={newStudent.program_code}
                 onChange={(e) => setNewStudent({ ...newStudent, program_code: e.target.value })}
-                className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 bg-white"
+                className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 bg-white text-zinc-900"
               >
                 {INITIAL_PROGRAMS.map((p) => (
                   <option key={p.code} value={p.code}>
@@ -370,11 +370,11 @@ export const StudentPage: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-700">Semester *</label>
+              <label className="text-xs font-semibold text-zinc-700">Semester *</label>
               <select
                 value={newStudent.semester}
                 onChange={(e) => setNewStudent({ ...newStudent, semester: Number(e.target.value) })}
-                className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 bg-white"
+                className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 bg-white text-zinc-900"
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
                   <option key={s} value={s}>
@@ -384,25 +384,25 @@ export const StudentPage: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-700">Section *</label>
+              <label className="text-xs font-semibold text-zinc-700">Section *</label>
               <input
                 required
                 maxLength={2}
                 value={newStudent.section}
                 onChange={(e) => setNewStudent({ ...newStudent, section: e.target.value.toUpperCase() })}
-                className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1 font-mono uppercase text-center"
+                className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 font-mono uppercase text-center text-zinc-900 bg-white"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700">Email Address</label>
+            <label className="text-xs font-semibold text-zinc-700">Email Address</label>
             <input
               type="email"
               placeholder="name@jainuniversity.ac.in"
               value={newStudent.email}
               onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
-              className="w-full text-xs p-2 border border-slate-300 rounded-lg mt-1"
+              className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 text-zinc-900 bg-white"
             />
           </div>
 
@@ -410,13 +410,13 @@ export const StudentPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowAddModal(false)}
-              className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg"
+              className="px-3 py-1.5 text-xs text-zinc-600 hover:bg-zinc-100 rounded-lg cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 text-xs bg-primary-600 hover:bg-primary-500 text-white font-medium rounded-lg shadow-xs"
+              className="px-4 py-1.5 text-xs bg-black hover:bg-zinc-800 text-white font-medium rounded-lg shadow-xs cursor-pointer"
             >
               Save Student
             </button>
