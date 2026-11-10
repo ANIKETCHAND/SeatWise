@@ -33,10 +33,13 @@ def brute_force_feasible(counts, rows, cols, policy=None):
     groups = []
     for g, n in counts.items():
         groups.extend([g] * n)
+    groups.extend([None] * (len(seats) - total))
 
     def ok(assign):
         occ = dict(zip(seats, assign))
         for (r, c), g in occ.items():
+            if g is None:
+                continue
             if policy.block_same_batch_horizontal and (r, c + 1) in occ and occ[(r, c + 1)] == g:
                 return False
             if policy.block_same_batch_vertical and (r + 1, c) in occ and occ[(r + 1, c)] == g:
@@ -288,12 +291,33 @@ class TestEmptySeatsAndPolicies:
             ({"A": 2, "B": 2}, 2, 2),
             ({"A": 3, "B": 3}, 2, 3),
             ({"A": 2, "B": 1, "C": 1}, 2, 2),
+            ({"A": 2}, 2, 2),
+            ({"A": 2}, 1, 3),
+            ({"A": 1, "B": 1}, 2, 2),
+            ({"A": 3, "B": 1}, 2, 3),
         ]:
             hall = rect_hall("H", rows, cols)
-            status, _, _ = solve_batch_assignment((hall,), counts, Policy(), 5.0, prefer_cpsat=False)
+            status, sol, _ = solve_batch_assignment((hall,), counts, Policy(), 5.0, prefer_cpsat=False)
             assert status in ("solution", "infeasible")
             expected = brute_force_feasible(counts, rows, cols)
-            assert (status == "solution") == expected
+            assert (status == "solution") == expected, f"Failed for {counts} in {rows}x{cols}"
+            if expected:
+                assert sol is not None
+                assert len(sol) == sum(counts.values())
+
+    def test_backtracking_diagonal_placement_with_empty_seats(self):
+        # 2 same-batch students in 2x2 room must be placed diagonally at (0,0) and (1,1)
+        hall = rect_hall("H", 2, 2)
+        status, sol, solver_name = solve_batch_assignment((hall,), {"A": 2}, Policy(), 5.0, prefer_cpsat=False)
+        assert status == "solution"
+        assert sol is not None
+        assert len(sol) == 2
+        seats = list(sol.keys())
+        # Both must be 'A', and must not share row or column
+        assert sol[seats[0]] == "A" and sol[seats[1]] == "A"
+        assert seats[0][1] != seats[1][1] or seats[0][2] != seats[1][2]
+        # Seats must not be adjacent
+        assert abs(seats[0][1] - seats[1][1]) + abs(seats[0][2] - seats[1][2]) > 1
 
 
 class TestUnevenGrids:

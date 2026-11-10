@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
 
-from ..auth import AuthContext, require_authenticated
+from ..auth import AuthContext, require_staff_or_faculty
 from ..database.client import require_db
 
 router = APIRouter(tags=["seating-history"])
@@ -16,7 +16,7 @@ router = APIRouter(tags=["seating-history"])
 def list_seating_plans(
     kind: str | None = None,
     limit: int = Query(default=50, ge=1, le=200),
-    auth: AuthContext = Depends(require_authenticated),
+    auth: AuthContext = Depends(require_staff_or_faculty),
 ) -> dict:
     """List seating plans across classroom and examination categories."""
     db = require_db()

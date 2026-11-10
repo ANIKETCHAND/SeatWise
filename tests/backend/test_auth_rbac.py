@@ -336,3 +336,69 @@ class TestSecurityInvariants:
             last_status = resp.status_code
 
         assert last_status == 429
+
+
+# ==============================================================================
+# 5. Student Privilege Isolation and Tenant Boundaries
+# ==============================================================================
+class TestStudentPrivilegeIsolation:
+    def test_student_cannot_list_all_institutional_plans(self, client, student_headers):
+        resp = client.get("/api/seating/plans", headers=student_headers)
+        assert resp.status_code == 403
+        resp_hist = client.get("/api/history", headers=student_headers)
+        assert resp_hist.status_code == 403
+
+    def test_student_cannot_export_plan_csv(self, client, student_headers):
+        dummy_id = "00000000-0000-0000-0000-000000000001"
+        resp = client.get(f"/api/reports/plan/{dummy_id}/csv", headers=student_headers)
+        assert resp.status_code == 403
+
+    def test_student_cannot_export_exam_csv(self, client, student_headers):
+        dummy_id = "00000000-0000-0000-0000-000000000001"
+        resp = client.get(f"/api/reports/exam/{dummy_id}/csv", headers=student_headers)
+        assert resp.status_code == 403
+
+    def test_student_cannot_lookup_other_students_via_exam_lookup(self, client, student_headers):
+        # Demo student is 23JU0102; querying 23JU0999 must return empty matches
+        resp = client.get("/api/seating/examination/lookup?q=23JU0999", headers=student_headers)
+        assert resp.status_code in (200, 503)
+        if resp.status_code == 200:
+            assert resp.json()["matches"] == []
+
+    def test_student_cannot_list_examination_plans(self, client, student_headers):
+        resp = client.get("/api/seating/examination/plans", headers=student_headers)
+        assert resp.status_code == 403
+
+    def test_student_cannot_get_examination_plan_detail(self, client, student_headers):
+        dummy_id = "00000000-0000-0000-0000-000000000001"
+        resp = client.get(f"/api/seating/examination/{dummy_id}", headers=student_headers)
+        assert resp.status_code == 403
+
+    def test_student_cannot_list_classroom_plans(self, client, student_headers):
+        resp = client.get("/api/seating/classroom/plans", headers=student_headers)
+        assert resp.status_code == 403
+
+    def test_student_cannot_get_classroom_plan_detail(self, client, student_headers):
+        dummy_id = "00000000-0000-0000-0000-000000000001"
+        resp = client.get(f"/api/seating/classroom/{dummy_id}", headers=student_headers)
+        assert resp.status_code == 403
+
+    def test_student_cannot_list_all_examinations(self, client, student_headers):
+        resp = client.get("/api/examinations", headers=student_headers)
+        assert resp.status_code == 403
+
+    def test_student_cannot_get_examination_admin_detail(self, client, student_headers):
+        dummy_id = "00000000-0000-0000-0000-000000000001"
+        resp = client.get(f"/api/examinations/{dummy_id}", headers=student_headers)
+        assert resp.status_code == 403
+
+    def test_student_cannot_export_locator_pdf(self, client, student_headers):
+        dummy_id = "00000000-0000-0000-0000-000000000001"
+        resp = client.get(f"/api/reports/examination/{dummy_id}/locator/pdf", headers=student_headers)
+        assert resp.status_code == 403
+
+    def test_student_cannot_fetch_locator_records(self, client, student_headers):
+        dummy_id = "00000000-0000-0000-0000-000000000001"
+        resp = client.get(f"/api/reports/examination/{dummy_id}/locator", headers=student_headers)
+        assert resp.status_code == 403
+

@@ -178,7 +178,7 @@ def validate_plan(payload: dict, auth: AuthContext = Depends(require_staff)) -> 
 def list_plans(
     examination_id: str | None = None,
     limit: int = Query(default=25, ge=1, le=100),
-    auth: AuthContext = Depends(require_authenticated),
+    auth: AuthContext = Depends(require_staff_or_faculty),
 ) -> dict:
     db = require_db()
     query = (
@@ -322,6 +322,23 @@ def seat_lookup(
     students = query.execute().data or []
     if not students:
         return {"matches": []}
+
+    # Security invariant: If caller is a student, restrict matches to their own linked record
+    if auth.role == "student":
+        from .student_portal_routes import _resolve_student_record
+        try:
+            curr_student = _resolve_student_record(auth, db)
+            curr_id = str(curr_student.get("id"))
+            curr_roll = str(curr_student.get("roll_number", "")).upper()
+            students = [
+                s for s in students
+                if str(s.get("id")) == curr_id or str(s.get("roll_number", "")).upper() == curr_roll
+            ]
+        except Exception:
+            students = []
+
+    if not students:
+        return {"matches": []}
     plan_query = (
         db.table("seat_assignments")
         .select(
@@ -365,7 +382,7 @@ def seat_lookup(
 
 @router.get("/{plan_id}")
 @router.get("/plans/{plan_id}")
-def get_plan(plan_id: str, auth: AuthContext = Depends(require_authenticated)) -> dict:
+def get_plan(plan_id: str, auth: AuthContext = Depends(require_staff_or_faculty)) -> dict:
     db = require_db()
     plans = (
         db.table("seating_plans")
@@ -376,6 +393,7 @@ def get_plan(plan_id: str, auth: AuthContext = Depends(require_authenticated)) -
     )
     if not plans:
         raise ApiError(404, "not_found", "Seating plan not found.")
+
     plan = plans[0]
     assignments = (
         db.table("seat_assignments")

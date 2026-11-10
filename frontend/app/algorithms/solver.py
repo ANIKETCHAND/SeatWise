@@ -111,12 +111,14 @@ def solve_with_backtracking(
     def search(position: int) -> dict | None:
         if time.monotonic() > deadline:
             raise TimeoutError
-        if all(v == 0 for v in remaining.values()):
+        total_remaining = sum(remaining.values())
+        if total_remaining == 0:
             return dict(assignment)
         # find next unassigned seat
         while position < len(order) and order[position] in assignment:
             position += 1
-        if position >= len(order):
+        seats_left = len(order) - position
+        if seats_left < total_remaining:
             return None  # seats exhausted with students left -> infeasible
         seat_key = order[position]
         for group in candidates(seat_key):
@@ -127,6 +129,11 @@ def solve_with_backtracking(
                 return result
             del assignment[seat_key]
             remaining[group] += 1
+        # When surplus seats exist, explore leaving this seat empty
+        if seats_left > total_remaining:
+            result = search(position + 1)
+            if result is not None:
+                return result
         return None
 
     try:

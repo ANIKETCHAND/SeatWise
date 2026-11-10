@@ -254,7 +254,7 @@ def save(
 def list_plans(
     batch_id: str | None = None,
     limit: int = Query(default=25, ge=1, le=100),
-    auth: AuthContext = Depends(require_authenticated),
+    auth: AuthContext = Depends(require_staff_or_faculty),
 ) -> dict:
     db = require_db()
     query = (
@@ -271,7 +271,7 @@ def list_plans(
 
 @router.get("/{plan_id}")
 @router.get("/plans/{plan_id}")
-def get_plan(plan_id: str, auth: AuthContext = Depends(require_authenticated)) -> dict:
+def get_plan(plan_id: str, auth: AuthContext = Depends(require_staff_or_faculty)) -> dict:
     db = require_db()
     plans = (
         db.table("seating_plans")

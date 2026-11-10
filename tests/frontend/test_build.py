@@ -95,3 +95,34 @@ def test_frontend_page_contracts():
         assert "export const" in txt or "export default" in txt, f"Page {page.name} has no export"
         # Ensure React components are balanced
         assert txt.count("{") == txt.count("}"), f"Unbalanced braces in {page.name}"
+
+
+def test_all_22_frontend_pages_exist():
+    pages_dir = Path(__file__).resolve().parents[2] / "frontend" / "src" / "pages"
+    all_22_pages = [
+        "LandingPage.tsx",
+        "LoginPage.tsx",
+        "DashboardPage.tsx",
+        "ExamDashboardPage.tsx",
+        "FacultyDashboardPage.tsx",
+        "StudentDashboardPage.tsx",
+        "UserManagementPage.tsx",
+        "AuditLogsPage.tsx",
+        "UniversityPage.tsx",
+        "TimetablePage.tsx",
+        "StudentPage.tsx",
+        "FacultyPage.tsx",
+        "RoomsPage.tsx",
+        "ClassroomSeatingPage.tsx",
+        "ExaminationsPage.tsx",
+        "ExamManagementPage.tsx",
+        "ExamSeatingPage.tsx",
+        "MathAnalysisPage.tsx",
+        "ReportsPage.tsx",
+        "HistoryPage.tsx",
+        "SettingsPage.tsx",
+        "StudentSeatLookupPage.tsx",
+    ]
+    for page_name in all_22_pages:
+        assert (pages_dir / page_name).exists(), f"Missing required application page: {page_name}"
+

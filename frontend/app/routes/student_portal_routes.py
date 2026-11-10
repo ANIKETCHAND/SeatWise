@@ -96,15 +96,55 @@ def get_today_examinations(auth: AuthContext = Depends(require_authenticated)) -
     student = _resolve_student_record(auth, db)
     today_str = datetime.date.today().isoformat()
 
-    # Query exams scheduled for today
+    if auth.user_id.startswith("demo-"):
+        return {
+            "today": today_str,
+            "examinations": [
+                {
+                    "id": "exam-demo-01",
+                    "examination_name": "Mid-Term Examinations - Computer Science & AI",
+                    "date": today_str,
+                    "session": "FN",
+                    "session_label": "FN (09:30 AM - 12:30 PM)",
+                    "status": "published",
+                }
+            ],
+        }
+
     try:
+        batch_id = None
+        if student.get("program_id") and student.get("semester") and student.get("section"):
+            b_res = (
+                db.table("batches")
+                .select("id")
+                .eq("program_id", student["program_id"])
+                .eq("semester", student["semester"])
+                .eq("section", student["section"])
+                .limit(1)
+                .execute()
+            )
+            if b_res.data:
+                batch_id = b_res.data[0]["id"]
+
         exams_res = (
             db.table("examinations")
             .select("id,name,exam_date,session,status")
             .eq("exam_date", today_str)
+            .eq("status", "published")
             .execute()
         )
         all_today = exams_res.data or []
+        if batch_id and all_today:
+            exam_ids = [e["id"] for e in all_today]
+            eb_res = (
+                db.table("examination_batches")
+                .select("examination_id")
+                .eq("batch_id", batch_id)
+                .in_("examination_id", exam_ids)
+                .execute()
+            )
+            participating = {eb["examination_id"] for eb in (eb_res.data or [])}
+            all_today = [e for e in all_today if e["id"] in participating]
     except Exception:
         all_today = []
 
@@ -118,7 +158,7 @@ def get_today_examinations(auth: AuthContext = Depends(require_authenticated)) -
                 "date": ex["exam_date"],
                 "session": ex.get("session", "FN"),
                 "session_label": session_label,
-                "status": ex.get("status", "draft"),
+                "status": ex.get("status", "published"),
             }
         )
 
@@ -129,19 +169,59 @@ def get_today_examinations(auth: AuthContext = Depends(require_authenticated)) -
 def get_upcoming_examinations(auth: AuthContext = Depends(require_authenticated)) -> dict:
     """Retrieve published future examinations."""
     db = require_db()
-    _resolve_student_record(auth, db)
+    student = _resolve_student_record(auth, db)
     today_str = datetime.date.today().isoformat()
 
+    if auth.user_id.startswith("demo-"):
+        return {
+            "examinations": [
+                {
+                    "id": "exam-demo-01",
+                    "examination_name": "Mid-Term Examinations - Computer Science & AI",
+                    "date": today_str,
+                    "session": "FN",
+                    "session_label": "Morning (FN)",
+                    "status": "published",
+                }
+            ]
+        }
+
     try:
+        batch_id = None
+        if student.get("program_id") and student.get("semester") and student.get("section"):
+            b_res = (
+                db.table("batches")
+                .select("id")
+                .eq("program_id", student["program_id"])
+                .eq("semester", student["semester"])
+                .eq("section", student["section"])
+                .limit(1)
+                .execute()
+            )
+            if b_res.data:
+                batch_id = b_res.data[0]["id"]
+
         res = (
             db.table("examinations")
             .select("id,name,exam_date,session,status")
             .gte("exam_date", today_str)
+            .eq("status", "published")
             .order("exam_date", desc=False)
             .limit(10)
             .execute()
         )
         exams = res.data or []
+        if batch_id and exams:
+            exam_ids = [e["id"] for e in exams]
+            eb_res = (
+                db.table("examination_batches")
+                .select("examination_id")
+                .eq("batch_id", batch_id)
+                .in_("examination_id", exam_ids)
+                .execute()
+            )
+            participating = {eb["examination_id"] for eb in (eb_res.data or [])}
+            exams = [e for e in exams if e["id"] in participating]
     except Exception:
         exams = []
 
@@ -154,7 +234,7 @@ def get_upcoming_examinations(auth: AuthContext = Depends(require_authenticated)
                 "date": ex["exam_date"],
                 "session": ex.get("session", "FN"),
                 "session_label": "Morning (FN)" if ex.get("session") == "FN" else "Afternoon (AN)",
-                "status": ex.get("status", "draft"),
+                "status": ex.get("status", "published"),
             }
         )
 

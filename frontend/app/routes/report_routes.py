@@ -19,7 +19,7 @@ from reportlab.platypus import (
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
-from ..auth import AuthContext, require_authenticated
+from ..auth import AuthContext, require_authenticated, require_staff_or_faculty
 from ..database.client import require_db
 from ..utils.errors import ApiError
 
@@ -27,7 +27,7 @@ router = APIRouter(prefix="/reports", tags=["reports"])
 
 
 @router.get("/plan/{plan_id}/csv")
-def export_plan_csv(plan_id: str, auth: AuthContext = Depends(require_authenticated)):
+def export_plan_csv(plan_id: str, auth: AuthContext = Depends(require_staff_or_faculty)):
     """Export seating assignments of a plan to CSV."""
     db = require_db()
     plan = (
@@ -97,7 +97,7 @@ def export_plan_csv(plan_id: str, auth: AuthContext = Depends(require_authentica
 
 
 @router.get("/plan/{plan_id}/pdf")
-def export_plan_pdf(plan_id: str, auth: AuthContext = Depends(require_authenticated)):
+def export_plan_pdf(plan_id: str, auth: AuthContext = Depends(require_staff_or_faculty)):
     """Generate high-quality printable PDF seating report."""
     db = require_db()
     plan = (
@@ -215,7 +215,7 @@ def export_plan_pdf(plan_id: str, auth: AuthContext = Depends(require_authentica
 @router.get("/examination/{exam_id}/locator/pdf")
 @router.get("/exam/{exam_id}/locator/pdf")
 @router.get("/exam/{exam_id}/locator-pdf")
-def export_locator_pdf(exam_id: str, auth: AuthContext = Depends(require_authenticated)):
+def export_locator_pdf(exam_id: str, auth: AuthContext = Depends(require_staff_or_faculty)):
     """Generate student seat locator notice board list for an examination."""
     db = require_db()
     exam = db.table("examinations").select("*").eq("id", exam_id).single().execute().data
@@ -311,7 +311,7 @@ def export_locator_pdf(exam_id: str, auth: AuthContext = Depends(require_authent
 
 @router.get("/examination/{exam_id}/locator")
 @router.get("/exam/{exam_id}/locator")
-def get_locator_data(exam_id: str, auth: AuthContext = Depends(require_authenticated)):
+def get_locator_data(exam_id: str, auth: AuthContext = Depends(require_staff_or_faculty)):
     """Return JSON locator records for student lookup in the UI."""
     db = require_db()
     exam = db.table("examinations").select("*").eq("id", exam_id).single().execute().data
@@ -350,7 +350,7 @@ def get_locator_data(exam_id: str, auth: AuthContext = Depends(require_authentic
 
 @router.get("/examination/{exam_id}/csv")
 @router.get("/exam/{exam_id}/csv")
-def export_exam_csv(exam_id: str, auth: AuthContext = Depends(require_authenticated)):
+def export_exam_csv(exam_id: str, auth: AuthContext = Depends(require_staff_or_faculty)):
     """Export examination seating plan to CSV."""
     db = require_db()
     exam = db.table("examinations").select("*").eq("id", exam_id).single().execute().data

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
 
-from ..auth import AuthContext, require_admin, require_staff, require_authenticated
+from ..auth import AuthContext, require_admin, require_staff, require_authenticated, require_staff_or_faculty
 from ..database.client import require_db
 from ..schemas.index import (
     ExamBatchesRequest,
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/examinations", tags=["examinations"])
 def list_examinations(
     include_archived: bool = False,
     limit: int = Query(default=50, ge=1, le=200),
-    auth: AuthContext = Depends(require_authenticated),
+    auth: AuthContext = Depends(require_staff_or_faculty),
 ) -> dict:
     db = require_db()
     query = (
@@ -137,7 +137,7 @@ def archive_exam(exam_id: str, auth: AuthContext = Depends(require_staff)) -> di
 
 
 @router.get("/{exam_id}")
-def get_exam(exam_id: str, auth: AuthContext = Depends(require_authenticated)) -> dict:
+def get_exam(exam_id: str, auth: AuthContext = Depends(require_staff_or_faculty)) -> dict:
     db = require_db()
     exam = db.table("examinations").select("*").eq("id", exam_id).single().execute().data
     if not exam:
