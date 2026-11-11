@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ShieldCheck, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
 import { CrowdCanvas } from '../ui/skiper39';
 
 export const LandingHero: React.FC = () => {
@@ -39,12 +39,6 @@ export const LandingHero: React.FC = () => {
             Made Smarter.
           </span>
         </h1>
-
-        {/* Supporting Description */}
-        <p className="max-w-2xl mx-auto text-base sm:text-lg text-zinc-600 font-normal leading-relaxed">
-          SeatWise simplifies university examination seating with intelligent student allocation,
-          interactive classroom layouts, and mathematically validated seating arrangements.
-        </p>
 
         {/* Call to Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
