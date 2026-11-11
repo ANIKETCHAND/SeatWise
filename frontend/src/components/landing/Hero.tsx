@@ -10,17 +10,17 @@ export const LandingHero: React.FC = () => {
   };
 
   return (
-    <section className="relative min-h-[92vh] flex flex-col justify-between overflow-hidden bg-white pt-28 sm:pt-36">
+    <section className="relative min-h-[88vh] sm:min-h-[92vh] flex flex-col justify-between overflow-hidden bg-white pt-24 sm:pt-28">
       {/* Background subtle radial glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-zinc-100/80 rounded-full blur-[120px] pointer-events-none z-0" />
 
-      {/* Full Animated Crowd Canvas Background */}
+      {/* Full Animated Crowd Canvas Background shifted downwards */}
       <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <CrowdCanvas
           src="/open-peeps-sheet.png"
           rows={15}
           cols={7}
-          className="absolute bottom-0 left-0 w-full h-[85vh] pointer-events-none select-none"
+          className="absolute -bottom-10 sm:-bottom-16 left-0 w-full h-[48vh] sm:h-[54vh] max-h-[480px] pointer-events-none select-none"
         />
       </div>
 
@@ -66,7 +66,7 @@ export const LandingHero: React.FC = () => {
       </div>
 
       {/* Spacer to give breathing room for the crowd animation at the base */}
-      <div className="h-28 sm:h-36 pointer-events-none" />
+      <div className="h-16 sm:h-24 pointer-events-none" />
     </section>
   );
 };
