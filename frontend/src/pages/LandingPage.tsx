@@ -4,7 +4,6 @@ import { LandingHero } from '../components/landing/Hero';
 import { LandingFeatures } from '../components/landing/Features';
 import { LandingHowItWorks } from '../components/landing/HowItWorks';
 import { LandingProductPreview } from '../components/landing/ProductPreview';
-import { LandingAbout } from '../components/landing/About';
 import { LandingFinalCTA } from '../components/landing/FinalCTA';
 import { LandingFooter } from '../components/landing/Footer';
 
@@ -17,7 +16,6 @@ export const LandingPage: React.FC = () => {
         <LandingFeatures />
         <LandingHowItWorks />
         <LandingProductPreview />
-        <LandingAbout />
         <LandingFinalCTA />
       </main>
       <LandingFooter />

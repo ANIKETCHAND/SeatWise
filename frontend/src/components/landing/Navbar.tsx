@@ -76,12 +76,6 @@ export const LandingNavbar: React.FC = () => {
             >
               Planner Preview
             </button>
-            <button
-              onClick={() => scrollToSection('about')}
-              className="text-sm font-medium text-zinc-600 hover:text-black transition-colors"
-            >
-              About
-            </button>
           </div>
 
           {/* Right: Sign In / Portal CTA */}
@@ -137,12 +131,6 @@ export const LandingNavbar: React.FC = () => {
             className="block w-full text-left py-2 text-sm font-medium text-zinc-700 hover:text-black"
           >
             Planner Preview
-          </button>
-          <button
-            onClick={() => scrollToSection('about')}
-            className="block w-full text-left py-2 text-sm font-medium text-zinc-700 hover:text-black"
-          >
-            About
           </button>
           <div className="pt-3 border-t border-zinc-200">
             <Link
