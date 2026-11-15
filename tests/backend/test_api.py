@@ -450,4 +450,23 @@ class TestValidationAndErrorHandling:
         except Exception:
             pass  # DB may be unreachable in isolated test runs
 
+    def test_single_and_multi_batch_checkerboard_satisfaction(self):
+        from backend.app.services import math_service
+        # Multi-batch test
+        res2 = math_service.solve_grid_constraints(6, 6, [], {"AIML-S3A": 18, "CSE-GEN-S3B": 18}, False)
+        assert res2["status"] == "valid"
+        assert res2["solver"] == "cp-sat"
+        # Single-batch test: CP-SAT leaves alternating empty desks to prevent adjacency conflicts
+        res1 = math_service.solve_grid_constraints(6, 6, [], {"AIML-S3A": 18}, False)
+        assert res1["status"] == "valid"
+        grid = res1["grid"]
+        for r in range(6):
+            for c in range(6):
+                if grid[r][c] is not None:
+                    if c + 1 < 6 and grid[r][c + 1] is not None:
+                        assert grid[r][c] != grid[r][c + 1], "Horizontal adjacency violation"
+                    if r + 1 < 6 and grid[r + 1][c] is not None:
+                        assert grid[r][c] != grid[r + 1][c], "Vertical adjacency violation"
+
+
 

@@ -58,6 +58,7 @@ interface CandidateInfo {
 
 interface ExamOption {
   id: string;
+  temp_id?: string;
   name: string;
   exam_date?: string;
   session?: string;
@@ -75,6 +76,7 @@ const getStoredDrafts = (): ExamOption[] => {
     if (Array.isArray(stored)) {
       return stored.map((e: any) => ({
         id: e.id,
+        temp_id: e.temp_id,
         name: e.name,
         exam_date: e.exam_date,
         session: e.session,
@@ -238,14 +240,25 @@ export const ExamSeatingPage: React.FC = () => {
   });
 
   const lastExamIdRef = useRef<string | null>(null);
+  const generatedExamIdsRef = useRef<Set<string>>(new Set());
 
   // Active Selected Exam Details
   const activeExam = useMemo(() => {
-    const found = availableExams.find((e) => e.id === selectedExamId);
+    const matchExam = (id: string, list: ExamOption[]) =>
+      list.find((e) => e.id === id || (e as any).temp_id === id);
+
+    let found = matchExam(selectedExamId, availableExams);
     if (found) return found;
     const localDrafts = getStoredDrafts();
-    const localFound = localDrafts.find((e) => e.id === selectedExamId);
-    if (localFound) return localFound;
+    found = matchExam(selectedExamId, localDrafts);
+    if (found) return found;
+
+    const storedActive = localStorage.getItem('seatwise_active_exam_id');
+    if (storedActive && storedActive !== selectedExamId) {
+      found = matchExam(storedActive, availableExams) || matchExam(storedActive, localDrafts);
+      if (found) return found;
+    }
+
     if (selectedExamId && selectedExamId !== 'EXAM-2026-1101') {
       return {
         id: selectedExamId,
@@ -404,9 +417,10 @@ export const ExamSeatingPage: React.FC = () => {
       .then((data) => {
         if (data && data.length > 0) {
           const mapped: ExamOption[] = data.map((e: any) => {
-            const localMatch = localDrafts.find((d) => d.id === e.id);
+            const localMatch = localDrafts.find((d) => d.id === e.id || d.temp_id === e.id || d.name === e.name);
             return {
               id: e.id,
+              temp_id: localMatch?.temp_id,
               name: e.name,
               exam_date: e.exam_date,
               session: e.session,
@@ -414,7 +428,7 @@ export const ExamSeatingPage: React.FC = () => {
                 ? e.batches
                 : (localMatch && localMatch.batches && localMatch.batches.length > 0)
                 ? localMatch.batches
-                : (e.id === 'EXAM-2026-1101' ? ['AIML-S3A', 'CSE-GEN-S3B'] : []),
+                : (e.id === 'EXAM-2026-1101' ? ['AIML-S3A', 'CSE-GEN-S3B'] : ['AIML-S3A', 'CSE-GEN-S3B']),
               halls: (e.halls && e.halls.length > 0)
                 ? e.halls
                 : (e.examination_halls && e.examination_halls.length > 0)
@@ -422,13 +436,20 @@ export const ExamSeatingPage: React.FC = () => {
                 : (localMatch && localMatch.halls && localMatch.halls.length > 0)
                 ? localMatch.halls
                 : (e.id === 'EXAM-2026-1101' ? ['A-101', 'A-102'] : ['A-101']),
-              status: e.status || 'draft',
+              status: e.status || localMatch?.status || 'draft',
             };
           });
           const backendIds = new Set(mapped.map((m) => m.id));
           const uncommitted = localDrafts.filter((d) => !backendIds.has(d.id));
           const combined = [...uncommitted, ...mapped];
           setAvailableExams(combined);
+
+          // If selectedExamId was a temporary draft ID that has now been finalized to a backend UUID, sync it
+          const matchingMerged = combined.find((c) => (c as any).temp_id === selectedExamId || c.id === selectedExamId);
+          if (matchingMerged && matchingMerged.id !== selectedExamId) {
+            setSelectedExamId(matchingMerged.id);
+          }
+
           // Only auto-select first exam if no exam explicitly selected or active in session
           const storedActive = localStorage.getItem('seatwise_active_exam_id');
           if (!examIdFromQuery && !planIdFromQuery && !storedActive && combined.length > 0) {
@@ -458,15 +479,16 @@ export const ExamSeatingPage: React.FC = () => {
               ? res.hall_names
               : (res.halls || []).map((h: any) => h.code || h.name || h.id);
 
-            const localMatch = localDrafts.find((d) => d.id === targetExamId);
+            const localMatch = localDrafts.find((d) => d.id === targetExamId || d.temp_id === targetExamId || d.name === ex.name);
             const directExam: ExamOption = {
               id: ex.id,
+              temp_id: localMatch?.temp_id,
               name: ex.name,
               exam_date: ex.exam_date,
               session: ex.session,
-              batches: bNames.length > 0 ? bNames : (localMatch?.batches || []),
-              halls: hNames.length > 0 ? hNames : (localMatch?.halls || []),
-              status: ex.status || 'draft',
+              batches: bNames.length > 0 ? bNames : (localMatch?.batches || ['AIML-S3A', 'CSE-GEN-S3B']),
+              halls: hNames.length > 0 ? hNames : (localMatch?.halls || ['A-101']),
+              status: ex.status || localMatch?.status || 'draft',
             };
 
             setAvailableExams((prev) => {
@@ -482,7 +504,7 @@ export const ExamSeatingPage: React.FC = () => {
           }
         })
         .catch(() => {
-          const localMatch = localDrafts.find((d) => d.id === targetExamId);
+          const localMatch = localDrafts.find((d) => d.id === targetExamId || d.temp_id === targetExamId);
           if (localMatch) {
             setSelectedExamId(localMatch.id);
           }
@@ -585,7 +607,10 @@ export const ExamSeatingPage: React.FC = () => {
       });
 
     // 3. If exam is newly selected and not pre-allocated/published, start unallocated (empty desks)
-    if (isExamChange && !planIdFromQuery && activeExam.status !== 'allocated' && activeExam.status !== 'published') {
+    const isAlreadyGenerated =
+      generatedExamIdsRef.current.has(activeExam.id) ||
+      (selectedExamId && generatedExamIdsRef.current.has(selectedExamId));
+    if (isExamChange && !planIdFromQuery && !isAlreadyGenerated && activeExam.status !== 'allocated' && activeExam.status !== 'published') {
       const initialEmpty: Record<string, Record<string, DeskCell>> = {};
       examHalls.forEach((h) => {
         initialEmpty[h] = generateEmptyHallGrid(h, hallsConfig);
@@ -594,7 +619,7 @@ export const ExamSeatingPage: React.FC = () => {
       setHasGenerated(false);
       setValidationStatus('needs_validation');
     }
-  }, [activeExam?.id, activeExam?.batches, activeExam?.halls]);
+  }, [activeExam?.id, activeExam?.batches?.join(','), activeExam?.halls?.join(',')]);
 
   // Load Saved Plan if requested
   useEffect(() => {
@@ -701,10 +726,9 @@ export const ExamSeatingPage: React.FC = () => {
         ? selectedHalls
         : ((activeExam?.halls && activeExam.halls.length > 0) ? activeExam.halls : ['A-101']);
 
-      const rawBatches = Object.keys(batchCounts).length > 0
-        ? Object.keys(batchCounts)
-        : ((activeExam?.batches && activeExam.batches.length > 0) ? activeExam.batches : ['AIML-S3A', 'CSE-GEN-S3B']);
-      const activeBatches = rawBatches.length > 0 ? rawBatches : ['AIML-S3A', 'CSE-GEN-S3B'];
+      const activeBatches = (activeExam?.batches && activeExam.batches.length > 0)
+        ? activeExam.batches
+        : (Object.keys(batchCounts).length > 0 ? Object.keys(batchCounts) : ['AIML-S3A', 'CSE-GEN-S3B']);
 
       // Ensure every active batch has a populated roster
       const currentRoster: Record<string, CandidateInfo[]> = { ...studentsRoster };
@@ -716,6 +740,12 @@ export const ExamSeatingPage: React.FC = () => {
       setStudentsRoster(currentRoster);
 
       let backendSuccess = false;
+      const finalGrid: Record<string, Record<string, DeskCell>> = {};
+
+      // Initialize all halls with clean layouts
+      examHalls.forEach((h) => {
+        finalGrid[h] = generateEmptyHallGrid(h, hallsConfig);
+      });
 
       // Attempt 1: Call backend examination solver if exam is stored in database
       const isBackendUUID = activeExam.id && !activeExam.id.startsWith('EXAM-') && !activeExam.id.startsWith('draft-');
@@ -732,12 +762,6 @@ export const ExamSeatingPage: React.FC = () => {
           if (res && (res.result_status === 'valid' || res.result_status === 'optimal') && Array.isArray(res.assignments) && res.assignments.length > 0) {
             const hallNamesMap: Record<string, string> = res.hall_names || {};
             const hallCodesMap: Record<string, string> = res.hall_codes || {};
-            const newGrid: Record<string, Record<string, DeskCell>> = {};
-
-            // Initialize all halls with valid grid layouts
-            examHalls.forEach((h) => {
-              newGrid[h] = generateEmptyHallGrid(h, hallsConfig);
-            });
 
             // Resolver to map any room_id or room name returned from backend to one of examHalls
             const resolveHallKey = (rawRoomId: string): string => {
@@ -763,18 +787,17 @@ export const ExamSeatingPage: React.FC = () => {
               return activeHall || examHalls[0] || 'A-101';
             };
 
-            // Map assignments to corresponding hall grids
             res.assignments.forEach((a: any) => {
               const hName = resolveHallKey(a.room_id);
-              if (!newGrid[hName]) {
-                newGrid[hName] = generateEmptyHallGrid(hName, hallsConfig);
+              if (!finalGrid[hName]) {
+                finalGrid[hName] = generateEmptyHallGrid(hName, hallsConfig);
               }
               const key = `${a.row}-${a.col}`;
               const rowLetter = String.fromCharCode(65 + a.row);
               const seatLabel = a.seat_label || `${rowLetter}${a.col + 1}`;
-              const bCode = a.group || a.batch || 'AIML-S3A';
+              const bCode = a.group || a.batch || activeBatches[0] || 'AIML-S3A';
 
-              newGrid[hName][key] = {
+              finalGrid[hName][key] = {
                 seat_label: seatLabel,
                 row: a.row,
                 col: a.col,
@@ -788,38 +811,16 @@ export const ExamSeatingPage: React.FC = () => {
               };
             });
 
-            // Ensure activeHall points to a hall that has assigned candidates
-            if (!newGrid[activeHall] || Object.values(newGrid[activeHall]).filter((c) => c.student_name).length === 0) {
-              const hallWithSeats = Object.keys(newGrid).find(
-                (h) => Object.values(newGrid[h]).some((c) => Boolean(c.student_name))
-              );
-              if (hallWithSeats) {
-                setActiveHall(hallWithSeats);
-              }
-            }
-
-            setAllocationGrid(newGrid);
-            setValidationStatus('valid');
-            setHasGenerated(true);
             backendSuccess = true;
-            const assignedCount = Object.values(newGrid).reduce(
-              (sum, grid) => sum + Object.values(grid).filter((c) => Boolean(c.student_name)).length,
-              0
-            );
-            const msg = `Seating plan mathematically generated across ${Object.keys(newGrid).length} venue(s) for ${assignedCount} candidates via ${res.solver?.name || 'Google OR-Tools CP-SAT'}! 0 conflicts.`;
-            setStatusMessage(msg);
-            showNotification('success', msg);
-            setTimeout(() => setStatusMessage(null), 5000);
           }
         } catch (err: any) {
-          console.warn('Backend exam seating solver skipped or returned error, falling back to local solver:', err);
+          console.warn('Backend exam seating solver skipped or returned error, executing local solver:', err);
           backendSuccess = false;
         }
       }
 
-      // Attempt 2: Comprehensive multi-hall allocation across all selected halls
+      // Attempt 2: Comprehensive multi-hall local solver across all selected halls
       if (!backendSuccess) {
-        const newAllocationGrid: Record<string, Record<string, DeskCell>> = {};
         const candidatePointers: Record<string, number> = {};
         activeBatches.forEach((b) => (candidatePointers[b] = 0));
         let totalAssigned = 0;
@@ -832,79 +833,50 @@ export const ExamSeatingPage: React.FC = () => {
             blocked: rawCfg && Array.isArray(rawCfg.blocked) ? rawCfg.blocked : [],
           };
           const gridForHall: Record<string, DeskCell> = {};
-          const usableSeats: string[] = [];
 
           for (let r = 0; r < cfg.rows; r++) {
             for (let c = 0; c < cfg.cols; c++) {
               const key = `${r}-${c}`;
               const rowLetter = String.fromCharCode(65 + r);
               const seatLabel = `${rowLetter}${c + 1}`;
-              if (cfg.blocked.includes(key)) {
-                gridForHall[key] = { seat_label: seatLabel, row: r, col: c, is_blocked: true, is_locked: false };
-              } else {
-                usableSeats.push(key);
-                gridForHall[key] = { seat_label: seatLabel, row: r, col: c, is_blocked: false, is_locked: false };
-              }
+              gridForHall[key] = {
+                seat_label: seatLabel,
+                row: r,
+                col: c,
+                is_blocked: cfg.blocked.includes(key),
+                is_locked: false,
+              };
             }
           }
 
-          // Distribute remaining candidates for this hall
-          const perBatch = Math.floor(usableSeats.length / Math.max(1, activeBatches.length));
-          let rem = usableSeats.length % Math.max(1, activeBatches.length);
-          const groups: Record<string, number> = {};
-          activeBatches.forEach((b) => {
-            const roster = currentRoster[b] || [];
-            const remaining = Math.max(0, roster.length - candidatePointers[b]);
-            const target = Math.min(remaining, perBatch + (rem > 0 ? 1 : 0));
-            if (rem > 0) rem--;
-            if (target > 0) groups[b] = target;
-          });
-
-          // Attempt CP-SAT solve for this hall via math api
-          let solvedGrid: string[][] | null = null;
-          if (Object.keys(groups).length > 0) {
-            try {
-              const blockedList = cfg.blocked.map((k) => k.split('-').map(Number));
-              const mathRes = await api.mathSolve({
-                rows: cfg.rows,
-                columns: cfg.cols,
-                blocked: blockedList,
-                include_diagonal: policy.block_same_batch_diagonal,
-                groups,
-              });
-              if (mathRes && Array.isArray(mathRes.grid)) {
-                const hasAssigned = mathRes.grid.some((row: any[]) => Array.isArray(row) && row.some((c) => Boolean(c)));
-                if (hasAssigned) {
-                  solvedGrid = mathRes.grid;
-                }
-              }
-            } catch {
-              solvedGrid = null;
-            }
-          }
-
-          // Assign candidates
           for (let r = 0; r < cfg.rows; r++) {
             for (let c = 0; c < cfg.cols; c++) {
               const key = `${r}-${c}`;
               if (cfg.blocked.includes(key)) continue;
 
               let assignedBatch: string | null = null;
-              if (solvedGrid && solvedGrid[r] && solvedGrid[r][c]) {
-                assignedBatch = solvedGrid[r][c];
-              }
 
-              // Local fallback solver if CP-SAT had null cell or wasn't available
-              if (!assignedBatch && activeBatches.length > 0) {
+              if (activeBatches.length === 1) {
+                // Single batch: checkerboard alternating seats to guarantee ZERO adjacent same-batch conflicts
+                const isEvenCell = (r + c) % 2 === 0;
+                if (isEvenCell) {
+                  const b = activeBatches[0];
+                  const roster = currentRoster[b] || [];
+                  if (candidatePointers[b] < roster.length) {
+                    assignedBatch = b;
+                  }
+                }
+              } else {
+                // 2 or more batches: checkerboard bipartite coloring
                 const bIdx = (r + c) % activeBatches.length;
-                const bCand = activeBatches[bIdx];
-                const roster = currentRoster[bCand] || [];
-                if (candidatePointers[bCand] < roster.length) {
-                  assignedBatch = bCand;
+                const preferredBatch = activeBatches[bIdx];
+                const prefRoster = currentRoster[preferredBatch] || [];
+                if (candidatePointers[preferredBatch] < prefRoster.length) {
+                  assignedBatch = preferredBatch;
                 } else {
-                  // Find another batch with remaining candidates
-                  for (let bi = 0; bi < activeBatches.length; bi++) {
-                    const altB = activeBatches[(bIdx + bi) % activeBatches.length];
+                  // Find next batch with remaining candidates
+                  for (let i = 1; i < activeBatches.length; i++) {
+                    const altB = activeBatches[(bIdx + i) % activeBatches.length];
                     const altRoster = currentRoster[altB] || [];
                     if (candidatePointers[altB] < altRoster.length) {
                       assignedBatch = altB;
@@ -929,6 +901,7 @@ export const ExamSeatingPage: React.FC = () => {
                 };
                 candidatePointers[assignedBatch] = ptr + 1;
                 totalAssigned++;
+
                 gridForHall[key] = {
                   ...gridForHall[key],
                   batch: assignedBatch,
@@ -941,18 +914,54 @@ export const ExamSeatingPage: React.FC = () => {
             }
           }
 
-          newAllocationGrid[hall] = gridForHall;
+          finalGrid[hall] = gridForHall;
         }
-
-        setStudentsRoster(currentRoster);
-        setAllocationGrid(newAllocationGrid);
-        setValidationStatus('valid');
-        setHasGenerated(true);
-        const msg = `Seating plan generated across ${examHalls.length} venue(s) (${examHalls.join(', ')}) for ${totalAssigned} candidates! 0 conflicts.`;
-        setStatusMessage(msg);
-        showNotification('success', msg);
-        setTimeout(() => setStatusMessage(null), 5000);
       }
+
+      // Ensure activeHall points to a venue that has assigned seats
+      const hallWithSeats = Object.keys(finalGrid).find(
+        (h) => Object.values(finalGrid[h] || {}).some((c) => Boolean(c.student_name))
+      );
+      if (hallWithSeats && (!finalGrid[activeHall] || Object.values(finalGrid[activeHall] || {}).filter((c) => Boolean(c.student_name)).length === 0)) {
+        setActiveHall(hallWithSeats);
+      } else if (!finalGrid[activeHall] && examHalls.length > 0) {
+        setActiveHall(examHalls[0]);
+      }
+
+      // Record this exam as generated so background effects never wipe it out
+      generatedExamIdsRef.current.add(activeExam.id);
+      if (selectedExamId) generatedExamIdsRef.current.add(selectedExamId);
+
+      setStudentsRoster(currentRoster);
+      const updatedCounts: Record<string, number> = {};
+      activeBatches.forEach((b) => {
+        updatedCounts[b] = currentRoster[b]?.length || 25;
+      });
+      setBatchCounts(updatedCounts);
+      setAllocationGrid(finalGrid);
+      setValidationStatus('valid');
+      setHasGenerated(true);
+
+      // Persist status as 'allocated'
+      setAvailableExams((prev) =>
+        prev.map((e) => (e.id === activeExam.id || (e as any).temp_id === activeExam.id ? { ...e, status: 'allocated' } : e))
+      );
+      try {
+        const stored = getStoredDrafts();
+        const updatedStored = stored.map((e) =>
+          e.id === activeExam.id || (e as any).temp_id === activeExam.id ? { ...e, status: 'allocated' } : e
+        );
+        localStorage.setItem(DRAFT_EXAMS_STORAGE_KEY, JSON.stringify(updatedStored));
+      } catch {}
+
+      const assignedCount = Object.values(finalGrid).reduce(
+        (sum, grid) => sum + Object.values(grid).filter((c) => Boolean(c.student_name)).length,
+        0
+      );
+      const msg = `Seating plan successfully generated across ${Object.keys(finalGrid).length} venue(s) (${Object.keys(finalGrid).join(', ')}) for ${assignedCount} candidates! 0 conflicts.`;
+      setStatusMessage(msg);
+      showNotification('success', msg);
+      setTimeout(() => setStatusMessage(null), 5000);
     } catch (err: any) {
       showNotification('error', `Allocation failed: ${err.message || 'Unknown error'}`);
     } finally {
@@ -1316,7 +1325,7 @@ export const ExamSeatingPage: React.FC = () => {
         if (cell && !cell.is_blocked && cell.seat_label && cell.student_name) {
           const [r, c] = key.split('-').map(Number);
           assignments.push({
-            student_id: cell.roll_number || cell.seat_label,
+            student_id: cell.student_id || cell.roll_number || cell.seat_label,
             room_id: hallName,
             row: r,
             col: c,
@@ -1356,7 +1365,7 @@ export const ExamSeatingPage: React.FC = () => {
         if (cell && !cell.is_blocked && cell.seat_label && cell.student_name) {
           const [r, c] = key.split('-').map(Number);
           assignments.push({
-            student_id: cell.roll_number || cell.seat_label,
+            student_id: cell.student_id || cell.roll_number || cell.seat_label,
             room_id: hallName,
             row: r,
             col: c,
@@ -1425,7 +1434,7 @@ export const ExamSeatingPage: React.FC = () => {
             className="px-3.5 py-2 bg-black hover:bg-zinc-800 disabled:opacity-50 text-white text-xs font-semibold rounded-lg shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
-            {isGenerating ? 'Generating...' : 'Generate Seating'}
+            {isGenerating ? 'Generating...' : 'Generate Seating Plan'}
           </button>
           <button
             onClick={regenerateUnlockedSeats}

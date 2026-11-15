@@ -377,7 +377,7 @@ export const ExamManagementPage: React.FC = () => {
         .then((res: any) => {
           const realId = res?.examination?.id;
           if (realId) {
-            const finalized = nextList.map((ex) => (ex.id === tempId ? { ...ex, id: realId } : ex));
+            const finalized = nextList.map((ex) => (ex.id === tempId ? { ...ex, id: realId, temp_id: tempId } : ex));
             setExams(finalized);
             saveStoredDrafts(finalized);
             try {
