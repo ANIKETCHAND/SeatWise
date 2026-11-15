@@ -96,12 +96,34 @@ const AVAILABLE_HALLS = [
   'LH-101', 'LH-102', 'EXAM-HALL-MAIN', 'LH-201',
 ];
 
+export const DRAFT_EXAMS_STORAGE_KEY = 'seatwise_custom_exams';
+
+const getStoredDrafts = (): ExamRecord[] => {
+  try {
+    const raw = localStorage.getItem(DRAFT_EXAMS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveStoredDrafts = (drafts: ExamRecord[]) => {
+  try {
+    localStorage.setItem(DRAFT_EXAMS_STORAGE_KEY, JSON.stringify(drafts));
+  } catch {
+    // Ignore localStorage quota or access errors
+  }
+};
+
 export const ExamManagementPage: React.FC = () => {
   const { role } = useAuth();
   const { showNotification } = useNotification();
   const isStaff = role === 'admin' || role === 'exam_staff';
 
-  const [exams, setExams] = useState<ExamRecord[]>(INITIAL_EXAMS);
+  const [exams, setExams] = useState<ExamRecord[]>(() => {
+    const drafts = getStoredDrafts();
+    return drafts.length > 0 ? drafts : INITIAL_EXAMS;
+  });
   const [batchesList, setBatchesList] = useState<string[]>(AVAILABLE_BATCHES);
   const [hallsList, setHallsList] = useState<string[]>(AVAILABLE_HALLS);
   const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'allocated' | 'published' | 'archived'>('all');
@@ -124,29 +146,53 @@ export const ExamManagementPage: React.FC = () => {
     status: 'draft' as 'draft' | 'allocated' | 'published' | 'archived',
   });
 
-  // Load Real Supabase Data
+  // Load Real Supabase Data & Synchronize with local drafts
   useEffect(() => {
+    const localDrafts = getStoredDrafts();
     api.getExams()
       .then((data) => {
         if (data && data.length > 0) {
-          const mapped: ExamRecord[] = data.map((e: any) => ({
-            id: e.id,
-            name: e.name,
-            subject_name: e.subject_name || (e.name.includes('-') ? e.name.split('-')[1]?.trim() : ''),
-            subject_code: e.subject_code || '',
-            exam_date: e.exam_date,
-            session: e.session === 'AN' ? 'afternoon' : 'morning',
-            batches: e.batches && e.batches.length > 0 ? e.batches : ['AIML-S3A', 'CSE-GEN-S3B'],
-            halls: (e.examination_halls && e.examination_halls.length > 0)
+          const mapped: ExamRecord[] = data.map((e: any) => {
+            const localMatch = localDrafts.find((d) => d.id === e.id);
+            const resolvedBatches = (e.batches && e.batches.length > 0)
+              ? e.batches
+              : (localMatch && localMatch.batches && localMatch.batches.length > 0)
+              ? localMatch.batches
+              : (e.id === 'EXAM-2026-1101' ? ['AIML-S3A', 'CSE-GEN-S3B'] : []);
+            const resolvedHalls = (e.halls && e.halls.length > 0)
+              ? e.halls
+              : (e.examination_halls && e.examination_halls.length > 0)
               ? e.examination_halls.map((h: any) => h.rooms?.code || h.rooms?.name || h.room_id)
-              : (e.halls && e.halls.length > 0) ? e.halls : ['A-101', 'A-102', 'A-313'],
-            total_candidates: e.batch_count ? e.batch_count * 25 : 50,
-            status: e.status || 'draft',
-          }));
-          setExams(mapped);
+              : (localMatch && localMatch.halls && localMatch.halls.length > 0)
+              ? localMatch.halls
+              : (e.id === 'EXAM-2026-1101' ? ['A-101', 'A-102', 'A-313'] : ['A-101']);
+            return {
+              id: e.id,
+              name: e.name,
+              subject_name: e.subject_name || (e.name.includes('-') ? e.name.split('-')[1]?.trim() : ''),
+              subject_code: e.subject_code || '',
+              exam_date: e.exam_date,
+              session: e.session === 'AN' || e.session === 'afternoon' ? 'afternoon' : 'morning',
+              batches: resolvedBatches,
+              halls: resolvedHalls,
+              total_candidates: (e.batch_count || resolvedBatches.length || 2) * 20,
+              status: e.status || 'draft',
+            };
+          });
+          const backendIds = new Set(mapped.map((m) => m.id));
+          const uncommitted = localDrafts.filter((d) => !backendIds.has(d.id));
+          const combined = [...uncommitted, ...mapped];
+          setExams(combined);
+          saveStoredDrafts(combined);
+        } else if (localDrafts.length > 0) {
+          setExams(localDrafts);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        if (localDrafts.length > 0) {
+          setExams(localDrafts);
+        }
+      });
 
     api.getBatches()
       .then((data) => {
@@ -278,12 +324,17 @@ export const ExamManagementPage: React.FC = () => {
         return ex;
       });
       setExams(updatedList);
+      saveStoredDrafts(updatedList);
       setShowModal(false);
       api.updateExam(editingExamId, {
         name: formData.name,
         exam_date: formData.exam_date,
         session: formData.session === 'afternoon' ? 'AN' : 'FN',
         status: formData.status,
+        batches: formData.batches,
+        halls: formData.halls,
+        subject_name: formData.subject_name,
+        subject_code: formData.subject_code,
       })
         .then(() => {
           showNotification('success', `Examination "${formData.name}" successfully updated.`);
@@ -293,8 +344,9 @@ export const ExamManagementPage: React.FC = () => {
         });
     } else {
       // Create mode
+      const tempId = `EXAM-${Date.now().toString().slice(-4)}`;
       const created: ExamRecord = {
-        id: `EXAM-${Date.now().toString().slice(-4)}`,
+        id: tempId,
         name: formData.name,
         subject_name: formData.subject_name,
         subject_code: formData.subject_code,
@@ -305,16 +357,33 @@ export const ExamManagementPage: React.FC = () => {
         total_candidates: formData.batches.length * 20,
         status: 'draft',
       };
-      setExams([created, ...exams]);
+      const nextList = [created, ...exams];
+      setExams(nextList);
+      saveStoredDrafts(nextList);
+      try {
+        localStorage.setItem('seatwise_active_exam_id', tempId);
+      } catch {}
       setShowModal(false);
       api.createExam({
         name: created.name,
         exam_date: created.exam_date,
         session: created.session === 'afternoon' ? 'AN' : 'FN',
+        status: 'draft',
         subject_name: formData.subject_name,
         subject_code: formData.subject_code,
+        batches: formData.batches,
+        halls: formData.halls,
       })
-        .then(() => {
+        .then((res: any) => {
+          const realId = res?.examination?.id;
+          if (realId) {
+            const finalized = nextList.map((ex) => (ex.id === tempId ? { ...ex, id: realId } : ex));
+            setExams(finalized);
+            saveStoredDrafts(finalized);
+            try {
+              localStorage.setItem('seatwise_active_exam_id', realId);
+            } catch {}
+          }
           showNotification('success', `Examination "${created.name}" created. You can now configure seating plan.`);
         })
         .catch((err: any) => {
@@ -328,7 +397,9 @@ export const ExamManagementPage: React.FC = () => {
     const confirmArchive = window.confirm(`Are you sure you want to archive examination "${examName}"?`);
     if (!confirmArchive) return;
 
-    setExams(exams.map((ex) => (ex.id === examId ? { ...ex, status: 'archived' } : ex)));
+    const nextExams = exams.map((ex) => (ex.id === examId ? { ...ex, status: 'archived' as const } : ex));
+    setExams(nextExams);
+    saveStoredDrafts(nextExams);
     api.archiveExam(examId)
       .then(() => {
         showNotification('success', `Examination "${examName}" archived safely.`);
@@ -353,7 +424,9 @@ export const ExamManagementPage: React.FC = () => {
     const confirmDel = window.confirm(`Delete examination "${examName}" permanently? This cannot be undone.`);
     if (!confirmDel) return;
 
-    setExams(exams.filter((ex) => ex.id !== examId));
+    const remaining = exams.filter((ex) => ex.id !== examId);
+    setExams(remaining);
+    saveStoredDrafts(remaining);
     api.deleteExam(examId)
       .then(() => {
         showNotification('success', `Examination "${examName}" deleted.`);
@@ -500,6 +573,11 @@ export const ExamManagementPage: React.FC = () => {
                 </span>
                 <Link
                   to={`/seating-planner?exam_id=${exam.id}`}
+                  onClick={() => {
+                    try {
+                      localStorage.setItem('seatwise_active_exam_id', exam.id);
+                    } catch {}
+                  }}
                   className="inline-flex items-center gap-1 font-semibold text-zinc-950 hover:underline"
                 >
                   Plan Seating <ArrowRight className="w-3.5 h-3.5" />

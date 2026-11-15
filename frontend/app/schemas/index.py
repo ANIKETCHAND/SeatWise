@@ -196,6 +196,11 @@ class ExamCreate(BaseModel):
     session: str = Field(pattern="^(FN|AN|morning|afternoon)$")
     subject_name: str | None = None
     subject_code: str | None = None
+    batches: list[str] = Field(default_factory=list)
+    halls: list[str] = Field(default_factory=list)
+    batch_ids: list[str] = Field(default_factory=list)
+    room_ids: list[str] = Field(default_factory=list)
+    status: str | None = Field(default="draft", pattern="^(draft|allocated|published|archived)$")
 
     @field_validator("session")
     @classmethod
@@ -211,9 +216,13 @@ class ExamUpdate(BaseModel):
     name: str | None = None
     exam_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     session: str | None = Field(default=None, pattern="^(FN|AN|morning|afternoon)$")
-    status: str | None = Field(default=None, pattern="^(draft|published|archived)$")
+    status: str | None = Field(default=None, pattern="^(draft|allocated|published|archived)$")
     subject_name: str | None = None
     subject_code: str | None = None
+    batches: list[str] | None = None
+    halls: list[str] | None = None
+    batch_ids: list[str] | None = None
+    room_ids: list[str] | None = None
 
     @field_validator("session")
     @classmethod

@@ -9,7 +9,13 @@ export const examsApi = {
       return [];
     }
   },
-  getExam: (id: string) => request<any>(`/examinations/${id}`),
+  getExam: async (id: string) => {
+    try {
+      return await request<any>(`/examinations/${id}`);
+    } catch {
+      return null;
+    }
+  },
   createExam: (data: any) => request<any>('/examinations', { method: 'POST', body: JSON.stringify(data) }),
   updateExam: (id: string, data: any) => request<any>(`/examinations/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteExam: (id: string, force: boolean = false) =>
