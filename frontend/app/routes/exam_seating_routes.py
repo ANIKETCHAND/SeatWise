@@ -102,6 +102,7 @@ def generate(
         "assignments": assignments,
         "unallocated": list(result.unallocated_students),
         "hall_names": {h.hall_id: h.name for h in halls},
+        "hall_codes": {h.hall_id: h.name for h in halls},
     }
 
 

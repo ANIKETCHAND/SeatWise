@@ -45,21 +45,36 @@ def load_students_for_batches(batch_ids: list[str]) -> list[dict]:
         .execute()
     ).data or []
     synthetic: list[dict] = []
-    for b in batches:
-        p_code = (b.get("programs") or {}).get("code", "JU")
-        sem = b.get("semester", 3)
-        sec = b.get("section", "A")
-        for i in range(1, 16):
-            synthetic.append({
-                "id": str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{b['id']}-{i}")),
-                "full_name": f"Candidate {p_code} {sem}{sec} #{i}",
-                "roll_number": f"23JU-{p_code}-{sem}{sec}-{i:02d}",
-                "program_id": b["program_id"],
-                "semester": sem,
-                "section": sec,
-                "status": "active",
-                "programs": {"code": p_code},
-            })
+    if batches:
+        for b in batches:
+            p_code = (b.get("programs") or {}).get("code", "JU")
+            sem = b.get("semester", 3)
+            sec = b.get("section", "A")
+            for i in range(1, 16):
+                synthetic.append({
+                    "id": str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{b['id']}-{i}")),
+                    "full_name": f"Candidate {p_code} {sem}{sec} #{i}",
+                    "roll_number": f"23JU-{p_code}-{sem}{sec}-{i:02d}",
+                    "program_id": b["program_id"],
+                    "semester": sem,
+                    "section": sec,
+                    "status": "active",
+                    "programs": {"code": p_code},
+                })
+    else:
+        for idx, b_id in enumerate(batch_ids, start=1):
+            p_code = "AIML" if idx % 2 == 1 else "CSE"
+            for i in range(1, 16):
+                synthetic.append({
+                    "id": str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{b_id}-{i}")),
+                    "full_name": f"Candidate {p_code} #{i}",
+                    "roll_number": f"23JU-{p_code}-{i:02d}",
+                    "program_id": str(uuid.uuid5(uuid.NAMESPACE_DNS, p_code)),
+                    "semester": 3,
+                    "section": "A",
+                    "status": "active",
+                    "programs": {"code": p_code},
+                })
     return synthetic
 
 
@@ -97,11 +112,18 @@ def load_halls(room_ids: list[str]) -> list[Hall]:
     db = require_db()
     rooms = (
         db.table("rooms")
-        .select("id,name,rows,columns,room_type")
+        .select("id,code,name,rows,columns,room_type")
         .in_("id", room_ids)
         .eq("status", "active")
         .execute()
     ).data or []
+    if not rooms:
+        rooms = (
+            db.table("rooms")
+            .select("id,code,name,rows,columns,room_type")
+            .in_("id", room_ids)
+            .execute()
+        ).data or []
     if not rooms:
         raise ApiError(400, "no_rooms", "No usable rooms selected.")
 
@@ -128,9 +150,9 @@ def load_halls(room_ids: list[str]) -> list[Hall]:
             )
             for s in sorted(seat_dicts, key=lambda x: (x["row"], x["col"]))
         )
+        r_rows = room.get("rows") or 6
+        r_cols = room.get("columns") or 6
         if not seats:
-            r_rows = room.get("rows") or 6
-            r_cols = room.get("columns") or 6
             seats = tuple(
                 Seat(
                     hall_id=room["id"],
@@ -142,12 +164,13 @@ def load_halls(room_ids: list[str]) -> list[Hall]:
                 for r in range(r_rows)
                 for c in range(r_cols)
             )
+        room_code = room.get("code") or room.get("name") or str(room["id"])
         halls.append(
             Hall(
                 hall_id=room["id"],
-                name=room["name"],
-                rect_rows=room["rows"] or 0,
-                rect_cols=room["columns"] or 0,
+                name=room_code,
+                rect_rows=r_rows,
+                rect_cols=r_cols,
                 seats=seats,
             )
         )
