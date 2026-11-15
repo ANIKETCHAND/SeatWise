@@ -80,8 +80,8 @@ const getStoredDrafts = (): ExamOption[] => {
         name: e.name,
         exam_date: e.exam_date,
         session: e.session,
-        batches: e.batches && e.batches.length > 0 ? e.batches : ['AIML-S3A', 'CSE-GEN-S3B'],
-        halls: e.halls && e.halls.length > 0 ? e.halls : ['A-101'],
+        batches: normalizeBatchList(e.batches).length > 0 ? normalizeBatchList(e.batches) : ['AIML-S3A', 'CSE-GEN-S3B'],
+        halls: normalizeHallList(e.halls).length > 0 ? normalizeHallList(e.halls) : ['A-101'],
         status: e.status || 'draft',
       }));
     }
@@ -160,11 +160,11 @@ const getBatchStyle = (batchName: string, index: number = 0) => {
   return PRESET_BATCH_COLORS[Math.abs(charSum) % PRESET_BATCH_COLORS.length];
 };
 
-export const generateSyntheticCandidates = (batchName: string, count: number = 25): CandidateInfo[] => {
+export const generateSyntheticCandidates = (batchName: string, count: number = 25, startIndex: number = 1): CandidateInfo[] => {
   const cleanBatch = (batchName || 'AIML-S3A').trim();
   const batchPrefix = cleanBatch.split('-')[0] || 'JU';
   const candidates: CandidateInfo[] = [];
-  for (let i = 1; i <= count; i++) {
+  for (let i = startIndex; i < startIndex + count; i++) {
     candidates.push({
       id: `cand-${cleanBatch}-${i}`,
       roll_number: `23JU-${batchPrefix}-${i.toString().padStart(2, '0')}`,
@@ -173,6 +173,35 @@ export const generateSyntheticCandidates = (batchName: string, count: number = 2
     });
   }
   return candidates;
+};
+
+export const normalizeBatchList = (raw: any): string[] => {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((b: any) => {
+      if (typeof b === 'string') return b;
+      if (b && typeof b === 'object') {
+        if (b.programs && b.semester) {
+          return `${b.programs.code || 'JU'}-S${b.semester}${b.section || 'A'}`;
+        }
+        return b.code || b.name || b.batch_code || b.id || '';
+      }
+      return String(b || '');
+    })
+    .filter(Boolean);
+};
+
+export const normalizeHallList = (raw: any): string[] => {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((h: any) => {
+      if (typeof h === 'string') return h;
+      if (h && typeof h === 'object') {
+        return h.code || h.room_number || h.name || h.id || '';
+      }
+      return String(h || '');
+    })
+    .filter(Boolean);
 };
 
 export const normalizeBatchCode = (val: string): string => {
@@ -418,24 +447,30 @@ export const ExamSeatingPage: React.FC = () => {
         if (data && data.length > 0) {
           const mapped: ExamOption[] = data.map((e: any) => {
             const localMatch = localDrafts.find((d) => d.id === e.id || d.temp_id === e.id || d.name === e.name);
+            const rawBatches = (e.batches && e.batches.length > 0)
+              ? e.batches
+              : (localMatch && localMatch.batches && localMatch.batches.length > 0)
+              ? localMatch.batches
+              : (e.id === 'EXAM-2026-1101' ? ['AIML-S3A', 'CSE-GEN-S3B'] : ['AIML-S3A', 'CSE-GEN-S3B']);
+            const cleanBatches = normalizeBatchList(rawBatches);
+
+            const rawHalls = (e.halls && e.halls.length > 0)
+              ? e.halls
+              : (e.examination_halls && e.examination_halls.length > 0)
+              ? e.examination_halls.map((h: any) => h.rooms?.code || h.rooms?.name || h.room_id)
+              : (localMatch && localMatch.halls && localMatch.halls.length > 0)
+              ? localMatch.halls
+              : (e.id === 'EXAM-2026-1101' ? ['A-101', 'A-102'] : ['A-101']);
+            const cleanHalls = normalizeHallList(rawHalls);
+
             return {
               id: e.id,
               temp_id: localMatch?.temp_id,
               name: e.name,
               exam_date: e.exam_date,
               session: e.session,
-              batches: (e.batches && e.batches.length > 0)
-                ? e.batches
-                : (localMatch && localMatch.batches && localMatch.batches.length > 0)
-                ? localMatch.batches
-                : (e.id === 'EXAM-2026-1101' ? ['AIML-S3A', 'CSE-GEN-S3B'] : ['AIML-S3A', 'CSE-GEN-S3B']),
-              halls: (e.halls && e.halls.length > 0)
-                ? e.halls
-                : (e.examination_halls && e.examination_halls.length > 0)
-                ? e.examination_halls.map((h: any) => h.rooms?.code || h.rooms?.name || h.room_id)
-                : (localMatch && localMatch.halls && localMatch.halls.length > 0)
-                ? localMatch.halls
-                : (e.id === 'EXAM-2026-1101' ? ['A-101', 'A-102'] : ['A-101']),
+              batches: cleanBatches.length > 0 ? cleanBatches : ['AIML-S3A', 'CSE-GEN-S3B'],
+              halls: cleanHalls.length > 0 ? cleanHalls : ['A-101'],
               status: e.status || localMatch?.status || 'draft',
             };
           });
@@ -480,14 +515,17 @@ export const ExamSeatingPage: React.FC = () => {
               : (res.halls || []).map((h: any) => h.code || h.name || h.id);
 
             const localMatch = localDrafts.find((d) => d.id === targetExamId || d.temp_id === targetExamId || d.name === ex.name);
+            const cleanBatches = normalizeBatchList(bNames.length > 0 ? bNames : (localMatch?.batches || ['AIML-S3A', 'CSE-GEN-S3B']));
+            const cleanHalls = normalizeHallList(hNames.length > 0 ? hNames : (localMatch?.halls || ['A-101']));
+
             const directExam: ExamOption = {
               id: ex.id,
               temp_id: localMatch?.temp_id,
               name: ex.name,
               exam_date: ex.exam_date,
               session: ex.session,
-              batches: bNames.length > 0 ? bNames : (localMatch?.batches || ['AIML-S3A', 'CSE-GEN-S3B']),
-              halls: hNames.length > 0 ? hNames : (localMatch?.halls || ['A-101']),
+              batches: cleanBatches.length > 0 ? cleanBatches : ['AIML-S3A', 'CSE-GEN-S3B'],
+              halls: cleanHalls.length > 0 ? cleanHalls : ['A-101'],
               status: ex.status || localMatch?.status || 'draft',
             };
 
@@ -607,9 +645,16 @@ export const ExamSeatingPage: React.FC = () => {
       });
 
     // 3. If exam is newly selected and not pre-allocated/published, start unallocated (empty desks)
+    const hasAssignedSeats = Object.values(allocationGrid).some((grid) =>
+      Object.values(grid || {}).some((c) => Boolean(c.student_name))
+    );
     const isAlreadyGenerated =
       generatedExamIdsRef.current.has(activeExam.id) ||
-      (selectedExamId && generatedExamIdsRef.current.has(selectedExamId));
+      (selectedExamId && generatedExamIdsRef.current.has(selectedExamId)) ||
+      (activeExam.temp_id && generatedExamIdsRef.current.has(activeExam.temp_id)) ||
+      hasGenerated ||
+      hasAssignedSeats;
+
     if (isExamChange && !planIdFromQuery && !isAlreadyGenerated && activeExam.status !== 'allocated' && activeExam.status !== 'published') {
       const initialEmpty: Record<string, Record<string, DeskCell>> = {};
       examHalls.forEach((h) => {
@@ -726,15 +771,29 @@ export const ExamSeatingPage: React.FC = () => {
         ? selectedHalls
         : ((activeExam?.halls && activeExam.halls.length > 0) ? activeExam.halls : ['A-101']);
 
-      const activeBatches = (activeExam?.batches && activeExam.batches.length > 0)
+      const rawBatches = (activeExam?.batches && activeExam.batches.length > 0)
         ? activeExam.batches
         : (Object.keys(batchCounts).length > 0 ? Object.keys(batchCounts) : ['AIML-S3A', 'CSE-GEN-S3B']);
+      const activeBatches = normalizeBatchList(rawBatches).length > 0
+        ? normalizeBatchList(rawBatches)
+        : ['AIML-S3A', 'CSE-GEN-S3B'];
 
-      // Ensure every active batch has a populated roster
+      // Dynamic scaling: calculate total capacity across all target examination halls
+      const totalDesksInAllHalls = examHalls.reduce((sum, h) => {
+        const c = hallsConfig[h];
+        const r = c && c.rows > 0 ? c.rows : 6;
+        const col = c && c.cols > 0 ? c.cols : 6;
+        return sum + (r * col);
+      }, 0);
+      const minPerBatch = Math.max(30, Math.ceil(totalDesksInAllHalls / Math.max(1, activeBatches.length)));
+
+      // Ensure every active batch has a populated roster of sufficient size
       const currentRoster: Record<string, CandidateInfo[]> = { ...studentsRoster };
       activeBatches.forEach((b) => {
-        if (!currentRoster[b] || currentRoster[b].length === 0) {
-          currentRoster[b] = generateSyntheticCandidates(b, 25);
+        const existing = currentRoster[b] || [];
+        if (existing.length < minPerBatch) {
+          const needed = minPerBatch - existing.length;
+          currentRoster[b] = [...existing, ...generateSyntheticCandidates(b, needed, existing.length + 1)];
         }
       });
       setStudentsRoster(currentRoster);
@@ -854,6 +913,29 @@ export const ExamSeatingPage: React.FC = () => {
               const key = `${r}-${c}`;
               if (cfg.blocked.includes(key)) continue;
 
+              // Helper to check for horizontal and vertical same-batch adjacency violations
+              const isValidBatch = (bName: string): boolean => {
+                if (policy.block_same_batch_horizontal && c > 0) {
+                  const left = gridForHall[`${r}-${c - 1}`];
+                  if (left && !left.is_blocked && left.student_name && left.batch === bName) return false;
+                }
+                if (policy.block_same_batch_vertical && r > 0) {
+                  const up = gridForHall[`${r - 1}-${c}`];
+                  if (up && !up.is_blocked && up.student_name && up.batch === bName) return false;
+                }
+                if (policy.block_same_batch_diagonal) {
+                  if (r > 0 && c > 0) {
+                    const dl = gridForHall[`${r - 1}-${c - 1}`];
+                    if (dl && !dl.is_blocked && dl.student_name && dl.batch === bName) return false;
+                  }
+                  if (r > 0 && c + 1 < cfg.cols) {
+                    const dr = gridForHall[`${r - 1}-${c + 1}`];
+                    if (dr && !dr.is_blocked && dr.student_name && dr.batch === bName) return false;
+                  }
+                }
+                return true;
+              };
+
               let assignedBatch: string | null = null;
 
               if (activeBatches.length === 1) {
@@ -867,18 +949,18 @@ export const ExamSeatingPage: React.FC = () => {
                   }
                 }
               } else {
-                // 2 or more batches: checkerboard bipartite coloring
+                // 2 or more batches: checkerboard bipartite coloring with adjacency safety
                 const bIdx = (r + c) % activeBatches.length;
                 const preferredBatch = activeBatches[bIdx];
                 const prefRoster = currentRoster[preferredBatch] || [];
-                if (candidatePointers[preferredBatch] < prefRoster.length) {
+                if (candidatePointers[preferredBatch] < prefRoster.length && isValidBatch(preferredBatch)) {
                   assignedBatch = preferredBatch;
                 } else {
-                  // Find next batch with remaining candidates
+                  // Find next batch with remaining candidates that does not violate adjacency
                   for (let i = 1; i < activeBatches.length; i++) {
                     const altB = activeBatches[(bIdx + i) % activeBatches.length];
                     const altRoster = currentRoster[altB] || [];
-                    if (candidatePointers[altB] < altRoster.length) {
+                    if (candidatePointers[altB] < altRoster.length && isValidBatch(altB)) {
                       assignedBatch = altB;
                       break;
                     }
@@ -889,7 +971,7 @@ export const ExamSeatingPage: React.FC = () => {
               if (assignedBatch) {
                 let roster = currentRoster[assignedBatch];
                 if (!roster || roster.length === 0) {
-                  roster = generateSyntheticCandidates(assignedBatch, 25);
+                  roster = generateSyntheticCandidates(assignedBatch, minPerBatch);
                   currentRoster[assignedBatch] = roster;
                 }
                 const ptr = candidatePointers[assignedBatch] || 0;
@@ -931,6 +1013,7 @@ export const ExamSeatingPage: React.FC = () => {
       // Record this exam as generated so background effects never wipe it out
       generatedExamIdsRef.current.add(activeExam.id);
       if (selectedExamId) generatedExamIdsRef.current.add(selectedExamId);
+      if (activeExam.temp_id) generatedExamIdsRef.current.add(activeExam.temp_id);
 
       setStudentsRoster(currentRoster);
       const updatedCounts: Record<string, number> = {};
@@ -1761,7 +1844,11 @@ export const ExamSeatingPage: React.FC = () => {
               <select
                 value={selectedExamId}
                 onChange={(e) => {
-                  setSelectedExamId(e.target.value);
+                  const val = e.target.value;
+                  setSelectedExamId(val);
+                  try {
+                    localStorage.setItem('seatwise_active_exam_id', val);
+                  } catch {}
                   setValidationStatus('needs_validation');
                 }}
                 className="text-xs font-semibold border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-white text-zinc-900 max-w-xs truncate"
