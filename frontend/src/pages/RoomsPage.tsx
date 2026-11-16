@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   DoorClosed,
   ShieldCheck,
@@ -24,6 +24,7 @@ import { Room } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { api } from '../services/api';
+import { broadcastSync, useDataSync } from '../services/syncService';
 import {
   CAMPUS_ROOMS,
   CAMPUS_FLOORS,
@@ -57,7 +58,7 @@ export const RoomsPage: React.FC = () => {
   const [editorFeedback, setEditorFeedback] = useState<string | null>(null);
 
   // Sync with Backend API if available
-  useEffect(() => {
+  const loadRooms = useCallback(() => {
     api.getRooms()
       .then((data) => {
         if (data && data.length > 0) {
@@ -86,6 +87,12 @@ export const RoomsPage: React.FC = () => {
       })
       .catch(() => {});
   }, []);
+
+  useDataSync(loadRooms);
+
+  useEffect(() => {
+    loadRooms();
+  }, [loadRooms]);
 
   const selectRoomForEditing = (room: CampusRoom) => {
     setSelectedRoom(room);
@@ -142,6 +149,7 @@ export const RoomsPage: React.FC = () => {
     if (selectedRoom.id === roomId || selectedRoom.room_number === roomId) {
       setSelectedRoom((prev) => ({ ...prev, is_exam_approved: !prev.is_exam_approved }));
     }
+    broadcastSync('ROOM_UPDATED', { roomId });
     showNotification('success', `Updated examination certification for venue.`);
   };
 
@@ -195,10 +203,12 @@ export const RoomsPage: React.FC = () => {
       blocked: blockedArr,
     })
       .then(() => {
+        broadcastSync('ROOM_UPDATED', { roomId: selectedRoom.id });
         setEditorFeedback(`Layout for ${selectedRoom.room_number} saved to database.`);
         showNotification('success', `Room layout for ${selectedRoom.room_number} saved.`);
       })
       .catch((err: any) => {
+        broadcastSync('ROOM_UPDATED', { roomId: selectedRoom.id });
         setEditorFeedback(`Layout for ${selectedRoom.room_number} updated locally.`);
         showNotification('warning', `Layout updated locally (${err.message || 'Saved in memory'})`);
       });

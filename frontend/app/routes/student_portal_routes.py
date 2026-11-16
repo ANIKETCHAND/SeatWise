@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from ..auth import AuthContext, require_authenticated
 from ..database.client import require_db
+from ..utils.uuid_helper import resolve_exam_id
 
 router = APIRouter(prefix="/student", tags=["student-portal"])
 
@@ -134,17 +135,38 @@ def get_today_examinations(auth: AuthContext = Depends(require_authenticated)) -
             .execute()
         )
         all_today = exams_res.data or []
-        if batch_id and all_today:
+        if all_today:
             exam_ids = [e["id"] for e in all_today]
-            eb_res = (
-                db.table("examination_batches")
-                .select("examination_id")
-                .eq("batch_id", batch_id)
-                .in_("examination_id", exam_ids)
+            participating = set()
+            if batch_id:
+                eb_res = (
+                    db.table("examination_batches")
+                    .select("examination_id")
+                    .eq("batch_id", batch_id)
+                    .in_("examination_id", exam_ids)
+                    .execute()
+                )
+                participating = {eb["examination_id"] for eb in (eb_res.data or [])}
+
+            # Check if student has a published seat assignment in this examination
+            s_ids = [student["id"]]
+            if student.get("roll_number"):
+                match_s = db.table("students").select("id").ilike("roll_number", student["roll_number"]).execute().data or []
+                s_ids = list(dict.fromkeys(s_ids + [s["id"] for s in match_s]))
+            sa_res = (
+                db.table("seat_assignments")
+                .select("seating_plans!inner(examination_id)")
+                .in_("student_id", s_ids)
+                .eq("seating_plans.status", "published")
                 .execute()
             )
-            participating = {eb["examination_id"] for eb in (eb_res.data or [])}
-            all_today = [e for e in all_today if e["id"] in participating]
+            assigned_exam_ids = {
+                r["seating_plans"]["examination_id"]
+                for r in (sa_res.data or [])
+                if r.get("seating_plans") and r["seating_plans"].get("examination_id")
+            }
+            if participating or assigned_exam_ids:
+                all_today = [e for e in all_today if e["id"] in participating or e["id"] in assigned_exam_ids]
     except Exception:
         all_today = []
 
@@ -211,17 +233,37 @@ def get_upcoming_examinations(auth: AuthContext = Depends(require_authenticated)
             .execute()
         )
         exams = res.data or []
-        if batch_id and exams:
+        if exams:
             exam_ids = [e["id"] for e in exams]
-            eb_res = (
-                db.table("examination_batches")
-                .select("examination_id")
-                .eq("batch_id", batch_id)
-                .in_("examination_id", exam_ids)
+            participating = set()
+            if batch_id:
+                eb_res = (
+                    db.table("examination_batches")
+                    .select("examination_id")
+                    .eq("batch_id", batch_id)
+                    .in_("examination_id", exam_ids)
+                    .execute()
+                )
+                participating = {eb["examination_id"] for eb in (eb_res.data or [])}
+
+            s_ids = [student["id"]]
+            if student.get("roll_number"):
+                match_s = db.table("students").select("id").ilike("roll_number", student["roll_number"]).execute().data or []
+                s_ids = list(dict.fromkeys(s_ids + [s["id"] for s in match_s]))
+            sa_res = (
+                db.table("seat_assignments")
+                .select("seating_plans!inner(examination_id)")
+                .in_("student_id", s_ids)
+                .eq("seating_plans.status", "published")
                 .execute()
             )
-            participating = {eb["examination_id"] for eb in (eb_res.data or [])}
-            exams = [e for e in exams if e["id"] in participating]
+            assigned_exam_ids = {
+                r["seating_plans"]["examination_id"]
+                for r in (sa_res.data or [])
+                if r.get("seating_plans") and r["seating_plans"].get("examination_id")
+            }
+            if participating or assigned_exam_ids:
+                exams = [e for e in exams if e["id"] in participating or e["id"] in assigned_exam_ids]
     except Exception:
         exams = []
 
@@ -244,6 +286,7 @@ def get_upcoming_examinations(auth: AuthContext = Depends(require_authenticated)
 @router.get("/seat-lookup")
 def student_seat_lookup(
     roll_number: str | None = None,
+    q: str | None = None,
     examination_id: str | None = None,
     auth: AuthContext = Depends(require_authenticated),
 ) -> dict:
@@ -254,42 +297,51 @@ def student_seat_lookup(
     Only published seating arrangements are returned.
     """
     db = require_db()
+    query_val = roll_number or q
 
+    all_matched_ids = []
     if auth.role == "student":
         current_student = _resolve_student_record(auth, db)
         # Security invariant: Students cannot query other students' roll numbers
-        if roll_number and roll_number.strip().upper() != current_student["roll_number"].strip().upper():
-            raise HTTPException(
-                status_code=403,
-                detail="Access denied: Students may only inspect their own examination seat allocation.",
-            )
+        if query_val:
+            rq = query_val.strip().upper()
+            c_roll = str(current_student.get("roll_number", "")).strip().upper()
+            c_name = str(current_student.get("full_name", "")).strip().upper()
+            c_email = str(current_student.get("email", "")).strip().upper()
+            if rq != c_roll and rq not in c_name and rq != c_email:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Access denied: Students may only inspect their own examination seat allocation.",
+                )
         target_student_id = current_student["id"]
         target_roll = current_student["roll_number"]
         target_name = current_student["full_name"]
     else:
         # If exam staff/admin queries for someone else
-        if roll_number:
-            clean_q = roll_number.strip().upper()
+        if query_val:
+            clean_q = query_val.strip()
             try:
-                res = db.table("students").select("id,roll_number,full_name,programs(code)").eq("roll_number", clean_q).execute()
+                res = db.table("students").select("id,roll_number,full_name,programs(code)").or_(f"roll_number.ilike.%{clean_q}%,full_name.ilike.%{clean_q}%").execute()
                 if res.data:
-                    s = res.data[0]
+                    all_matched_ids = [m["id"] for m in res.data]
+                    exact_roll = next((s for s in res.data if str(s.get("roll_number", "")).strip().upper() == clean_q.upper()), None)
+                    s = exact_roll or res.data[0]
                     target_student_id = s["id"]
                     target_roll = s["roll_number"]
                     target_name = s["full_name"]
-                elif auth.user_id.startswith("demo-") and clean_q in ("23JU0101", "23JU0102"):
+                elif auth.user_id.startswith("demo-") and clean_q.upper() in ("23JU0101", "23JU0102"):
                     target_student_id = "00000000-0000-0000-0000-000000000001"
-                    target_roll = clean_q
-                    target_name = "Aarav Sharma" if clean_q == "23JU0101" else "Demo Student"
+                    target_roll = clean_q.upper()
+                    target_name = "Aarav Sharma" if clean_q.upper() == "23JU0101" else "Demo Student"
                 else:
                     target_student_id = None
                     target_roll = clean_q
                     target_name = clean_q
             except Exception:
-                if auth.user_id.startswith("demo-") and clean_q in ("23JU0101", "23JU0102"):
+                if auth.user_id.startswith("demo-") and clean_q.upper() in ("23JU0101", "23JU0102"):
                     target_student_id = "00000000-0000-0000-0000-000000000001"
-                    target_roll = clean_q
-                    target_name = "Aarav Sharma" if clean_q == "23JU0101" else "Demo Student"
+                    target_roll = clean_q.upper()
+                    target_name = "Aarav Sharma" if clean_q.upper() == "23JU0101" else "Demo Student"
                 else:
                     target_student_id = None
                     target_roll = clean_q
@@ -300,7 +352,7 @@ def student_seat_lookup(
                 detail="roll_number query parameter is required for administrative seat lookup.",
             )
 
-    if not target_student_id:
+    if not target_student_id and not all_matched_ids:
         return {"student": {"name": target_name, "roll_number": target_roll}, "allocations": []}
 
     # Demo mode synthetic return for test suite
@@ -330,25 +382,58 @@ def student_seat_lookup(
             ],
         }
 
+    resolved_eid = resolve_exam_id(db, examination_id) if examination_id else None
+    if examination_id and not resolved_eid:
+        return {"student": {"name": target_name, "roll_number": target_roll}, "allocations": []}
+
     # Query published seat assignment
     query = (
         db.table("seat_assignments")
         .select(
-            "student_id,seat_label,row,col,room_id,rooms(id,name,code,building,floor,rows,columns),seating_plans!inner(id,status,plan_date,period,examinations(id,name,exam_date,session))"
+            "student_id,seat_label,row,col,room_id,rooms(id,name,code,building,floor,rows,columns),seating_plans!inner(id,status,plan_date,period,created_at,examinations(id,name,exam_date,session))"
         )
         .eq("student_id", target_student_id)
         .eq("seating_plans.status", "published")
+        .order("created_at", desc=True, foreign_table="seating_plans")
     )
-    if examination_id:
-        query = query.eq("seating_plans.examination_id", examination_id)
+    if resolved_eid:
+        query = query.eq("seating_plans.examination_id", resolved_eid)
 
-    res = query.limit(5).execute()
+    res = query.limit(200).execute()
+    res_data = res.data or []
+    if not res_data:
+        m_ids = []
+        if target_roll:
+            matching_s = db.table("students").select("id").ilike("roll_number", target_roll).execute().data or []
+            m_ids.extend([s["id"] for s in matching_s if str(s["id"]) != str(target_student_id)])
+        if all_matched_ids:
+            m_ids.extend([mid for mid in all_matched_ids if str(mid) != str(target_student_id) and mid not in m_ids])
+        if m_ids:
+            query2 = (
+                db.table("seat_assignments")
+                .select(
+                    "student_id,seat_label,row,col,room_id,rooms(id,name,code,building,floor,rows,columns),seating_plans!inner(id,status,plan_date,period,created_at,examinations(id,name,exam_date,session))"
+                )
+                .in_("student_id", m_ids)
+                .eq("seating_plans.status", "published")
+                .order("created_at", desc=True, foreign_table="seating_plans")
+            )
+            if resolved_eid:
+                query2 = query2.eq("seating_plans.examination_id", resolved_eid)
+            res_data = query2.limit(200).execute().data or []
+
     allocations = []
+    seen_exams = set()
 
-    for row in res.data or []:
+    for row in res_data:
         room = row.get("rooms") or {}
         plan = row.get("seating_plans") or {}
         exam = plan.get("examinations") or {}
+        exam_key = exam.get("id") or plan.get("id")
+
+        if exam_key in seen_exams and not resolved_eid:
+            continue
+        seen_exams.add(exam_key)
 
         allocations.append(
             {

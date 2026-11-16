@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FileCheck2,
@@ -23,6 +23,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { Modal } from '../components/common/Modal';
 import { api } from '../services/api';
+import { broadcastSync, useDataSync } from '../services/syncService';
 
 export interface ExamRecord {
   id: string;
@@ -147,7 +148,7 @@ export const ExamManagementPage: React.FC = () => {
   });
 
   // Load Real Supabase Data & Synchronize with local drafts
-  useEffect(() => {
+  const loadExams = useCallback(() => {
     const localDrafts = getStoredDrafts();
     api.getExams()
       .then((data) => {
@@ -180,8 +181,11 @@ export const ExamManagementPage: React.FC = () => {
             };
           });
           const backendIds = new Set(mapped.map((m) => m.id));
-          const uncommitted = localDrafts.filter((d) => !backendIds.has(d.id));
-          const combined = [...uncommitted, ...mapped];
+          const backendNames = new Set(mapped.map((m) => m.name.trim().toLowerCase()));
+          const uncommitted = localDrafts.filter(
+            (d) => !backendIds.has(d.id) && !backendNames.has(d.name.trim().toLowerCase())
+          );
+          const combined = [...mapped, ...uncommitted];
           setExams(combined);
           saveStoredDrafts(combined);
         } else if (localDrafts.length > 0) {
@@ -193,6 +197,12 @@ export const ExamManagementPage: React.FC = () => {
           setExams(localDrafts);
         }
       });
+  }, []);
+
+  useDataSync(loadExams);
+
+  useEffect(() => {
+    loadExams();
 
     api.getBatches()
       .then((data) => {
@@ -211,7 +221,7 @@ export const ExamManagementPage: React.FC = () => {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [loadExams]);
 
   // Hall Booking Conflict Detection
   const hallConflicts = useMemo(() => {
@@ -337,6 +347,7 @@ export const ExamManagementPage: React.FC = () => {
         subject_code: formData.subject_code,
       })
         .then(() => {
+          broadcastSync('EXAM_UPDATED', { examId: editingExamId });
           showNotification('success', `Examination "${formData.name}" successfully updated.`);
         })
         .catch((err: any) => {
@@ -384,6 +395,7 @@ export const ExamManagementPage: React.FC = () => {
               localStorage.setItem('seatwise_active_exam_id', realId);
             } catch {}
           }
+          broadcastSync('EXAM_CREATED', { examId: realId || tempId });
           showNotification('success', `Examination "${created.name}" created. You can now configure seating plan.`);
         })
         .catch((err: any) => {
@@ -402,6 +414,7 @@ export const ExamManagementPage: React.FC = () => {
     saveStoredDrafts(nextExams);
     api.archiveExam(examId)
       .then(() => {
+        broadcastSync('EXAM_UPDATED', { examId });
         showNotification('success', `Examination "${examName}" archived safely.`);
       })
       .catch((err: any) => {
@@ -429,6 +442,7 @@ export const ExamManagementPage: React.FC = () => {
     saveStoredDrafts(remaining);
     api.deleteExam(examId)
       .then(() => {
+        broadcastSync('EXAM_DELETED', { examId });
         showNotification('success', `Examination "${examName}" deleted.`);
       })
       .catch((err: any) => {

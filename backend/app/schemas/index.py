@@ -12,6 +12,7 @@ class MeResponse(BaseModel):
     username: str | None = None
     role: str
     full_name: str
+    roll_number: str | None = None
     department: str | None = None
     account_status: str = "active"
     must_change_password: bool = False

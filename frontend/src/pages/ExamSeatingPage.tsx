@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Binary,
@@ -35,6 +35,7 @@ import { PolicyConfigurator } from '../components/seating/PolicyConfigurator';
 import { SeatingLegend } from '../components/seating/SeatingLegend';
 import { checkAllocationConflicts } from '../utils/seatingMath';
 import { CAMPUS_ROOMS } from '../data/campusFloorData';
+import { broadcastSync, useDataSync } from '../services/syncService';
 
 interface DeskCell {
   seat_label: string;
@@ -440,7 +441,7 @@ export const ExamSeatingPage: React.FC = () => {
   }, [activeHall, hallsConfig]);
 
   // Load Examinations from Backend & Supabase
-  useEffect(() => {
+  const loadExaminations = useCallback(() => {
     const localDrafts = getStoredDrafts();
     api.getExams()
       .then((data) => {
@@ -475,20 +476,41 @@ export const ExamSeatingPage: React.FC = () => {
             };
           });
           const backendIds = new Set(mapped.map((m) => m.id));
-          const uncommitted = localDrafts.filter((d) => !backendIds.has(d.id));
-          const combined = [...uncommitted, ...mapped];
+          const backendNames = new Set(mapped.map((m) => m.name.trim().toLowerCase()));
+          const uncommitted = localDrafts.filter(
+            (d) => !backendIds.has(d.id) && !backendNames.has(d.name.trim().toLowerCase())
+          );
+          const combined = [...mapped, ...uncommitted];
           setAvailableExams(combined);
 
           // If selectedExamId was a temporary draft ID that has now been finalized to a backend UUID, sync it
-          const matchingMerged = combined.find((c) => (c as any).temp_id === selectedExamId || c.id === selectedExamId);
+          const matchingMerged = combined.find(
+            (c) =>
+              (c as any).temp_id === selectedExamId ||
+              c.id === selectedExamId ||
+              (selectedExamId === 'EXAM-2026-1101' && c.name.toLowerCase().includes('mid-term')) ||
+              (selectedExamId === 'EXAM-2026-1102' && c.name.toLowerCase().includes('semester end')) ||
+              (selectedExamId === 'EXAM-2026-1103' && c.name.toLowerCase().includes('postgraduate'))
+          );
           if (matchingMerged && matchingMerged.id !== selectedExamId) {
             setSelectedExamId(matchingMerged.id);
           }
+        }
+      })
+      .catch(() => {});
+  }, [selectedExamId]);
 
-          // Only auto-select first exam if no exam explicitly selected or active in session
+  useDataSync(loadExaminations);
+
+  useEffect(() => {
+    loadExaminations();
+    const localDrafts = getStoredDrafts();
+    api.getExams()
+      .then((data) => {
+        if (data && data.length > 0) {
           const storedActive = localStorage.getItem('seatwise_active_exam_id');
-          if (!examIdFromQuery && !planIdFromQuery && !storedActive && combined.length > 0) {
-            setSelectedExamId(combined[0].id);
+          if (!examIdFromQuery && !planIdFromQuery && !storedActive) {
+            setSelectedExamId(data[0].id);
           }
         } else if (localDrafts.length > 0) {
           setAvailableExams(localDrafts);
@@ -1409,6 +1431,9 @@ export const ExamSeatingPage: React.FC = () => {
           const [r, c] = key.split('-').map(Number);
           assignments.push({
             student_id: cell.student_id || cell.roll_number || cell.seat_label,
+            roll_number: cell.roll_number,
+            student_name: cell.student_name,
+            batch: cell.batch,
             room_id: hallName,
             row: r,
             col: c,
@@ -1425,6 +1450,7 @@ export const ExamSeatingPage: React.FC = () => {
         assignments,
       }).then((res) => {
         if (res && res.plan_id) setSavedPlanId(res.plan_id);
+        broadcastSync('SEATING_SAVED', { examId: selectedExamId, planId: res?.plan_id });
         showNotification('success', 'Examination seating allocation saved to database as draft.');
       }).catch((err) => {
         console.error('Failed to save exam seating plan', err);
@@ -1449,6 +1475,9 @@ export const ExamSeatingPage: React.FC = () => {
           const [r, c] = key.split('-').map(Number);
           assignments.push({
             student_id: cell.student_id || cell.roll_number || cell.seat_label,
+            roll_number: cell.roll_number,
+            student_name: cell.student_name,
+            batch: cell.batch,
             room_id: hallName,
             row: r,
             col: c,
@@ -1460,12 +1489,37 @@ export const ExamSeatingPage: React.FC = () => {
 
     if (assignments.length > 0) {
       api.saveExamSeating({
-        examination_id: selectedExamId || 'EXAM-2026-1101',
-        plan: { kind: 'examination', status: 'published' },
+        examination_id: selectedExamId || activeExam?.id || 'EXAM-2026-1101',
+        examination_name: activeExam?.name,
+        plan: {
+          kind: 'examination',
+          status: 'published',
+          name: activeExam?.name,
+          examination_id: selectedExamId || activeExam?.id,
+          room_id: activeHall,
+        },
         assignments,
-      }).then((res) => {
-        if (res && res.plan_id) setSavedPlanId(res.plan_id);
-        showNotification('success', 'Examination Seating Plan published and synced.');
+      }).then(async (res) => {
+        if (res && res.plan_id) {
+          setSavedPlanId(res.plan_id);
+          try {
+            await api.publishExamPlan(res.plan_id);
+          } catch {}
+        }
+        const finalExamId = res?.examination_id || selectedExamId;
+        if (finalExamId) {
+          try {
+            await api.updateExam(finalExamId, { status: 'published' });
+          } catch {}
+          if (finalExamId !== selectedExamId) {
+            setSelectedExamId(finalExamId);
+          }
+        }
+        setAvailableExams((prev) =>
+          prev.map((e) => (e.id === selectedExamId || e.id === finalExamId ? { ...e, id: finalExamId || e.id, status: 'published' } : e))
+        );
+        broadcastSync('EXAM_PUBLISHED', { examId: finalExamId, planId: res?.plan_id });
+        showNotification('success', 'Examination Seating Plan published and synced across all accounts.');
       }).catch((err) => {
         console.error('Failed to save exam seating plan', err);
         showNotification('warning', 'Published locally; remote sync encountered an error.');

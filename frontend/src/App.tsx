@@ -237,7 +237,7 @@ export const App: React.FC = () => {
                 <Route
                   path="seat-lookup"
                   element={
-                    <ProtectedRoute allowedRoles={['admin', 'exam_staff']}>
+                    <ProtectedRoute allowedRoles={['admin', 'exam_staff', 'faculty', 'student']}>
                       <StudentSeatLookupPage />
                     </ProtectedRoute>
                   }

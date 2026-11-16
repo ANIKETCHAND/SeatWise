@@ -15,6 +15,7 @@ import { INITIAL_PROGRAMS, PERIOD_TIMINGS } from '../data/universityData';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
+import { broadcastSync } from '../services/syncService';
 import jainTimetableLookup from '../data/jain_timetable_lookup.json';
 
 export const TimetablePage: React.FC = () => {
@@ -139,6 +140,7 @@ export const TimetablePage: React.FC = () => {
         formData.append('job_id', previewData.job_id);
         const res = await api.confirmTimetableImport(formData);
         const count = res.imported?.entries || 3569;
+        broadcastSync('TIMETABLE_UPDATED', { count });
         setImportStatus(`Successfully imported ${count} timetable sessions without duplicates!`);
         showNotification('success', `Successfully imported ${count} timetable sessions!`);
         setTimeout(() => {

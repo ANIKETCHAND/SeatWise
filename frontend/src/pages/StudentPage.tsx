@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Users,
   Plus,
@@ -19,6 +19,7 @@ import { useNotification } from '../context/NotificationContext';
 import { Modal } from '../components/common/Modal';
 import { exportTableToCsv } from '../utils/exportHelpers';
 import { api } from '../services/api';
+import { broadcastSync, useDataSync } from '../services/syncService';
 
 // Verified sample roster clearly labeled per Section 8 specification
 const SAMPLE_STUDENTS: Student[] = [
@@ -49,7 +50,7 @@ export const StudentPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
 
-  useEffect(() => {
+  const loadStudents = useCallback(() => {
     api.getStudents()
       .then((data) => {
         if (data && data.length > 0) {
@@ -61,6 +62,12 @@ export const StudentPage: React.FC = () => {
         // Keeps verified sample data mode
       });
   }, []);
+
+  useDataSync(loadStudents);
+
+  useEffect(() => {
+    loadStudents();
+  }, [loadStudents]);
 
   // Add Student Form State
   const [newStudent, setNewStudent] = useState({
@@ -118,9 +125,11 @@ export const StudentPage: React.FC = () => {
       phone: student.phone,
     })
       .then(() => {
+        broadcastSync('STUDENT_UPDATED', { rollNumber: student.roll_number });
         showNotification('success', `Student ${student.full_name} (${student.roll_number}) enrolled successfully.`);
       })
       .catch((err: any) => {
+        broadcastSync('STUDENT_UPDATED', { rollNumber: student.roll_number });
         showNotification('warning', `Student enrolled locally (${err.message || 'Database sync failed'})`);
       });
   };

@@ -1,39 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   GraduationCap,
   CalendarDays,
-  Users,
+  DoorClosed,
   Armchair,
   FileCheck2,
   CheckCircle2,
-  BookOpen,
   ArrowRight,
   FileSpreadsheet,
+  Search,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { useDataSync } from '../services/syncService';
 
 export const FacultyDashboardPage: React.FC = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState<boolean>(true);
   const [timetable, setTimetable] = useState<any[]>([]);
   const [batches, setBatches] = useState<any[]>([]);
+  const [exams, setExams] = useState<any[]>([]);
 
-  useEffect(() => {
-    setLoading(true);
-    Promise.allSettled([api.getTimetable({}), api.getBatches()])
-      .then(([ttRes, batchRes]) => {
+  const loadFacultyData = useCallback(() => {
+    Promise.allSettled([api.getTimetable({}), api.getBatches(), api.getExams()])
+      .then(([ttRes, batchRes, examRes]) => {
         if (ttRes.status === 'fulfilled' && ttRes.value) {
           setTimetable(ttRes.value);
         }
         if (batchRes.status === 'fulfilled' && batchRes.value) {
           setBatches(batchRes.value);
         }
+        if (examRes.status === 'fulfilled' && examRes.value) {
+          setExams(examRes.value);
+        }
       })
       .finally(() => setLoading(false));
   }, []);
+
+  useDataSync(loadFacultyData);
+
+  useEffect(() => {
+    setLoading(true);
+    loadFacultyData();
+  }, [loadFacultyData]);
+
+  const publishedExams = exams.filter((e) => e.status === 'published');
+  const allExamHalls = Array.from(
+    new Set(publishedExams.flatMap((e) => e.halls || []))
+  );
 
   if (loading) {
     return (
@@ -78,7 +94,7 @@ export const FacultyDashboardPage: React.FC = () => {
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="bg-white border border-zinc-200 rounded-xl p-4 shadow-xs space-y-1">
           <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider block">
             Assigned Batches
@@ -97,13 +113,97 @@ export const FacultyDashboardPage: React.FC = () => {
 
         <div className="bg-white border border-zinc-200 rounded-xl p-4 shadow-xs space-y-1">
           <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider block">
-            Academic Scope
+            Published Exams
           </span>
-          <div className="text-sm font-bold text-zinc-950 pt-1">
-            {user?.department || 'Computer Science & Engineering'}
-          </div>
-          <span className="text-[10px] text-zinc-400">Authorized departmental courses</span>
+          <div className="text-2xl font-bold font-mono text-emerald-600">{publishedExams.length}</div>
+          <span className="text-[10px] text-zinc-400">Seating charts active</span>
         </div>
+
+        <div className="bg-white border border-zinc-200 rounded-xl p-4 shadow-xs space-y-1">
+          <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider block">
+            Assigned Exam Halls
+          </span>
+          <div className="text-2xl font-bold font-mono text-zinc-950">{allExamHalls.length}</div>
+          <span className="text-[10px] text-zinc-400">Invigilation venues</span>
+        </div>
+      </div>
+
+      {/* Published Examination Schedules & Assigned Halls */}
+      <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+          <div>
+            <h3 className="text-sm font-bold text-zinc-950 flex items-center gap-2">
+              <FileCheck2 className="w-4 h-4 text-emerald-600" />
+              Published Examinations & Assigned Halls
+            </h3>
+            <p className="text-[11px] text-zinc-500">Live examination schedules, participating cohorts, and hall allocations.</p>
+          </div>
+          <Link to="/seat-lookup" className="text-xs font-semibold text-black hover:underline flex items-center gap-1">
+            <Search className="w-3.5 h-3.5" /> Seat Lookup
+          </Link>
+        </div>
+
+        {publishedExams.length === 0 ? (
+          <div className="py-8 text-center text-xs text-zinc-500">
+            No published examination seating plans at this moment. Published plans will automatically appear here.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {publishedExams.map((ex) => (
+              <div key={ex.id} className="p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 className="text-xs font-bold text-zinc-900">{ex.name}</h4>
+                    <p className="text-[11px] text-zinc-500">
+                      Date: <span className="font-semibold text-zinc-800">{ex.exam_date}</span> • Session:{' '}
+                      <span className="font-mono uppercase font-semibold text-zinc-800">{ex.session}</span>
+                    </p>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-100 text-emerald-800 font-semibold uppercase">
+                    Published
+                  </span>
+                </div>
+
+                <div className="space-y-1.5 pt-2 border-t border-zinc-200/60 text-xs">
+                  <div className="flex items-center gap-2 text-zinc-600">
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Halls:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {(ex.halls || []).length > 0 ? (
+                        (ex.halls || []).map((h: string, hIdx: number) => (
+                          <span
+                            key={hIdx}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-zinc-300 text-[10px] font-mono font-bold text-zinc-900 shadow-2xs"
+                          >
+                            <DoorClosed className="w-2.5 h-2.5 text-zinc-500" />
+                            {h}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-[10px] text-zinc-400 font-mono">None specified</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-zinc-600">
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Batches:</span>
+                    <span className="text-[11px] text-zinc-700 font-mono">
+                      {(ex.batches || []).join(', ') || 'General'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                  <Link
+                    to={`/seat-lookup?exam=${ex.id}`}
+                    className="text-[11px] font-semibold text-black hover:underline flex items-center gap-1"
+                  >
+                    View Allocated Seats <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Main Grid */}
@@ -164,6 +264,22 @@ export const FacultyDashboardPage: React.FC = () => {
                 <div>
                   <h4 className="text-xs font-semibold text-zinc-900">Classroom Seating</h4>
                   <p className="text-[10px] text-zinc-500">Arrange student seating for lectures</p>
+                </div>
+              </div>
+              <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-black group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+
+            <Link
+              to="/seat-lookup"
+              className="p-3 rounded-xl border border-zinc-200 hover:border-black bg-white hover:bg-zinc-50 transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-zinc-100 group-hover:bg-black group-hover:text-white flex items-center justify-center text-zinc-800 transition-colors">
+                  <Search className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold text-zinc-900">Seat Lookup</h4>
+                  <p className="text-[10px] text-zinc-500">Find candidate examination desks</p>
                 </div>
               </div>
               <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-black group-hover:translate-x-0.5 transition-transform" />

@@ -72,6 +72,7 @@ export const Sidebar: React.FC = () => {
               { name: 'Seating Planner', path: '/seating-planner', icon: Binary },
               { name: 'Halls & Rooms', path: '/rooms', icon: DoorClosed },
               { name: 'Students', path: '/students', icon: Users },
+              { name: 'Seat Lookup', path: '/seat-lookup', icon: Search },
             ],
           },
           {
@@ -102,6 +103,7 @@ export const Sidebar: React.FC = () => {
               { name: 'Seating Planner', path: '/seating-planner', icon: Binary },
               { name: 'Halls & Rooms', path: '/rooms', icon: DoorClosed },
               { name: 'Students', path: '/students', icon: Users },
+              { name: 'Seat Lookup', path: '/seat-lookup', icon: Search },
               { name: 'Timetable', path: '/timetable', icon: CalendarDays },
               { name: 'Reports', path: '/reports', icon: FileSpreadsheet },
               { name: 'Seating History', path: '/history', icon: History },
@@ -117,6 +119,7 @@ export const Sidebar: React.FC = () => {
               { name: 'Dashboard', path: '/faculty-dashboard', icon: LayoutDashboard },
               { name: 'Timetable', path: '/timetable', icon: CalendarDays },
               { name: 'Classroom Seating', path: '/classroom-seating', icon: Armchair },
+              { name: 'Seat Lookup', path: '/seat-lookup', icon: Search },
               { name: 'Reports', path: '/reports', icon: FileSpreadsheet },
             ],
           },

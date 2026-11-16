@@ -35,12 +35,23 @@ def _mask_email(email: str) -> str:
 @router.get("/me", response_model=MeResponse)
 def me(auth: AuthContext = Depends(get_auth)) -> MeResponse:
     """Return the authenticated caller's profile and active permissions."""
+    roll_number = None
+    if auth.role == "student":
+        try:
+            db = require_db()
+            from .student_portal_routes import _resolve_student_record
+            s_rec = _resolve_student_record(auth, db)
+            roll_number = s_rec.get("roll_number")
+        except Exception:
+            pass
+
     return MeResponse(
         user_id=auth.user_id,
         email=auth.email,
         username=auth.username,
         role=auth.role,
         full_name=auth.full_name,
+        roll_number=roll_number,
         department=auth.department,
         account_status=auth.account_status,
         must_change_password=auth.must_change_password,

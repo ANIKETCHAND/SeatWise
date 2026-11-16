@@ -16,7 +16,7 @@ from ..schemas.index import (
     PolicyCreate,
 )
 from ..utils.errors import ApiError
-from ..utils.uuid_helper import safe_user_uuid
+from ..utils.uuid_helper import safe_user_uuid, resolve_exam_id
 
 router = APIRouter(prefix="/examinations", tags=["examinations"])
 
@@ -262,28 +262,38 @@ def create_exam(payload: ExamCreate, auth: AuthContext = Depends(require_staff))
 @router.patch("/{exam_id}")
 def update_exam(exam_id: str, payload: ExamUpdate, auth: AuthContext = Depends(require_staff)) -> dict:
     db = require_db()
+    real_exam_id = resolve_exam_id(db, exam_id) or exam_id
+    if not _is_uuid(real_exam_id):
+        raise ApiError(404, "not_found", "Examination not found.")
     excluded = {"batches", "halls", "batch_ids", "room_ids", "subject_name", "subject_code"}
     updates = payload.model_dump(exclude_none=True, exclude=excluded)
     if updates:
         updates["updated_at"] = "now()"
-        row = db.table("examinations").update(updates).eq("id", exam_id).execute().data
+        row = db.table("examinations").update(updates).eq("id", real_exam_id).execute().data
         if not row:
             raise ApiError(404, "not_found", "Examination not found.")
         exam_row = row[0]
     else:
-        exam_row = db.table("examinations").select("*").eq("id", exam_id).single().execute().data
+        exam_row = db.table("examinations").select("*").eq("id", real_exam_id).single().execute().data
         if not exam_row:
             raise ApiError(404, "not_found", "Examination not found.")
+
+    # Synchronize associated seating plans when examination is published
+    if updates.get("status") == "published":
+        try:
+            db.table("seating_plans").update({"status": "published", "updated_at": "now()"}).eq("examination_id", real_exam_id).execute()
+        except Exception:
+            pass
 
     if payload.batches is not None or payload.batch_ids is not None:
         batch_ids = list(payload.batch_ids or [])
         if payload.batches:
             batch_ids.extend(_resolve_batch_ids(db, payload.batches))
         batch_ids = list(dict.fromkeys(batch_ids))
-        db.table("examination_batches").delete().eq("examination_id", exam_id).execute()
+        db.table("examination_batches").delete().eq("examination_id", real_exam_id).execute()
         if batch_ids:
             db.table("examination_batches").insert(
-                [{"examination_id": exam_id, "batch_id": b} for b in batch_ids]
+                [{"examination_id": real_exam_id, "batch_id": b} for b in batch_ids]
             ).execute()
         exam_row["batches"] = payload.batches or []
         exam_row["batch_count"] = len(batch_ids)
@@ -293,10 +303,10 @@ def update_exam(exam_id: str, payload: ExamUpdate, auth: AuthContext = Depends(r
         if payload.halls:
             room_ids.extend(_resolve_room_ids(db, payload.halls))
         room_ids = list(dict.fromkeys(room_ids))
-        db.table("examination_halls").delete().eq("examination_id", exam_id).execute()
+        db.table("examination_halls").delete().eq("examination_id", real_exam_id).execute()
         if room_ids:
             db.table("examination_halls").insert(
-                [{"examination_id": exam_id, "room_id": r} for r in room_ids]
+                [{"examination_id": real_exam_id, "room_id": r} for r in room_ids]
             ).execute()
         exam_row["halls"] = payload.halls or []
         exam_row["hall_count"] = len(room_ids)
@@ -315,7 +325,10 @@ def delete_exam(
 ) -> dict:
     """Delete draft exam or safely archive if published plans exist."""
     db = require_db()
-    exam = db.table("examinations").select("*").eq("id", exam_id).single().execute().data
+    real_exam_id = resolve_exam_id(db, exam_id) or exam_id
+    if not _is_uuid(real_exam_id):
+        raise ApiError(404, "not_found", "Examination not found.")
+    exam = db.table("examinations").select("*").eq("id", real_exam_id).single().execute().data
     if not exam:
         raise ApiError(404, "not_found", "Examination not found.")
 
@@ -323,39 +336,42 @@ def delete_exam(
     published_plans = (
         db.table("seating_plans")
         .select("id")
-        .eq("examination_id", exam_id)
+        .eq("examination_id", real_exam_id)
         .eq("status", "published")
         .execute()
         .data
         or []
     )
     if published_plans and not force:
-        db.table("examinations").update({"status": "archived", "updated_at": "now()"}).eq("id", exam_id).execute()
+        db.table("examinations").update({"status": "archived", "updated_at": "now()"}).eq("id", real_exam_id).execute()
         return {
             "status": "archived",
-            "examination_id": exam_id,
+            "examination_id": real_exam_id,
             "message": "Examination has published seating plans and was archived safely.",
         }
 
     # Safe cascade deletion
-    db.table("examination_batches").delete().eq("examination_id", exam_id).execute()
-    db.table("examination_halls").delete().eq("examination_id", exam_id).execute()
-    db.table("seating_plans").delete().eq("examination_id", exam_id).execute()
-    db.table("examinations").delete().eq("id", exam_id).execute()
-    return {"status": "deleted", "examination_id": exam_id}
+    db.table("examination_batches").delete().eq("examination_id", real_exam_id).execute()
+    db.table("examination_halls").delete().eq("examination_id", real_exam_id).execute()
+    db.table("seating_plans").delete().eq("examination_id", real_exam_id).execute()
+    db.table("examinations").delete().eq("id", real_exam_id).execute()
+    return {"status": "deleted", "examination_id": real_exam_id}
 
 
 @router.post("/{exam_id}/archive")
 def archive_exam(exam_id: str, auth: AuthContext = Depends(require_staff)) -> dict:
     """Safely archive an examination."""
     db = require_db()
-    exam = db.table("examinations").select("id").eq("id", exam_id).single().execute().data
+    real_exam_id = resolve_exam_id(db, exam_id) or exam_id
+    if not _is_uuid(real_exam_id):
+        raise ApiError(404, "not_found", "Examination not found.")
+    exam = db.table("examinations").select("id").eq("id", real_exam_id).single().execute().data
     if not exam:
         raise ApiError(404, "not_found", "Examination not found.")
     row = (
         db.table("examinations")
         .update({"status": "archived", "updated_at": "now()"})
-        .eq("id", exam_id)
+        .eq("id", real_exam_id)
         .execute()
         .data[0]
     )
@@ -364,16 +380,17 @@ def archive_exam(exam_id: str, auth: AuthContext = Depends(require_staff)) -> di
 
 @router.get("/{exam_id}")
 def get_exam(exam_id: str, auth: AuthContext = Depends(require_staff_or_faculty)) -> dict:
-    if not _is_uuid(exam_id):
-        raise ApiError(404, "not_found", "Examination not found.")
     db = require_db()
-    exam = db.table("examinations").select("*").eq("id", exam_id).single().execute().data
+    real_exam_id = resolve_exam_id(db, exam_id) or exam_id
+    if not _is_uuid(real_exam_id):
+        raise ApiError(404, "not_found", "Examination not found.")
+    exam = db.table("examinations").select("*").eq("id", real_exam_id).single().execute().data
     if not exam:
         raise ApiError(404, "not_found", "Examination not found.")
     batches = (
         db.table("examination_batches")
         .select("batches(id,semester,section,class_teacher,programs(code,name))")
-        .eq("examination_id", exam_id)
+        .eq("examination_id", real_exam_id)
         .execute()
         .data
         or []
@@ -381,7 +398,7 @@ def get_exam(exam_id: str, auth: AuthContext = Depends(require_staff_or_faculty)
     halls = (
         db.table("examination_halls")
         .select("rooms(id,code,name,rows,columns,total_seats,is_exam_approved)")
-        .eq("examination_id", exam_id)
+        .eq("examination_id", real_exam_id)
         .execute()
         .data
         or []
@@ -412,13 +429,16 @@ def set_batches(
     exam_id: str, payload: ExamBatchesRequest, auth: AuthContext = Depends(require_staff)
 ) -> dict:
     db = require_db()
-    exam = db.table("examinations").select("id").eq("id", exam_id).single().execute().data
+    real_exam_id = resolve_exam_id(db, exam_id) or exam_id
+    if not _is_uuid(real_exam_id):
+        raise ApiError(404, "not_found", "Examination not found.")
+    exam = db.table("examinations").select("id").eq("id", real_exam_id).single().execute().data
     if not exam:
         raise ApiError(404, "not_found", "Examination not found.")
-    db.table("examination_batches").delete().eq("examination_id", exam_id).execute()
+    db.table("examination_batches").delete().eq("examination_id", real_exam_id).execute()
     if payload.batch_ids:
         db.table("examination_batches").insert(
-            [{"examination_id": exam_id, "batch_id": b} for b in payload.batch_ids]
+            [{"examination_id": real_exam_id, "batch_id": b} for b in payload.batch_ids]
         ).execute()
     return {"batches": len(payload.batch_ids)}
 
@@ -428,7 +448,10 @@ def set_halls(
     exam_id: str, payload: ExamHallsRequest, auth: AuthContext = Depends(require_staff)
 ) -> dict:
     db = require_db()
-    exam = db.table("examinations").select("id,exam_date,session,name").eq("id", exam_id).single().execute().data
+    real_exam_id = resolve_exam_id(db, exam_id) or exam_id
+    if not _is_uuid(real_exam_id):
+        raise ApiError(404, "not_found", "Examination not found.")
+    exam = db.table("examinations").select("id,exam_date,session,name").eq("id", real_exam_id).single().execute().data
     if not exam:
         raise ApiError(404, "not_found", "Examination not found.")
 
@@ -457,7 +480,7 @@ def set_halls(
             .select("id,name")
             .eq("exam_date", exam["exam_date"])
             .eq("session", exam["session"])
-            .neq("id", exam_id)
+            .neq("id", real_exam_id)
             .neq("status", "archived")
             .execute()
             .data
@@ -488,9 +511,9 @@ def set_halls(
                     f"on {exam['exam_date']} ({exam['session']} session). Cannot double-book examination halls.",
                 )
 
-    db.table("examination_halls").delete().eq("examination_id", exam_id).execute()
+    db.table("examination_halls").delete().eq("examination_id", real_exam_id).execute()
     db.table("examination_halls").insert(
-        [{"examination_id": exam_id, "room_id": r} for r in payload.room_ids]
+        [{"examination_id": real_exam_id, "room_id": r} for r in payload.room_ids]
     ).execute()
     return {"halls": len(payload.room_ids)}
 
@@ -498,6 +521,9 @@ def set_halls(
 @router.put("/{exam_id}/policy")
 def set_policy(exam_id: str, payload: dict, auth: AuthContext = Depends(require_staff)) -> dict:
     db = require_db()
+    real_exam_id = resolve_exam_id(db, exam_id) or exam_id
+    if not _is_uuid(real_exam_id):
+        raise ApiError(404, "not_found", "Examination not found.")
     policy_id = payload.get("policy_id")
     if policy_id:
         policy = db.table("seating_policies").select("id").eq("id", policy_id).single().execute().data
@@ -508,7 +534,7 @@ def set_policy(exam_id: str, payload: dict, auth: AuthContext = Depends(require_
     row = (
         db.table("examinations")
         .update({"policy_id": policy_id, "updated_at": "now()"})
-        .eq("id", exam_id)
+        .eq("id", real_exam_id)
         .execute()
         .data
     )
@@ -525,7 +551,10 @@ def set_exam_subjects(
     exam_id: str, payload: ExamSubjectsRequest, auth: AuthContext = Depends(require_staff)
 ) -> dict:
     db = require_db()
-    exam = db.table("examinations").select("id").eq("id", exam_id).single().execute().data
+    real_exam_id = resolve_exam_id(db, exam_id) or exam_id
+    if not _is_uuid(real_exam_id):
+        raise ApiError(404, "not_found", "Examination not found.")
+    exam = db.table("examinations").select("id").eq("id", real_exam_id).single().execute().data
     if not exam:
         raise ApiError(404, "not_found", "Examination not found.")
     db.table("audit_logs").insert(
@@ -533,7 +562,7 @@ def set_exam_subjects(
             "user_id": safe_user_uuid(auth.user_id),
             "action": "examination.set_subjects",
             "entity_type": "examinations",
-            "entity_id": exam_id,
+            "entity_id": real_exam_id,
             "details": {"subjects": payload.subjects},
         }
     ).execute()
@@ -545,14 +574,17 @@ def get_exam_subjects(
     exam_id: str, auth: AuthContext = Depends(require_authenticated)
 ) -> dict:
     db = require_db()
-    exam = db.table("examinations").select("id,name").eq("id", exam_id).single().execute().data
+    real_exam_id = resolve_exam_id(db, exam_id) or exam_id
+    if not _is_uuid(real_exam_id):
+        raise ApiError(404, "not_found", "Examination not found.")
+    exam = db.table("examinations").select("id,name").eq("id", real_exam_id).single().execute().data
     if not exam:
         raise ApiError(404, "not_found", "Examination not found.")
     recent_log = (
         db.table("audit_logs")
         .select("details")
         .eq("entity_type", "examinations")
-        .eq("entity_id", exam_id)
+        .eq("entity_id", real_exam_id)
         .eq("action", "examination.set_subjects")
         .order("created_at", desc=True)
         .limit(1)
@@ -561,6 +593,7 @@ def get_exam_subjects(
         or []
     )
     subjects = (recent_log[0].get("details") or {}).get("subjects", []) if recent_log else []
+    return {"subjects": subjects}
     return {"subjects": subjects}
 
 

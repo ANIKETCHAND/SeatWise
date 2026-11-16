@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Search,
   CheckCircle2,
@@ -13,17 +14,21 @@ import {
   UserCheck,
 } from 'lucide-react';
 import { api } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { useDataSync } from '../services/syncService';
 
 export const StudentSeatLookupPage: React.FC = () => {
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [exams, setExams] = useState<{ id: string; name: string; exam_date?: string; session?: string }[]>([]);
-  const [selectedExamId, setSelectedExamId] = useState<string>('');
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedExamId, setSelectedExamId] = useState<string>(() => searchParams.get('exam') || '');
+  const [searchQuery, setSearchQuery] = useState<string>(() => searchParams.get('q') || user?.roll_number || '');
   const [loading, setLoading] = useState<boolean>(false);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [results, setResults] = useState<any[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadExams = useCallback(() => {
     api.getExams()
       .then((data) => {
         if (data && data.length > 0) {
@@ -33,14 +38,18 @@ export const StudentSeatLookupPage: React.FC = () => {
             exam_date: e.exam_date,
             session: e.session,
           })));
-          setSelectedExamId(data[0].id);
+          const qExam = searchParams.get('exam');
+          if (qExam && data.some((e: any) => e.id === qExam)) {
+            setSelectedExamId(qExam);
+          } else {
+            setSelectedExamId((prev) => prev || data[0].id);
+          }
         } else {
-          // Provide default demo exams if database is empty
           setExams([
             { id: 'EXAM-2026-1101', name: 'Mid-Term Examinations - Computer Science & AI', exam_date: '2026-11-20', session: 'morning' },
             { id: 'EXAM-2026-1102', name: 'Semester End Theory Assessment - Cycle II', exam_date: '2026-12-05', session: 'afternoon' },
           ]);
-          setSelectedExamId('EXAM-2026-1101');
+          setSelectedExamId((prev) => prev || 'EXAM-2026-1101');
         }
       })
       .catch(() => {
@@ -48,9 +57,21 @@ export const StudentSeatLookupPage: React.FC = () => {
           { id: 'EXAM-2026-1101', name: 'Mid-Term Examinations - Computer Science & AI', exam_date: '2026-11-20', session: 'morning' },
           { id: 'EXAM-2026-1102', name: 'Semester End Theory Assessment - Cycle II', exam_date: '2026-12-05', session: 'afternoon' },
         ]);
-        setSelectedExamId('EXAM-2026-1101');
+        setSelectedExamId((prev) => prev || 'EXAM-2026-1101');
       });
-  }, []);
+  }, [searchParams]);
+
+  useDataSync(loadExams);
+
+  useEffect(() => {
+    loadExams();
+  }, [loadExams]);
+
+  useEffect(() => {
+    if (!searchQuery && user?.roll_number) {
+      setSearchQuery(user.roll_number);
+    }
+  }, [user?.roll_number, searchQuery]);
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -69,6 +90,32 @@ export const StudentSeatLookupPage: React.FC = () => {
       if (res && res.matches && res.matches.length > 0) {
         setResults(res.matches);
       } else {
+        // Also query personal allocation via student portal if student or matching roll
+        try {
+          const mySeatRes = await api.lookupMySeat(query, selectedExamId || undefined);
+          if (mySeatRes && mySeatRes.allocations && mySeatRes.allocations.length > 0) {
+            const mapped = mySeatRes.allocations.map((alloc) => ({
+              student: {
+                id: 's-self',
+                full_name: alloc.student_name || mySeatRes.student?.name || query,
+                roll_number: alloc.roll_number || mySeatRes.student?.roll_number || query,
+                program: 'Computer Science & Engineering',
+              },
+              seat: {
+                seat_label: alloc.seat_label,
+                row: alloc.row,
+                col: alloc.column,
+                hall: `${alloc.hall_name} (${alloc.room_code || 'Hall'})`,
+                examination: alloc.examination_name,
+                exam_date: alloc.examination_date,
+                session: alloc.examination_session,
+              },
+            }));
+            setResults(mapped);
+            return;
+          }
+        } catch {}
+
         // Fallback demo matching for instant testing if Supabase returns empty
         const qUpper = query.toUpperCase();
         const demoStudents = [

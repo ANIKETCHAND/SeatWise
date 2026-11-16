@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   History,
   Search,
@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../services/api';
+import { useDataSync } from '../services/syncService';
 
 interface HistoryItem {
   id: string;
@@ -36,7 +37,7 @@ export const HistoryPage: React.FC = () => {
   const [filterKind, setFilterKind] = useState<'all' | 'examination' | 'classroom'>('all');
   const [search, setSearch] = useState('');
 
-  useEffect(() => {
+  const loadHistory = useCallback(() => {
     api.getSeatingPlans()
       .then((data) => {
         if (data && data.length > 0) {
@@ -57,6 +58,12 @@ export const HistoryPage: React.FC = () => {
       })
       .catch(() => {});
   }, []);
+
+  useDataSync(loadHistory);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
 
   const filteredHistory = historyItems.filter((item) => {
     if (filterKind !== 'all' && item.kind !== filterKind) return false;

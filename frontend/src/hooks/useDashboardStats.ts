@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
 import { TOTAL_PROGRAMS_COUNT, TOTAL_BATCHES_COUNT } from '../data/universityData';
+import { useDataSync } from '../services/syncService';
 
 export interface DashboardMetrics {
   total_examinations: number;
@@ -107,6 +108,8 @@ export function useDashboardStats() {
       setLoading(false);
     }
   }, []);
+
+  useDataSync(fetchStats);
 
   useEffect(() => {
     fetchStats();

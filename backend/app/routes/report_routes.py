@@ -22,6 +22,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from ..auth import AuthContext, require_authenticated, require_staff_or_faculty
 from ..database.client import require_db
 from ..utils.errors import ApiError
+from ..utils.uuid_helper import resolve_exam_id
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
@@ -218,11 +219,12 @@ def export_plan_pdf(plan_id: str, auth: AuthContext = Depends(require_staff_or_f
 def export_locator_pdf(exam_id: str, auth: AuthContext = Depends(require_staff_or_faculty)):
     """Generate student seat locator notice board list for an examination."""
     db = require_db()
-    exam = db.table("examinations").select("*").eq("id", exam_id).single().execute().data
+    real_exam_id = resolve_exam_id(db, exam_id) or exam_id
+    exam = db.table("examinations").select("*").eq("id", real_exam_id).single().execute().data
     if not exam:
         raise ApiError(404, "not_found", "Examination not found.")
 
-    plans = db.table("seating_plans").select("id").eq("examination_id", exam_id).execute().data or []
+    plans = db.table("seating_plans").select("id").eq("examination_id", real_exam_id).execute().data or []
     plan_ids = [p["id"] for p in plans]
     if not plan_ids:
         raise ApiError(404, "no_plans", "No seating plans generated for this examination.")
@@ -314,11 +316,12 @@ def export_locator_pdf(exam_id: str, auth: AuthContext = Depends(require_staff_o
 def get_locator_data(exam_id: str, auth: AuthContext = Depends(require_staff_or_faculty)):
     """Return JSON locator records for student lookup in the UI."""
     db = require_db()
-    exam = db.table("examinations").select("*").eq("id", exam_id).single().execute().data
+    real_exam_id = resolve_exam_id(db, exam_id) or exam_id
+    exam = db.table("examinations").select("*").eq("id", real_exam_id).single().execute().data
     if not exam:
         raise ApiError(404, "not_found", "Examination not found.")
 
-    plans = db.table("seating_plans").select("id").eq("examination_id", exam_id).execute().data or []
+    plans = db.table("seating_plans").select("id").eq("examination_id", real_exam_id).execute().data or []
     plan_ids = [p["id"] for p in plans]
     if not plan_ids:
         return {"exam": exam, "locators": []}
@@ -353,11 +356,12 @@ def get_locator_data(exam_id: str, auth: AuthContext = Depends(require_staff_or_
 def export_exam_csv(exam_id: str, auth: AuthContext = Depends(require_staff_or_faculty)):
     """Export examination seating plan to CSV."""
     db = require_db()
-    exam = db.table("examinations").select("*").eq("id", exam_id).single().execute().data
+    real_exam_id = resolve_exam_id(db, exam_id) or exam_id
+    exam = db.table("examinations").select("*").eq("id", real_exam_id).single().execute().data
     if not exam:
         raise ApiError(404, "not_found", "Examination not found.")
 
-    plans = db.table("seating_plans").select("id").eq("examination_id", exam_id).execute().data or []
+    plans = db.table("seating_plans").select("id").eq("examination_id", real_exam_id).execute().data or []
     plan_ids = [p["id"] for p in plans]
     assignments = []
     if plan_ids:

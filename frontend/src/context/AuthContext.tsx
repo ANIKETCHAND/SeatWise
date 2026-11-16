@@ -37,11 +37,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: data.email,
           role: data.role as UserRole,
           full_name: data.full_name || 'Authenticated User',
+          roll_number: (data as any).roll_number,
           department: data.department,
           account_status: data.account_status,
           must_change_password: data.must_change_password,
           permissions: data.permissions || [],
         };
+        if (!profile.roll_number && profile.role === 'student') {
+          try {
+            const sMe = await api.getStudentMe();
+            if (sMe?.roll_number) {
+              profile.roll_number = sMe.roll_number;
+            }
+          } catch {}
+        }
         setUser(profile);
         return profile;
       }

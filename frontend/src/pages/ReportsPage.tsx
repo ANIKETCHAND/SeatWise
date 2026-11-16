@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   FileSpreadsheet,
   Download,
@@ -18,6 +18,7 @@ import {
 import { api } from '../services/api';
 import { useNotification } from '../context/NotificationContext';
 import { exportTableToCsv } from '../utils/exportHelpers';
+import { useDataSync } from '../services/syncService';
 
 const DEFAULT_LOCATORS = [
   { roll: '23JU0101', name: 'Aarav Sharma', exam: 'Mid-Term Examinations Nov 2026', hall: 'A-101', seat: 'A1', batch: 'AIML-S3A', session: 'Morning', status: 'allocated' },
@@ -68,12 +69,12 @@ export const ReportsPage: React.FC = () => {
   const [searchStudent, setSearchStudent] = useState('');
   const [studentLocators, setStudentLocators] = useState(DEFAULT_LOCATORS);
 
-  useEffect(() => {
+  const loadReportsMeta = useCallback(() => {
     api.getExams()
       .then((data) => {
         if (data && data.length > 0) {
           setExamsList(data.map((e: any) => ({ id: e.id, name: e.name })));
-          setSelectedExam(data[0].id);
+          setSelectedExam((prev) => prev || data[0].id);
         }
       })
       .catch(() => {});
@@ -86,6 +87,12 @@ export const ReportsPage: React.FC = () => {
       })
       .catch(() => {});
   }, []);
+
+  useDataSync(loadReportsMeta);
+
+  useEffect(() => {
+    loadReportsMeta();
+  }, [loadReportsMeta]);
 
   useEffect(() => {
     if (selectedExam) {

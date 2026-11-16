@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   CalendarDays,
   Armchair,
@@ -19,6 +19,7 @@ import { api } from '../services/api';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { StudentExam, StudentSeatInfo } from '../types';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { useDataSync } from '../services/syncService';
 
 export const StudentDashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -62,9 +63,7 @@ export const StudentDashboardPage: React.FC = () => {
   // History
   const [examHistory, setExamHistory] = useState<any[]>([]);
 
-  useEffect(() => {
-    setLoading(true);
-
+  const loadStudentData = useCallback(() => {
     Promise.allSettled([
       api.getStudentMe(),
       api.getTodayExaminations(),
@@ -72,16 +71,18 @@ export const StudentDashboardPage: React.FC = () => {
       api.lookupMySeat(),
       api.getHistory(),
     ])
-      .then(([meRes, todayRes, upcomingRes, seatRes, historyRes]) => {
+      .then(async ([meRes, todayRes, upcomingRes, seatRes, historyRes]) => {
+        let currentRoll = user?.roll_number || (meRes.status === 'fulfilled' && meRes.value?.roll_number) || '23JU0101';
         if (meRes.status === 'fulfilled' && meRes.value) {
           setStudentInfo(meRes.value);
+          currentRoll = meRes.value.roll_number || currentRoll;
         } else if (user) {
           setStudentInfo({
             full_name: user.full_name || 'Student',
-            roll_number: user.roll_number || '23JU0102',
-            program_code: 'CSE',
-            program_name: 'B.Tech Computer Science & Engineering',
-            semester: 4,
+            roll_number: currentRoll,
+            program_code: 'AIML',
+            program_name: 'B.Tech in Artificial Intelligence & Machine Learning',
+            semester: 3,
             section: 'A',
           });
         }
@@ -94,9 +95,39 @@ export const StudentDashboardPage: React.FC = () => {
           setUpcomingExams(upcomingRes.value.examinations);
         }
 
-        if (seatRes.status === 'fulfilled' && seatRes.value?.allocations) {
-          setSeatAllocations(seatRes.value.allocations);
+        let resolvedAllocations: StudentSeatInfo[] = [];
+        if (seatRes.status === 'fulfilled' && seatRes.value?.allocations && seatRes.value.allocations.length > 0) {
+          resolvedAllocations = seatRes.value.allocations;
+        } else if (currentRoll) {
+          try {
+            const lookupRes = await api.lookupSeat(currentRoll);
+            if (lookupRes && lookupRes.matches && lookupRes.matches.length > 0) {
+              const matched = lookupRes.matches.find((m: any) => m.seat);
+              if (matched && matched.seat) {
+                const s = matched.seat;
+                resolvedAllocations = [
+                  {
+                    student_name: matched.student?.full_name || user?.full_name || 'Student',
+                    roll_number: matched.student?.roll_number || currentRoll,
+                    examination_id: s.examination_id || 'EXAM-2026-1101',
+                    examination_name: s.examination || 'University Examination',
+                    examination_date: s.exam_date || s.plan_date || '2026-11-20',
+                    examination_session: s.session || 'FN',
+                    hall_name: s.hall || 'A-101',
+                    room_code: s.room_code || 'A-101',
+                    building: 'FET Academic Block',
+                    floor: 'Floor 1',
+                    row: s.row != null ? Number(s.row) : 0,
+                    column: s.col != null ? Number(s.col) : 0,
+                    seat_label: s.seat_label || 'A1',
+                    room_dimensions: { rows: 6, columns: 6 },
+                  },
+                ];
+              }
+            }
+          } catch {}
         }
+        setSeatAllocations(resolvedAllocations);
 
         if (historyRes.status === 'fulfilled' && historyRes.value?.history) {
           setExamHistory(historyRes.value.history);
@@ -104,6 +135,13 @@ export const StudentDashboardPage: React.FC = () => {
       })
       .finally(() => setLoading(false));
   }, [user]);
+
+  useDataSync(loadStudentData);
+
+  useEffect(() => {
+    setLoading(true);
+    loadStudentData();
+  }, [loadStudentData]);
 
   const activeSeat = seatAllocations[selectedAllocationIndex] || seatAllocations[0] || null;
 

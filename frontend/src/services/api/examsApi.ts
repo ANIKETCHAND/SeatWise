@@ -6,7 +6,31 @@ export const examsApi = {
       const res = await request<any>('/examinations');
       return Array.isArray(res) ? res : res?.examinations || [];
     } catch {
-      return [];
+      try {
+        const upcoming = await request<any>('/student/examinations/upcoming');
+        const today = await request<any>('/student/examinations/today');
+        const list = [
+          ...(today?.examinations || []),
+          ...(upcoming?.examinations || []),
+        ];
+        const seen = new Set();
+        return list
+          .filter((e) => {
+            const id = e.id || e.examination_id;
+            if (!id || seen.has(id)) return false;
+            seen.add(id);
+            return true;
+          })
+          .map((e) => ({
+            id: e.id || e.examination_id,
+            name: e.examination_name || e.name,
+            exam_date: e.date || e.exam_date,
+            session: e.session,
+            status: e.status || 'published',
+          }));
+      } catch {
+        return [];
+      }
     }
   },
   getExam: async (id: string) => {

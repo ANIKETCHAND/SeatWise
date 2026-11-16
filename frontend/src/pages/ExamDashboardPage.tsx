@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FileCheck2,
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { useDataSync } from '../services/syncService';
 
 export const ExamDashboardPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -23,8 +24,7 @@ export const ExamDashboardPage: React.FC = () => {
   const [rooms, setRooms] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
 
-  useEffect(() => {
-    setLoading(true);
+  const refreshDashboard = useCallback(() => {
     Promise.allSettled([api.getExams(), api.getRooms(), api.getDashboardStats()])
       .then(([examRes, roomRes, dashRes]) => {
         if (examRes.status === 'fulfilled' && examRes.value) {
@@ -39,6 +39,13 @@ export const ExamDashboardPage: React.FC = () => {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  useDataSync(refreshDashboard);
+
+  useEffect(() => {
+    setLoading(true);
+    refreshDashboard();
+  }, [refreshDashboard]);
 
   if (loading) {
     return (
