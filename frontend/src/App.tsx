@@ -11,7 +11,6 @@ import { ExamDashboardPage } from './pages/ExamDashboardPage';
 import { FacultyDashboardPage } from './pages/FacultyDashboardPage';
 import { StudentDashboardPage } from './pages/StudentDashboardPage';
 import { UserManagementPage } from './pages/UserManagementPage';
-import { AuditLogsPage } from './pages/AuditLogsPage';
 
 import { UniversityPage } from './pages/UniversityPage';
 import { TimetablePage } from './pages/TimetablePage';
@@ -67,11 +66,7 @@ export const App: React.FC = () => {
                 />
                 <Route
                   path="admin/audit-logs"
-                  element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <AuditLogsPage />
-                    </ProtectedRoute>
-                  }
+                  element={<Navigate to="/dashboard" replace />}
                 />
                 <Route
                   path="admin/settings"

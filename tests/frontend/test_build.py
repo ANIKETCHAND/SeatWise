@@ -96,9 +96,9 @@ def test_frontend_page_contracts():
         assert txt.count("{") == txt.count("}"), f"Unbalanced braces in {page.name}"
 
 
-def test_all_21_frontend_pages_exist():
+def test_all_20_frontend_pages_exist():
     pages_dir = Path(__file__).resolve().parents[2] / "frontend" / "src" / "pages"
-    all_21_pages = [
+    all_20_pages = [
         "LandingPage.tsx",
         "LoginPage.tsx",
         "DashboardPage.tsx",
@@ -106,7 +106,6 @@ def test_all_21_frontend_pages_exist():
         "FacultyDashboardPage.tsx",
         "StudentDashboardPage.tsx",
         "UserManagementPage.tsx",
-        "AuditLogsPage.tsx",
         "UniversityPage.tsx",
         "TimetablePage.tsx",
         "StudentPage.tsx",
@@ -121,6 +120,6 @@ def test_all_21_frontend_pages_exist():
         "SettingsPage.tsx",
         "StudentSeatLookupPage.tsx",
     ]
-    for page_name in all_21_pages:
+    for page_name in all_20_pages:
         assert (pages_dir / page_name).exists(), f"Missing required application page: {page_name}"
 

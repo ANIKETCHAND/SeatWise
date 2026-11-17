@@ -59,7 +59,6 @@ export const Sidebar: React.FC = () => {
               { name: 'Students', path: '/admin/users?role=student', icon: UserRound },
               { name: 'Add User', path: '/admin/users?action=create', icon: UserPlus },
               { name: 'Passwords', path: '/admin/users?action=passwords', icon: KeyRound },
-              { name: 'Audit Logs', path: '/admin/audit-logs', icon: History },
             ],
           },
           {
