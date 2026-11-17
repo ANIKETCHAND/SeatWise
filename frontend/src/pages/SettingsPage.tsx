@@ -51,10 +51,20 @@ export const SettingsPage: React.FC = () => {
       <form onSubmit={handleSave} className="space-y-6">
         {/* Institutional Identity */}
         <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-2xs space-y-4">
-          <h2 className="text-sm font-bold text-zinc-900 flex items-center gap-2 border-b border-zinc-100 pb-3">
-            <Building className="w-4 h-4 text-zinc-900" />
-            Institution Identity
-          </h2>
+          <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+            <h2 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+              <Building className="w-4 h-4 text-zinc-900" />
+              Institution Identity
+            </h2>
+            <div className="bg-white px-2.5 py-1 rounded-lg border border-zinc-200 shadow-2xs flex items-center gap-2">
+              <img
+                src="/jain-logo.png"
+                alt="JAIN Deemed-to-be University"
+                className="h-6 w-auto object-contain"
+              />
+              <span className="text-[10px] font-mono text-zinc-500 font-medium">Official Crest</span>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

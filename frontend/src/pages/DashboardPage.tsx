@@ -122,9 +122,18 @@ export const DashboardPage: React.FC = () => {
       {/* Welcome Banner */}
       <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 lg:p-8 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 text-zinc-300 text-xs font-semibold mb-3 border border-zinc-700/80 font-mono">
-            <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-            Jain University FET
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            <div className="bg-white px-2.5 py-1 rounded-lg border border-zinc-200/20 shadow-xs inline-flex items-center">
+              <img
+                src="/jain-logo.png"
+                alt="JAIN Deemed-to-be University"
+                className="h-6 w-auto object-contain"
+              />
+            </div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 text-zinc-300 text-xs font-semibold border border-zinc-700/80 font-mono">
+              <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+              Faculty of Engineering & Technology
+            </div>
           </div>
           <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-white">
             Dashboard

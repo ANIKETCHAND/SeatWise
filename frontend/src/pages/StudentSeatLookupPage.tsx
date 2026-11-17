@@ -179,15 +179,24 @@ export const StudentSeatLookupPage: React.FC = () => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-zinc-950 tracking-tight flex items-center gap-2">
-            <Search className="w-5 h-5 text-black" />
-            Seat Lookup
-          </h1>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Find examination hall and seat assignments by roll number or name.
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
+        <div className="flex items-center gap-3.5">
+          <div className="bg-white p-1.5 rounded-lg border border-zinc-200/80 shadow-2xs shrink-0">
+            <img
+              src="/jain-logo.png"
+              alt="JAIN Deemed-to-be University"
+              className="h-8 sm:h-9 w-auto object-contain"
+            />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-zinc-950 tracking-tight flex items-center gap-2">
+              <Search className="w-5 h-5 text-black" />
+              Seat Lookup
+            </h1>
+            <p className="text-xs text-zinc-500 mt-0.5">
+              Faculty of Engineering & Technology (FET) — Candidate Seat Allocation Lookup
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -204,7 +213,7 @@ export const StudentSeatLookupPage: React.FC = () => {
       </div>
 
       {/* Search Filter Card */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs">
+      <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-xs print:hidden">
         <form onSubmit={handleSearch} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -302,6 +311,18 @@ export const StudentSeatLookupPage: React.FC = () => {
                       Seat Assigned
                     </div>
 
+                    {/* Institutional Header */}
+                    <div className="flex items-center justify-between pb-2 border-b border-zinc-100 pr-28">
+                      <div className="bg-white px-2 py-0.5 rounded border border-zinc-200/80 shadow-2xs">
+                        <img
+                          src="/jain-logo.png"
+                          alt="JAIN Deemed-to-be University"
+                          className="h-5 w-auto object-contain"
+                        />
+                      </div>
+                      <span className="text-[10px] font-mono text-zinc-500 font-medium">FET Examination Slip</span>
+                    </div>
+
                     {/* Candidate Info */}
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-900 flex items-center justify-center font-bold text-base shrink-0 border border-zinc-200">
@@ -383,7 +404,7 @@ export const StudentSeatLookupPage: React.FC = () => {
       )}
 
       {/* Privacy Notice */}
-      <div className="bg-zinc-50 rounded-xl border border-zinc-200 p-4 text-zinc-600 text-xs flex items-start gap-3">
+      <div className="bg-zinc-50 rounded-xl border border-zinc-200 p-4 text-zinc-600 text-xs flex items-start gap-3 print:hidden">
         <Sparkles className="w-4 h-4 text-zinc-900 shrink-0 mt-0.5" />
         <div>
           <p className="font-semibold text-zinc-900">Candidate Instructions & Privacy Notice</p>

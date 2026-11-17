@@ -174,7 +174,7 @@ export const ReportsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
         <div>
           <h1 className="text-xl font-bold text-zinc-950 tracking-tight flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5 text-zinc-900" />
@@ -213,7 +213,7 @@ export const ReportsPage: React.FC = () => {
       </div>
 
       {/* Report Types Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-zinc-200 pb-3">
+      <div className="flex flex-wrap items-center gap-2 border-b border-zinc-200 pb-3 print:hidden">
         {[
           { id: 'hall_seating', label: 'Hall Seating Chart', icon: Building },
           { id: 'locator', label: 'Student Seat Locator', icon: Search },
@@ -242,7 +242,7 @@ export const ReportsPage: React.FC = () => {
       </div>
 
       {/* Report Filters */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-2xs flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-2xs flex flex-wrap items-center justify-between gap-4 print:hidden">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-semibold text-zinc-600">Examination:</span>
@@ -288,12 +288,25 @@ export const ReportsPage: React.FC = () => {
       {/* TAB 1: Hall-wise Seating Chart */}
       {reportType === 'hall_seating' && (
         <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs p-6 space-y-4">
-          <div className="text-center pb-4 border-b border-zinc-200">
-            <h2 className="text-base font-bold text-zinc-950">JAIN UNIVERSITY</h2>
-            <p className="text-xs text-zinc-600 font-medium">FACULTY OF ENGINEERING & TECHNOLOGY — EXAMINATION SEATING PLAN</p>
-            <p className="text-[11px] text-zinc-500 mt-1">
-              Venue: <strong>{selectedHall}</strong> • Session: Morning (09:30 AM – 12:30 PM) • Generated: {new Date().toLocaleDateString('en-US', { dateStyle: 'full' })}
-            </p>
+          <div className="flex flex-col sm:flex-row items-center justify-between pb-4 border-b border-zinc-200 gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="bg-white p-1.5 rounded-lg border border-zinc-200/80 shadow-2xs shrink-0">
+                <img
+                  src="/jain-logo.png"
+                  alt="JAIN Deemed-to-be University"
+                  className="h-10 sm:h-12 w-auto object-contain"
+                />
+              </div>
+              <div className="text-left">
+                <h2 className="text-base font-bold text-zinc-950">JAIN (DEEMED-TO-BE UNIVERSITY)</h2>
+                <p className="text-xs text-zinc-600 font-medium">FACULTY OF ENGINEERING & TECHNOLOGY — EXAMINATION SEATING PLAN</p>
+              </div>
+            </div>
+            <div className="text-center sm:text-right text-[11px] text-zinc-500">
+              <p>Venue: <strong className="text-zinc-900">{selectedHall}</strong></p>
+              <p>Session: Morning (09:30 AM – 12:30 PM)</p>
+              <p>Date: {new Date().toLocaleDateString('en-US', { dateStyle: 'full' })}</p>
+            </div>
           </div>
 
           <div className="grid grid-cols-6 gap-2 pt-2">
@@ -328,13 +341,22 @@ export const ReportsPage: React.FC = () => {
       {reportType === 'locator' && (
         <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs overflow-hidden">
           <div className="p-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-bold text-zinc-900">
-                Student Seat Locator
-              </h2>
-              <p className="text-xs text-zinc-500">
-                Student seat allocation directory for notice boards and lookup.
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="bg-white p-1 rounded-md border border-zinc-200 shadow-2xs">
+                <img
+                  src="/jain-logo.png"
+                  alt="JAIN Deemed-to-be University"
+                  className="h-6 w-auto object-contain"
+                />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-zinc-900">
+                  Student Seat Locator
+                </h2>
+                <p className="text-xs text-zinc-500">
+                  Student seat allocation directory for notice boards and lookup.
+                </p>
+              </div>
             </div>
             <span className="text-xs font-mono font-bold text-zinc-900 bg-zinc-100 px-2.5 py-1 rounded border border-zinc-300">
               {filteredLocators.length} Matches
@@ -372,11 +394,24 @@ export const ReportsPage: React.FC = () => {
 
       {/* TAB 3: Batch-wise Report */}
       {reportType === 'batch_wise' && (
-        <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs p-5 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
-            <div>
-              <h2 className="text-sm font-bold text-zinc-900">Batch Allocation Report</h2>
-              <p className="text-xs text-zinc-500">Student allocations grouped by academic program and section.</p>
+        <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between pb-4 border-b border-zinc-200 gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="bg-white p-1.5 rounded-lg border border-zinc-200/80 shadow-2xs shrink-0">
+                <img
+                  src="/jain-logo.png"
+                  alt="JAIN Deemed-to-be University"
+                  className="h-10 sm:h-12 w-auto object-contain"
+                />
+              </div>
+              <div className="text-left">
+                <h2 className="text-base font-bold text-zinc-950">JAIN (DEEMED-TO-BE UNIVERSITY)</h2>
+                <p className="text-xs text-zinc-600 font-medium">FACULTY OF ENGINEERING & TECHNOLOGY — BATCH ALLOCATION REPORT</p>
+              </div>
+            </div>
+            <div className="text-center sm:text-right text-[11px] text-zinc-500">
+              <p>Academic Cycle: <strong className="text-zinc-900">2026-2027</strong></p>
+              <p>Generated: {new Date().toLocaleDateString('en-US', { dateStyle: 'full' })}</p>
             </div>
           </div>
 
@@ -417,9 +452,24 @@ export const ReportsPage: React.FC = () => {
       {/* TAB 4: Attendance Sheet */}
       {reportType === 'attendance' && (
         <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs p-6 space-y-4">
-          <div className="text-center pb-4 border-b border-zinc-200">
-            <h2 className="text-base font-bold text-zinc-950">JAIN UNIVERSITY — ATTENDANCE & BOOKLET SHEET</h2>
-            <p className="text-xs text-zinc-500">Hall: {selectedHall} • Date: November 20, 2026</p>
+          <div className="flex flex-col sm:flex-row items-center justify-between pb-4 border-b border-zinc-200 gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="bg-white p-1.5 rounded-lg border border-zinc-200/80 shadow-2xs shrink-0">
+                <img
+                  src="/jain-logo.png"
+                  alt="JAIN Deemed-to-be University"
+                  className="h-10 sm:h-12 w-auto object-contain"
+                />
+              </div>
+              <div className="text-left">
+                <h2 className="text-base font-bold text-zinc-950">JAIN (DEEMED-TO-BE UNIVERSITY)</h2>
+                <p className="text-xs text-zinc-600 font-medium">FACULTY OF ENGINEERING & TECHNOLOGY — ATTENDANCE & BOOKLET SHEET</p>
+              </div>
+            </div>
+            <div className="text-center sm:text-right text-[11px] text-zinc-500">
+              <p>Venue: <strong className="text-zinc-900">{selectedHall}</strong></p>
+              <p>Date: November 20, 2026</p>
+            </div>
           </div>
 
           <table className="w-full text-left border-collapse text-xs">
@@ -452,12 +502,25 @@ export const ReportsPage: React.FC = () => {
       {/* TAB 5: Empty & Blocked Desks */}
       {reportType === 'empty_seats' && (
         <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs overflow-hidden">
-          <div className="p-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-bold text-zinc-900">Empty & Blocked Desks</h2>
-              <p className="text-xs text-zinc-500">Unoccupied capacity and maintenance-blocked desks across halls.</p>
+          <div className="p-4 border-b border-zinc-200 bg-zinc-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="bg-white p-1 rounded-md border border-zinc-200 shadow-2xs shrink-0">
+                <img
+                  src="/jain-logo.png"
+                  alt="JAIN Deemed-to-be University"
+                  className="h-8 w-auto object-contain"
+                />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-zinc-900">
+                  JAIN (DEEMED-TO-BE UNIVERSITY) — EMPTY & BLOCKED DESKS AUDIT
+                </h2>
+                <p className="text-xs text-zinc-500">
+                  Faculty of Engineering & Technology • Capacity and maintenance audit across examination halls.
+                </p>
+              </div>
             </div>
-            <span className="text-xs font-mono font-bold text-zinc-800 bg-zinc-200 px-2.5 py-1 rounded">
+            <span className="text-xs font-mono font-bold text-zinc-800 bg-zinc-200 px-2.5 py-1 rounded shrink-0">
               {DEFAULT_EMPTY_SEATS.length} Desks Identified
             </span>
           </div>
@@ -498,14 +561,25 @@ export const ReportsPage: React.FC = () => {
       {/* TAB 6: Unallocated Students */}
       {reportType === 'unallocated' && (
         <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs overflow-hidden">
-          <div className="p-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-bold text-zinc-900">Unallocated Students</h2>
-              <p className="text-xs text-zinc-500">
-                Eligible students who could not be accommodated due to capacity or adjacency rules.
-              </p>
+          <div className="p-4 border-b border-zinc-200 bg-zinc-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="bg-white p-1 rounded-md border border-zinc-200 shadow-2xs shrink-0">
+                <img
+                  src="/jain-logo.png"
+                  alt="JAIN Deemed-to-be University"
+                  className="h-8 w-auto object-contain"
+                />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-zinc-900">
+                  JAIN (DEEMED-TO-BE UNIVERSITY) — UNALLOCATED CANDIDATES
+                </h2>
+                <p className="text-xs text-zinc-500">
+                  Faculty of Engineering & Technology • Candidates requiring hall assignment or capacity expansion.
+                </p>
+              </div>
             </div>
-            <span className="text-xs font-mono font-bold text-zinc-900 bg-zinc-100 px-2.5 py-1 rounded border border-zinc-300">
+            <span className="text-xs font-mono font-bold text-zinc-900 bg-zinc-100 px-2.5 py-1 rounded border border-zinc-300 shrink-0">
               {unallocatedList.length} Pending
             </span>
           </div>
@@ -546,10 +620,21 @@ export const ReportsPage: React.FC = () => {
       {/* TAB 7: Validation Report */}
       {reportType === 'validation' && (
         <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs p-6 space-y-4">
-          <h2 className="text-base font-bold text-zinc-900 flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-zinc-900" />
-            Constraint Validation Report
-          </h2>
+          <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
+            <div className="flex items-center gap-3">
+              <div className="bg-white p-1 rounded-md border border-zinc-200 shadow-2xs shrink-0">
+                <img
+                  src="/jain-logo.png"
+                  alt="JAIN Deemed-to-be University"
+                  className="h-8 w-auto object-contain"
+                />
+              </div>
+              <h2 className="text-base font-bold text-zinc-900 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-zinc-900" />
+                JAIN (DEEMED-TO-BE UNIVERSITY) — Constraint Validation Audit
+              </h2>
+            </div>
+          </div>
           <div className="p-4 bg-zinc-50 rounded-lg border border-zinc-200 space-y-2 text-xs text-zinc-800 font-mono">
             <p>PLAN_ID: PLAN-EX-9921</p>
             <p>EXAMINATION: Mid-Term Examinations - Computer Science & AI (Nov 2026)</p>

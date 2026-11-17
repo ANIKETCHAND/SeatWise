@@ -28,13 +28,20 @@ export const Navbar: React.FC = () => {
   }, []);
 
   return (
-    <header className="h-16 bg-white border-b border-zinc-200 px-6 flex items-center justify-between shadow-xs sticky top-0 z-30">
-      <div className="flex items-center gap-4">
+    <header className="h-16 bg-white border-b border-zinc-200 px-6 flex items-center justify-between shadow-xs sticky top-0 z-30 print:hidden">
+      <div className="flex items-center gap-3.5">
+        <div className="flex items-center bg-white px-2 py-1 rounded-lg border border-zinc-200/90 shadow-2xs">
+          <img
+            src="/jain-logo.png"
+            alt="JAIN Deemed-to-be University"
+            className="h-7 sm:h-8 w-auto object-contain"
+          />
+        </div>
         <div>
-          <h1 className="text-base font-bold text-zinc-950 tracking-tight">
+          <h1 className="text-sm sm:text-base font-bold text-zinc-950 tracking-tight leading-tight">
             Jain (Deemed-to-be University)
           </h1>
-          <p className="text-xs text-zinc-500 font-normal">
+          <p className="text-[11px] sm:text-xs text-zinc-500 font-normal">
             Faculty of Engineering and Technology (FET) Seating Portal
           </p>
         </div>

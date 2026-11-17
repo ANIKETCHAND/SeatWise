@@ -43,6 +43,22 @@
       "dest": "/faculty_photos/$1"
     },
     {
+      "src": "/jain-logo.png",
+      "dest": "/jain-logo.png"
+    },
+    {
+      "src": "/jain-logo.jpg",
+      "dest": "/jain-logo.jpg"
+    },
+    {
+      "src": "/jain-logo-transparent.png",
+      "dest": "/jain-logo-transparent.png"
+    },
+    {
+      "src": "/jain-logo-raw.jpg",
+      "dest": "/jain-logo-raw.jpg"
+    },
+    {
       "src": "/assets/(.*)",
       "dest": "/assets/$1"
     },

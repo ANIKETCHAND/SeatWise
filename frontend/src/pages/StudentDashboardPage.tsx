@@ -163,9 +163,18 @@ export const StudentDashboardPage: React.FC = () => {
             {studentInfo?.full_name?.charAt(0) || 'S'}
           </div>
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 text-[10px] font-mono border border-zinc-200 mb-1">
-              <CheckCircle2 className="w-3 h-3 text-black" />
-              Student
+            <div className="flex items-center gap-2 mb-1">
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 text-[10px] font-mono border border-zinc-200">
+                <CheckCircle2 className="w-3 h-3 text-black" />
+                Student
+              </div>
+              <div className="bg-white px-2 py-0.5 rounded-md border border-zinc-200 shadow-2xs">
+                <img
+                  src="/jain-logo.png"
+                  alt="JAIN Deemed-to-be University"
+                  className="h-4 sm:h-5 w-auto object-contain"
+                />
+              </div>
             </div>
             <h1 className="text-xl font-bold tracking-tight text-zinc-950">
               {studentInfo?.full_name || user?.full_name || 'Student Portal'}
@@ -182,7 +191,7 @@ export const StudentDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 print:hidden">
           <button
             onClick={() => window.print()}
             className="px-3.5 py-2 rounded-xl border border-zinc-200 hover:border-black bg-white text-xs font-semibold text-zinc-800 hover:text-black transition-colors flex items-center gap-2 shadow-xs cursor-pointer"
@@ -194,7 +203,7 @@ export const StudentDashboardPage: React.FC = () => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-zinc-200 pb-2">
+      <div className="flex items-center gap-2 border-b border-zinc-200 pb-2 print:hidden">
         <button
           onClick={() => {
             setActiveTab('find-seat');
@@ -302,9 +311,18 @@ export const StudentDashboardPage: React.FC = () => {
                   {/* Left Column: Official Desk Ticket */}
                   <div className="lg:col-span-1 bg-white border border-zinc-200 rounded-2xl p-6 shadow-xs space-y-5">
                     <div className="border-b border-zinc-100 pb-3 flex items-center justify-between">
-                      <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider">
-                        Seat Assignment
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <div className="bg-white p-1 rounded-md border border-zinc-200 shadow-2xs">
+                          <img
+                            src="/jain-logo.png"
+                            alt="JAIN Deemed-to-be University"
+                            className="h-5 w-auto object-contain"
+                          />
+                        </div>
+                        <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider">
+                          Seat Assignment
+                        </span>
+                      </div>
                       <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
                         Published
                       </span>

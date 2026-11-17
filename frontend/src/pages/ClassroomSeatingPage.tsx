@@ -273,15 +273,24 @@ export const ClassroomSeatingPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-zinc-950 tracking-tight flex items-center gap-2">
-            <Armchair className="w-5 h-5 text-black" />
-            Classroom Seating
-          </h1>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Arrange student seating for lectures and record attendance.
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
+        <div className="flex items-center gap-3.5">
+          <div className="bg-white p-1.5 rounded-lg border border-zinc-200/80 shadow-2xs shrink-0">
+            <img
+              src="/jain-logo.png"
+              alt="JAIN Deemed-to-be University"
+              className="h-8 sm:h-9 w-auto object-contain"
+            />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-zinc-950 tracking-tight flex items-center gap-2">
+              <Armchair className="w-5 h-5 text-black" />
+              Classroom Seating
+            </h1>
+            <p className="text-xs text-zinc-500 mt-0.5">
+              Faculty of Engineering & Technology (FET) — Regular Lecture Seating & Attendance
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -317,7 +326,7 @@ export const ClassroomSeatingPage: React.FC = () => {
       )}
 
       {/* Timetable Session Selector Toolbar */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-xs grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="bg-white rounded-xl border border-zinc-200 p-4 shadow-xs grid grid-cols-2 sm:grid-cols-5 gap-3 print:hidden">
         <div>
           <label className="text-[11px] font-semibold text-zinc-500 uppercase">Program</label>
           <select
@@ -437,7 +446,7 @@ export const ClassroomSeatingPage: React.FC = () => {
       </div>
 
       {/* Notice Banner */}
-      <div className="p-3 bg-zinc-100 border border-zinc-300 rounded-lg text-zinc-900 text-xs flex items-center justify-between">
+      <div className="p-3 bg-zinc-100 border border-zinc-300 rounded-lg text-zinc-900 text-xs flex items-center justify-between print:hidden">
         <div className="flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-black shrink-0" />
           <span>
@@ -453,6 +462,27 @@ export const ClassroomSeatingPage: React.FC = () => {
 
       {/* Classroom Seating Grid Visualizer */}
       <div className="bg-white rounded-xl border border-zinc-200 p-6 shadow-xs space-y-4">
+        {/* Institutional Print/Chart Header */}
+        <div className="flex flex-col sm:flex-row items-center justify-between pb-4 border-b border-zinc-200 gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="bg-white p-1.5 rounded-lg border border-zinc-200/80 shadow-2xs shrink-0">
+              <img
+                src="/jain-logo.png"
+                alt="JAIN Deemed-to-be University"
+                className="h-10 sm:h-12 w-auto object-contain"
+              />
+            </div>
+            <div className="text-left">
+              <h2 className="text-base font-bold text-zinc-950">JAIN (DEEMED-TO-BE UNIVERSITY)</h2>
+              <p className="text-xs text-zinc-600 font-medium">FACULTY OF ENGINEERING & TECHNOLOGY — LECTURE ATTENDANCE & SEATING PLAN</p>
+            </div>
+          </div>
+          <div className="text-center sm:text-right text-[11px] text-zinc-500">
+            <p>Venue: <strong className="text-zinc-900">{resolvedSession.room} ({resolvedSession.building})</strong></p>
+            <p>Class: <strong className="text-zinc-900">{program} Sem {semester} - Sec {section}</strong></p>
+            <p>Course: {resolvedSession.subject}</p>
+          </div>
+        </div>
         {/* Front of Classroom */}
         <div className="w-full py-2 bg-zinc-100 rounded text-center text-xs font-bold text-zinc-700 uppercase tracking-widest border border-zinc-300">
           [ Whiteboard / Projector Screen / Faculty Podium ]

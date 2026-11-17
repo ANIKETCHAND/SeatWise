@@ -32,23 +32,35 @@ export const LandingNavbar: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          {/* Left: Logo */}
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center text-white shadow-md shadow-zinc-950/10 group-hover:scale-105 transition-transform">
-              <Layers className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-lg font-bold text-black tracking-tight flex items-center gap-1.5">
-                SeatWise
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-900 border border-zinc-300 font-semibold">
-                  JU
+          {/* Left: Brand & Institutional Logo */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center text-white shadow-md shadow-zinc-950/10 group-hover:scale-105 transition-transform">
+                <Layers className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-lg font-bold text-black tracking-tight flex items-center gap-1.5">
+                  SeatWise
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-900 border border-zinc-300 font-semibold">
+                    JU
+                  </span>
                 </span>
-              </span>
-              <p className="text-[10px] text-zinc-500 font-medium leading-none">
-                Jain University Seating
-              </p>
+                <p className="text-[10px] text-zinc-500 font-medium leading-none">
+                  Jain University Seating
+                </p>
+              </div>
+            </Link>
+
+            <div className="hidden sm:block h-7 w-px bg-zinc-200" />
+
+            <div className="hidden sm:flex items-center bg-white px-2.5 py-1 rounded-lg border border-zinc-200/80 shadow-xs hover:border-zinc-300 transition-colors">
+              <img
+                src="/jain-logo.png"
+                alt="JAIN Deemed-to-be University"
+                className="h-7 md:h-8 w-auto object-contain"
+              />
             </div>
-          </Link>
+          </div>
 
           {/* Center: Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
@@ -105,6 +117,13 @@ export const LandingNavbar: React.FC = () => {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white/95 backdrop-blur-xl border-b border-zinc-200 px-4 pt-3 pb-6 space-y-3">
+          <div className="flex items-center justify-center p-2 mb-2 bg-white rounded-lg border border-zinc-200 shadow-2xs">
+            <img
+              src="/jain-logo.png"
+              alt="JAIN Deemed-to-be University"
+              className="h-8 w-auto object-contain"
+            />
+          </div>
           <button
             onClick={() => {
               window.scrollTo({ top: 0, behavior: 'smooth' });

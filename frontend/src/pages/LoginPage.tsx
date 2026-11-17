@@ -236,20 +236,32 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col justify-between text-zinc-900 font-sans selection:bg-black selection:text-white">
       {/* Top Header */}
-      <header className="px-6 py-4 flex items-center justify-between border-b border-zinc-200 bg-white">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
-            <Layers className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-base font-bold text-black tracking-tight flex items-center gap-1.5">
-              SeatWise
-              <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-zinc-100 text-zinc-900 border border-zinc-300 font-semibold">
-                JU
+      <header className="px-6 py-3.5 flex items-center justify-between border-b border-zinc-200 bg-white">
+        <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
+              <Layers className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-base font-bold text-black tracking-tight flex items-center gap-1.5">
+                SeatWise
+                <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-zinc-100 text-zinc-900 border border-zinc-300 font-semibold">
+                  JU
+                </span>
               </span>
-            </span>
+            </div>
+          </Link>
+
+          <div className="hidden sm:block h-6 w-px bg-zinc-200" />
+
+          <div className="hidden sm:flex items-center bg-white px-2 py-0.5 rounded-lg border border-zinc-200 shadow-2xs">
+            <img
+              src="/jain-logo.png"
+              alt="JAIN Deemed-to-be University"
+              className="h-6 sm:h-7 w-auto object-contain"
+            />
           </div>
-        </Link>
+        </div>
 
         <Link
           to="/"
@@ -264,10 +276,19 @@ export const LoginPage: React.FC = () => {
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-xl bg-white border border-zinc-200 rounded-2xl shadow-sm p-6 sm:p-8 space-y-6">
           {/* Header Info */}
-          <div className="text-center space-y-1.5">
+          <div className="text-center space-y-2.5">
+            <div className="flex justify-center">
+              <div className="bg-white px-4 py-2 rounded-xl border border-zinc-200 shadow-xs flex items-center justify-center">
+                <img
+                  src="/jain-logo.png"
+                  alt="JAIN Deemed-to-be University"
+                  className="h-10 sm:h-12 w-auto object-contain"
+                />
+              </div>
+            </div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 text-[11px] font-medium border border-zinc-200 font-mono">
               <CheckCircle2 className="w-3 h-3 text-black" />
-              Jain University FET
+              Faculty of Engineering & Technology (FET)
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-zinc-950">
               Sign In to SeatWise

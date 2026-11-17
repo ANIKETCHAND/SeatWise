@@ -145,22 +145,33 @@ export const Sidebar: React.FC = () => {
   const sections = getNavLinks();
 
   return (
-    <aside className="w-64 bg-zinc-950 text-zinc-300 flex flex-col shrink-0 min-h-screen border-r border-zinc-800">
+    <aside className="w-64 bg-zinc-950 text-zinc-300 flex flex-col shrink-0 min-h-screen border-r border-zinc-800 print:hidden">
       {/* Brand Header */}
-      <div className="h-16 flex items-center px-5 border-b border-zinc-800/80 gap-3 bg-black">
-        <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center text-black shadow-sm group-hover:scale-105 transition-transform">
-          <Sparkles className="w-5 h-5 text-black" />
-        </div>
-        <div>
-          <div className="flex items-center gap-1.5 font-bold tracking-tight text-white text-base">
-            SeatWise
-            <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700 font-mono">
-              JU
-            </span>
+      <div className="p-4 border-b border-zinc-800/80 bg-black flex flex-col gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-black shadow-sm shrink-0">
+            <Sparkles className="w-4 h-4 text-black" />
           </div>
-          <p className="text-[11px] text-zinc-400 font-medium truncate max-w-[150px]">
-            Jain University Seating
-          </p>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 font-bold tracking-tight text-white text-sm">
+              SeatWise
+              <span className="text-[9px] uppercase font-semibold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700 font-mono">
+                JU
+              </span>
+            </div>
+            <p className="text-[10px] text-zinc-400 font-medium truncate">
+              FET Seating Management
+            </p>
+          </div>
+        </div>
+
+        {/* Institutional Logo Card */}
+        <div className="bg-white rounded-lg px-2.5 py-1.5 flex items-center justify-center shadow-xs border border-zinc-200/20">
+          <img
+            src="/jain-logo.png"
+            alt="JAIN Deemed-to-be University"
+            className="h-7 w-auto object-contain max-w-full"
+          />
         </div>
       </div>
 
