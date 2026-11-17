@@ -21,6 +21,8 @@ import { INITIAL_PROGRAMS, PERIOD_TIMINGS } from '../data/universityData';
 import { api } from '../services/api';
 import { useNotification } from '../context/NotificationContext';
 import { exportTableToCsv } from '../utils/exportHelpers';
+import jainTimetableLookup from '../data/jain_timetable_lookup.json';
+import { CAMPUS_ROOMS } from '../data/campusFloorData';
 
 interface AssignedSeat {
   seat_label: string;
@@ -30,6 +32,28 @@ interface AssignedSeat {
   student_name: string;
   is_absent?: boolean;
 }
+
+interface ClassroomSession {
+  subject: string;
+  code: string;
+  faculty: string;
+  room: string;
+  building: string;
+  rows: number;
+  columns: number;
+  total_desks: number;
+  blocked: string[];
+}
+
+const DEFAULT_STUDENT_NAMES = [
+  'Aarav Sharma', 'Ananya Deshmukh', 'Bhavin Patel', 'Chaitanya Reddy', 'Divya Nambiar',
+  'Eshaan Joshi', 'Farhan Akhtar', 'Gaurav Kulkarni', 'Harini Iyer', 'Ishaan Verma',
+  'Janhavi Rao', 'Karan Mehra', 'Lavanya S.', 'Manish Tewari', 'Neha Chawla',
+  'Omkar Joshi', 'Pooja Hegde', 'Pranav Nair', 'Rohan Gupta', 'Sanya Mirza',
+  'Siddharth Roy', 'Tanvi Bhat', 'Uday Shankar', 'Varun Dhawan', 'Vidya Balan',
+  'Yash Singhania', 'Zara Sheikh', 'Aditya Birla', 'Meera Rajput', 'Kavya Madhavan',
+  'Nikhil Kamath', 'Tarun Tahiliani'
+];
 
 export const ClassroomSeatingPage: React.FC = () => {
   const { showNotification } = useNotification();
@@ -47,7 +71,7 @@ export const ClassroomSeatingPage: React.FC = () => {
   const [feedback, setFeedback] = useState<string | null>(null);
 
   // Timetable Resolved Context
-  const resolvedSession = {
+  const [session, setSession] = useState<ClassroomSession>({
     subject: 'Data Structures & Algorithms',
     code: '21CS301',
     faculty: 'Dr. Ramesh Kumar',
@@ -57,58 +81,131 @@ export const ClassroomSeatingPage: React.FC = () => {
     columns: 8,
     total_desks: 40,
     blocked: ['0-2'],
-  };
-
-  // Mock Students Roster for Section 3A
-  const initialRoster = Array.from({ length: 32 }).map((_, i) => ({
-    roll: `23JU01${(i + 1).toString().padStart(2, '0')}`,
-    name: [
-      'Aarav Sharma', 'Ananya Deshmukh', 'Bhavin Patel', 'Chaitanya Reddy', 'Divya Nambiar',
-      'Eshaan Joshi', 'Farhan Akhtar', 'Gaurav Kulkarni', 'Harini Iyer', 'Ishaan Verma',
-      'Janhavi Rao', 'Karan Mehra', 'Lavanya S.', 'Manish Tewari', 'Neha Chawla',
-      'Omkar Joshi', 'Pooja Hegde', 'Pranav Nair', 'Rohan Gupta', 'Sanya Mirza',
-      'Siddharth Roy', 'Tanvi Bhat', 'Uday Shankar', 'Varun Dhawan', 'Vidya Balan',
-      'Yash Singhania', 'Zara Sheikh', 'Aditya Birla', 'Meera Rajput', 'Kavya Madhavan',
-      'Nikhil Kamath', 'Tarun Tahiliani'
-    ][i % 32],
-  }));
-
-  // Initial Seating assignments (Standard classroom mode: same batch adjacent is ALLOWED)
-  const [assignments, setAssignments] = useState<Record<string, AssignedSeat>>(() => {
-    const map: Record<string, AssignedSeat> = {};
-    let studentIdx = 0;
-    for (let r = 0; r < resolvedSession.rows; r++) {
-      for (let c = 0; c < resolvedSession.columns; c++) {
-        const key = `${r}-${c}`;
-        if (resolvedSession.blocked.includes(key)) continue;
-        if (studentIdx < initialRoster.length) {
-          const st = initialRoster[studentIdx++];
-          const rowLetter = String.fromCharCode(65 + r);
-          map[key] = {
-            seat_label: `${rowLetter}${c + 1}`,
-            row: r,
-            col: c,
-            student_roll: st.roll,
-            student_name: st.name,
-            is_absent: false,
-          };
-        }
-      }
-    }
-    return map;
   });
 
+  const [assignments, setAssignments] = useState<Record<string, AssignedSeat>>({});
+  const [currentRoster, setCurrentRoster] = useState<Array<{ roll: string; name: string }>>([]);
   const [selectedSeatKey, setSelectedSeatKey] = useState<string | null>(null);
+
+  // Dynamic Session & Roster Resolution on Program/Semester/Section/Date/Period change
+  useEffect(() => {
+    if (planIdFromQuery) return;
+
+    const dayMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayShort = dayMap[new Date(date).getDay()] || 'Mon';
+
+    const activeBatchKey = `${program}_Sem${semester}_Sec${section}`;
+    const batchSched = (jainTimetableLookup as Record<string, Record<string, any>>)[activeBatchKey] || {};
+    const slot = batchSched[dayShort]?.[period];
+
+    const subName = slot?.subject || `${program} S${semester} ${period}`;
+    const subCode = slot?.code || `${program}-${semester}01`;
+    const facName = slot?.faculty || 'Faculty In-Charge';
+    const roomCode = slot?.room || 'LH-201';
+
+    const cleanRoom = roomCode.replace(/\s*\[AC\]\s*/gi, '').replace(/\s*(Room|Lab)\s*$/gi, '').trim();
+    const campusRoom = CAMPUS_ROOMS.find(
+      (r) => r.room_number === roomCode || r.name === roomCode || r.room_number === cleanRoom
+    );
+    const roomRows = campusRoom?.rows || 5;
+    const roomCols = campusRoom?.columns || 8;
+    const blockedSeats = campusRoom?.blocked_seats || ['0-2'];
+    const buildingInfo = campusRoom ? `Block ${campusRoom.block}, ${campusRoom.floor} Floor` : 'FET Campus Core';
+
+    setSession({
+      subject: subName,
+      code: subCode,
+      faculty: facName,
+      room: roomCode,
+      building: buildingInfo,
+      rows: roomRows,
+      columns: roomCols,
+      total_desks: roomRows * roomCols,
+      blocked: blockedSeats,
+    });
+
+    api.getStudents({ semester, section })
+      .then((studentsData) => {
+        let roster: Array<{ roll: string; name: string }> = [];
+        if (studentsData && studentsData.length > 0) {
+          roster = studentsData.map((s: any) => ({
+            roll: s.roll_number || s.id,
+            name: s.full_name || 'Student',
+          }));
+        } else {
+          roster = Array.from({ length: 32 }).map((_, i) => ({
+            roll: `23JU-${program}-${semester}${section}-${(i + 1).toString().padStart(2, '0')}`,
+            name: DEFAULT_STUDENT_NAMES[i % DEFAULT_STUDENT_NAMES.length],
+          }));
+        }
+        setCurrentRoster(roster);
+
+        const map: Record<string, AssignedSeat> = {};
+        let sIdx = 0;
+        for (let r = 0; r < roomRows; r++) {
+          for (let c = 0; c < roomCols; c++) {
+            const key = `${r}-${c}`;
+            if (blockedSeats.includes(key)) continue;
+            if (sIdx < roster.length) {
+              const st = roster[sIdx++];
+              const rowLetter = String.fromCharCode(65 + r);
+              map[key] = {
+                seat_label: `${rowLetter}${c + 1}`,
+                row: r,
+                col: c,
+                student_roll: st.roll,
+                student_name: st.name,
+                is_absent: false,
+              };
+            }
+          }
+        }
+        setAssignments(map);
+      })
+      .catch(() => {
+        const roster = Array.from({ length: 32 }).map((_, i) => ({
+          roll: `23JU-${program}-${semester}${section}-${(i + 1).toString().padStart(2, '0')}`,
+          name: DEFAULT_STUDENT_NAMES[i % DEFAULT_STUDENT_NAMES.length],
+        }));
+        setCurrentRoster(roster);
+
+        const map: Record<string, AssignedSeat> = {};
+        let sIdx = 0;
+        for (let r = 0; r < roomRows; r++) {
+          for (let c = 0; c < roomCols; c++) {
+            const key = `${r}-${c}`;
+            if (blockedSeats.includes(key)) continue;
+            if (sIdx < roster.length) {
+              const st = roster[sIdx++];
+              const rowLetter = String.fromCharCode(65 + r);
+              map[key] = {
+                seat_label: `${rowLetter}${c + 1}`,
+                row: r,
+                col: c,
+                student_roll: st.roll,
+                student_name: st.name,
+                is_absent: false,
+              };
+            }
+          }
+        }
+        setAssignments(map);
+      });
+  }, [program, semester, section, date, period, planIdFromQuery]);
 
   // Auto-allocate / Shuffle
   const handleShuffle = () => {
-    const shuffledStudents = [...initialRoster].sort(() => Math.random() - 0.5);
+    const studentsToPlace = currentRoster.length > 0 ? [...currentRoster] : Object.values(assignments).map((a) => ({
+      roll: a.student_roll,
+      name: a.student_name,
+    }));
+    const shuffledStudents = [...studentsToPlace].sort(() => Math.random() - 0.5);
     const map: Record<string, AssignedSeat> = {};
     let studentIdx = 0;
-    for (let r = 0; r < resolvedSession.rows; r++) {
-      for (let c = 0; c < resolvedSession.columns; c++) {
+    for (let r = 0; r < session.rows; r++) {
+      for (let c = 0; c < session.columns; c++) {
         const key = `${r}-${c}`;
-        if (resolvedSession.blocked.includes(key)) continue;
+        if (session.blocked.includes(key)) continue;
         if (studentIdx < shuffledStudents.length) {
           const st = shuffledStudents[studentIdx++];
           const rowLetter = String.fromCharCode(65 + r);
@@ -223,12 +320,12 @@ export const ClassroomSeatingPage: React.FC = () => {
     try {
       const res = await api.saveClassroomSeating({
         batch_id: `batch-${program.toLowerCase()}-s${semester}${section.toLowerCase()}`,
-        room_id: resolvedSession.room,
+        room_id: session.room,
         plan_date: date,
         period: parseInt(period.replace('P', ''), 10) || 1,
         assignments: Object.entries(assignments).map(([_, a]) => ({
           student_id: a.student_roll,
-          room_id: resolvedSession.room,
+          room_id: session.room,
           row: a.row,
           col: a.col,
           seat_label: a.seat_label,
@@ -237,10 +334,10 @@ export const ClassroomSeatingPage: React.FC = () => {
       if (res && res.plan_id) {
         setSavedPlanId(res.plan_id);
       }
-      setFeedback(`Classroom seating plan for ${resolvedSession.room} (${period}) saved to database.`);
-      showNotification('success', `Classroom plan saved for ${resolvedSession.room} (${period}).`);
+      setFeedback('Changes saved.');
+      showNotification('success', `Classroom plan saved for ${session.room} (${period}).`);
     } catch (err: any) {
-      setFeedback(`Classroom seating plan for ${resolvedSession.room} (${period}) archived.`);
+      setFeedback('Changes saved locally.');
       showNotification('warning', `Plan saved locally (${err?.message || 'Database sync failed'})`);
     }
     setTimeout(() => setFeedback(null), 4000);
@@ -407,18 +504,18 @@ export const ClassroomSeatingPage: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700 font-semibold">
-                {resolvedSession.code}
+                {session.code}
               </span>
-              <h2 className="text-base font-bold text-white">{resolvedSession.subject}</h2>
+              <h2 className="text-base font-bold text-white">{session.subject}</h2>
             </div>
             <div className="flex items-center gap-4 text-xs text-zinc-300 mt-1">
               <span className="flex items-center gap-1">
                 <User className="w-3.5 h-3.5 text-zinc-400" />
-                {resolvedSession.faculty}
+                {session.faculty}
               </span>
               <span className="flex items-center gap-1 font-semibold text-zinc-200">
                 <DoorClosed className="w-3.5 h-3.5" />
-                Assigned Venue: {resolvedSession.room} ({resolvedSession.building})
+                Assigned Venue: {session.room} ({session.building})
               </span>
             </div>
           </div>
@@ -478,9 +575,9 @@ export const ClassroomSeatingPage: React.FC = () => {
             </div>
           </div>
           <div className="text-center sm:text-right text-[11px] text-zinc-500">
-            <p>Venue: <strong className="text-zinc-900">{resolvedSession.room} ({resolvedSession.building})</strong></p>
+            <p>Venue: <strong className="text-zinc-900">{session.room} ({session.building})</strong></p>
             <p>Class: <strong className="text-zinc-900">{program} Sem {semester} - Sec {section}</strong></p>
-            <p>Course: {resolvedSession.subject}</p>
+            <p>Course: {session.subject}</p>
           </div>
         </div>
         {/* Front of Classroom */}
@@ -492,14 +589,14 @@ export const ClassroomSeatingPage: React.FC = () => {
           <div
             className="grid gap-2.5 justify-center mx-auto"
             style={{
-              gridTemplateColumns: `repeat(${resolvedSession.columns}, minmax(88px, 110px))`,
+              gridTemplateColumns: `repeat(${session.columns}, minmax(88px, 110px))`,
             }}
           >
-            {Array.from({ length: resolvedSession.rows }).map((_, r) => {
+            {Array.from({ length: session.rows }).map((_, r) => {
               const rowLetter = String.fromCharCode(65 + r);
-              return Array.from({ length: resolvedSession.columns }).map((__, c) => {
+              return Array.from({ length: session.columns }).map((__, c) => {
                 const key = `${r}-${c}`;
-                const isBlocked = resolvedSession.blocked.includes(key);
+                const isBlocked = session.blocked.includes(key);
                 const assigned = assignments[key];
                 const seatLabel = `${rowLetter}${c + 1}`;
                 const isSelected = selectedSeatKey === key;

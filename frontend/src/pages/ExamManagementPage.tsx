@@ -24,6 +24,7 @@ import { useNotification } from '../context/NotificationContext';
 import { Modal } from '../components/common/Modal';
 import { api } from '../services/api';
 import { broadcastSync, useDataSync } from '../services/syncService';
+import { getApprovedExamHalls } from '../data/campusFloorData';
 
 export interface ExamRecord {
   id: string;
@@ -78,23 +79,13 @@ const INITIAL_EXAMS: ExamRecord[] = [
 ];
 
 const AVAILABLE_BATCHES = ['AIML-S3A', 'CSE-GEN-S3B', 'AIDE-S3A', 'CSBS-S5A', 'CTIS-S5A', 'CyberSecurity-S5A'];
-const AVAILABLE_HALLS = [
-  // 1st Floor (FET Campus Core Lecture Halls & Computing Labs)
-  'A-101', 'A-102', 'A-103', 'B-110', 'B-111', 'B-112', 'B-127-A', 'B-127-B', 'B-127-C',
-  'C-106', 'C-107', 'C-108', 'C-109', 'D-104', 'A-113', 'B-125-A', 'B-125-B', 'B-126-A', 'B-126-B',
-  // 2nd Floor
-  'A-201', 'A-202', 'A-203', 'A-204', 'A-205', 'A-206', 'A-210', 'A-211', 'A-212',
-  'B-207', 'B-208', 'B-224', 'D-204', 'D-205', 'D-206',
-  // 3rd Floor (Examination Sections & Valuation Centers)
-  'A-313', 'A-314', 'C-327', 'A-301', 'A-302', 'A-303', 'A-312', 'A-316',
-  'B-307', 'B-308', 'B-309', 'B-321-A', 'B-321-B', 'B-322-A', 'B-322-B', 'B-322-C',
-  'C-310', 'C-311', 'C-312', 'C-324-A', 'C-324-B', 'D-304', 'D-305', 'D-306',
-  // 4th Floor
-  'A-403', 'B-407', 'B-408', 'C-410', 'C-411', 'C-412',
-  // Ground Floor
-  'A-002', 'A-004',
-  // Legacy Aliases
-  'LH-101', 'LH-102', 'EXAM-HALL-MAIN', 'LH-201',
+const APPROVED_EXAM_HALLS = getApprovedExamHalls().map((r) => r.room_number);
+const AVAILABLE_HALLS = APPROVED_EXAM_HALLS.length > 0 ? APPROVED_EXAM_HALLS : [
+  'A-002', 'A-004', 'A-101', 'A-102', 'A-103', 'A-201', 'A-202', 'A-203', 'A-204', 'A-205', 'A-206',
+  'A-210', 'A-211', 'A-212', 'A-301', 'A-302', 'A-303', 'A-312', 'A-313', 'A-314', 'A-316', 'A-403',
+  'B-110', 'B-111', 'B-112', 'B-207', 'B-208', 'B-224', 'B-307', 'B-308', 'B-309', 'B-407', 'B-408',
+  'C-106', 'C-107', 'C-108', 'C-109', 'C-310', 'C-311', 'C-312', 'C-327', 'C-410', 'C-411', 'C-412',
+  'D-104', 'D-204', 'D-205', 'D-206', 'D-304', 'D-305', 'D-306',
 ];
 
 export const DRAFT_EXAMS_STORAGE_KEY = 'seatwise_custom_exams';
@@ -213,14 +204,18 @@ export const ExamManagementPage: React.FC = () => {
       })
       .catch(() => {});
 
-    api.getRooms()
+    api.getApprovedExamHalls()
       .then((data) => {
         if (data && data.length > 0) {
           const hNames = data.map((r: any) => r.code || r.name);
-          setHallsList(Array.from(new Set([...hNames, ...AVAILABLE_HALLS])));
+          setHallsList(Array.from(new Set(hNames)));
+        } else {
+          setHallsList(AVAILABLE_HALLS);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setHallsList(AVAILABLE_HALLS);
+      });
   }, [loadExams]);
 
   // Hall Booking Conflict Detection

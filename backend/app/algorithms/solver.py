@@ -26,6 +26,7 @@ from .models import Hall, Policy
 SOLUTION = "solution"
 INFEASIBLE = "infeasible"
 UNKNOWN = "unknown"
+TIMEOUT = "timeout"
 
 
 def solve_batch_assignment(
@@ -139,7 +140,7 @@ def solve_with_backtracking(
     try:
         solution = search(0)
     except TimeoutError:
-        return UNKNOWN, None, "backtracking"
+        return TIMEOUT, None, "backtracking"
     if solution is None:
         return INFEASIBLE, None, "backtracking"
     return SOLUTION, solution, "backtracking"

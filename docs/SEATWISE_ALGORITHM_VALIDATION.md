@@ -141,6 +141,10 @@ All required reference benchmark test cases from the specification were executed
 | **REF-11** | $2 \times 2$ (Diagonal ON) | 4 | A: 2 | **Infeasible** | `infeasible` | $K_4$ complete graph: 2 same-batch cannot fit | **PASS** |
 | **REF-12** | $2 \times 3$ (Diagonal ON) | 6 | A: 2 | **Valid** | `valid` | Placed at $(0,0)$ and $(0,2)$ with distance $> 1$ | **PASS** |
 | **REF-13** | Multiple Halls ($3 \times 4 + 3 \times 4$) | 24 | A: 7, B: 6 | **Valid** | `valid` | Distributed across halls H1 and H2 | **PASS** |
+| **REF-14** | $11 \times 11$ (9 blocked island) | 112 | 6 batches ($B_1: 55$, others: 10 each) | **Valid** | `valid` | Solved via CP-SAT at $\alpha(G)-1=55$ boundary | **PASS** |
+| **REF-15** | $11 \times 11$ (9 blocked island) | 112 | 6 batches ($B_1: 57$, others: 10 each) | **Infeasible** | `infeasible` | $57 > \alpha(G)=56$ independence bound | **PASS** |
+| **REF-16** | $10 \times 10$ ($t_{\text{limit}} = 0.0001\text{s}$) | 100 | 8 batches (6 each) | **Timeout** | `timeout` | Solver timeout explicitly distinguished from `unknown` & `infeasible` | **PASS** |
+| **REF-17** | $4 \times 6$ (Classroom Mode) | 24 | 1 batch (24 students) | **Valid** | `valid` | Peer adjacency allowed for regular classroom teaching | **PASS** |
 
 ---
 

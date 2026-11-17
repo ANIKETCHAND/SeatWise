@@ -242,6 +242,7 @@ def result_to_plan_json(
         "valid": "valid",
         "invalid": "invalid",
         "infeasible": "infeasible",
+        "timeout": "timeout",
         "unknown": "unknown",
     }.get(result.status, "pending")
 

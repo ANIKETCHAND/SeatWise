@@ -19,7 +19,7 @@ import itertools
 import pytest
 
 from conftest import make_request, make_students, rect_hall
-from app.algorithms import Policy, generate_seating, validate_allocation
+from app.algorithms import Hall, Policy, Seat, SeatingRequest, Student, generate_seating, validate_allocation
 from app.algorithms.solver import solve_batch_assignment
 from app.algorithms.independence import max_independent_set_size
 
@@ -339,3 +339,80 @@ class TestUnevenGrids:
     def test_single_row(self):
         result = generate_seating(make_request({"A": 3, "B": 3}, [rect_hall("H", 1, 6)]))
         assert result.status == "valid"
+
+
+class TestTimeoutAndIrregularHalls:
+    def test_solver_timeout_distinguished_from_infeasible_and_unknown(self):
+        # A large hall with 8 batches and a tight 0.0001s timeout forces a timeout
+        hall = rect_hall("H", 10, 10)
+        counts = {f"B{i}": 6 for i in range(8)}
+        req = make_request(counts, [hall])
+        req.solver_time_limit_seconds = 0.0001
+        result = generate_seating(req)
+        assert result.status in ("timeout", "valid")
+        if result.status == "timeout":
+            assert "timed out" in result.explanation.lower()
+            assert "not a proof" in result.explanation.lower()
+            assert result.stats.get("timeout_seconds") == 0.0001
+
+    def test_irregular_hall_cpsat_independence_bound(self):
+        # Irregular hall with > 100 seats, non-convex blocked desk island, and 6 batches
+        rows, cols = 11, 11  # 121 seats
+        blocked = {(r, c) for r in range(2, 5) for c in range(2, 5)}  # 9 blocked seats -> 112 usable
+        seats = tuple(Seat("H", r, c, f"{r}-{c}", (r, c) not in blocked) for r in range(rows) for c in range(cols))
+        hall = Hall("H", "Irregular Hall", rows, cols, seats)
+        policy = Policy()
+        alpha = max_independent_set_size((hall,), policy)
+        assert alpha == 56
+
+        # Largest batch size = alpha - 1 = 55, total 105 students <= 112 seats
+        counts = {"B1": alpha - 1, "B2": 10, "B3": 10, "B4": 10, "B5": 10, "B6": 10}
+        students = []
+        for g, n in counts.items():
+            for i in range(n):
+                students.append(Student(f"{g}-{i}", "", "", g))
+
+        req = SeatingRequest(tuple(students), (hall,), policy, solver_time_limit_seconds=10.0)
+        res = generate_seating(req)
+        assert res.status == "valid"
+        assert res.validation is not None
+        assert res.validation.is_valid is True
+        assert len(res.assignments) == 105
+
+    def test_irregular_hall_cpsat_infeasible_when_exceeding_alpha(self):
+        # Same irregular hall with largest batch size = alpha + 1 = 57 -> proven infeasible
+        rows, cols = 11, 11
+        blocked = {(r, c) for r in range(2, 5) for c in range(2, 5)}
+        seats = tuple(Seat("H", r, c, f"{r}-{c}", (r, c) not in blocked) for r in range(rows) for c in range(cols))
+        hall = Hall("H", "Irregular Hall", rows, cols, seats)
+        policy = Policy()
+        alpha = max_independent_set_size((hall,), policy)
+        assert alpha == 56
+
+        counts = {"B1": alpha + 1, "B2": 10, "B3": 10, "B4": 10, "B5": 10, "B6": 10}
+        students = []
+        for g, n in counts.items():
+            for i in range(n):
+                students.append(Student(f"{g}-{i}", "", "", g))
+
+        req = SeatingRequest(tuple(students), (hall,), policy, solver_time_limit_seconds=10.0)
+        res = generate_seating(req)
+        assert res.status == "infeasible"
+        assert any("independence" in note or "α" in note for note in res.math_notes)
+
+    def test_classroom_mode_no_same_batch_adjacency_restriction(self):
+        # Regular classroom seating: peer adjacency allowed
+        policy = Policy(
+            block_same_batch_horizontal=False,
+            block_same_batch_vertical=False,
+            block_same_batch_diagonal=False,
+        )
+        hall = rect_hall("H", 4, 6)
+        # All 24 students belong to the SAME batch "AIML-S3A", filling the entire hall
+        counts = {"AIML-S3A": 24}
+        req = make_request(counts, [hall], policy)
+        res = generate_seating(req)
+        assert res.status == "valid"
+        assert len(res.assignments) == 24
+        assert res.validation.is_valid is True
+

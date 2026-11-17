@@ -25,7 +25,7 @@ from ortools.sat.python import cp_model
 
 from .adjacency import adjacency_edges
 from .models import Hall, Policy
-from .solver import INFEASIBLE, SOLUTION, UNKNOWN
+from .solver import INFEASIBLE, SOLUTION, TIMEOUT, UNKNOWN
 
 
 def solve_with_cpsat(
@@ -79,4 +79,6 @@ def solve_with_cpsat(
         return SOLUTION, assignment, "cp-sat"
     if status in (cp_model.INFEASIBLE, cp_model.MODEL_INVALID):
         return INFEASIBLE, None, "cp-sat"
+    if status == cp_model.UNKNOWN:
+        return TIMEOUT, None, "cp-sat"
     return UNKNOWN, None, "cp-sat"

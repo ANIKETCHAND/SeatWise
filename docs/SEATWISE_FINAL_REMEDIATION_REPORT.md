@@ -22,7 +22,7 @@ All identified functional, logical, architectural, visual, security, and content
 3. **Database Integrity & Atomic RPCs:** Full audit of 20 relational entities, composite unique indexes, cascade deletions, and atomic PL/pgSQL stored procedures for seating plans and timetable imports.
 4. **Institutional Lockdown:** All multi-university selection dropdowns and switches permanently eliminated; application locked to Jain University FET.
 5. **Critical Parity Rule:** 100% byte-for-byte SHA-256 parity maintained across all Python source modules between `backend/app/` and `frontend/app/`.
-6. **Automated Verification:** 135 out of 135 automated Pytest unit and integration tests passing (100% pass rate) with zero failures. Clean Vite production build with code-split Rollup chunking.
+6. **Automated Verification:** 141 out of 141 automated Pytest unit and integration tests passing (100% pass rate) with zero failures. Clean Vite production build with code-split Rollup chunking.
 
 ---
 
@@ -55,7 +55,8 @@ All identified functional, logical, architectural, visual, security, and content
 - Verified bipartite independence number $\alpha(G)$ calculations via König's theorem.
 - Validated exact two-batch checkerboard synthesis on rectangular halls.
 - Validated multi-batch constraint satisfaction via Google OR-Tools CP-SAT with exact backtracking fallback.
-- Confirmed that all 13 reference test cases on small and large grids match mathematical specifications.
+- Confirmed that all 17 reference test cases on small, large, and irregular grids match mathematical specifications.
+- Explicitly separated solver timeout from unknown status with non-infeasibility disclaimer.
 - **Signoff Status:** **APPROVED (PASS)**
 
 ### 2.5 Team E — Database & Supabase Engineering Team
@@ -79,15 +80,15 @@ All identified functional, logical, architectural, visual, security, and content
 - **Signoff Status:** **APPROVED (PASS)**
 
 ### 2.8 Team H — Independent QA and Automation Team
-- Executed full automated test suite: 135 test cases executed, 135 passed (100% pass rate).
-- Verified production build via `npm run build` in `frontend` (Vite 6.4.5 built in 8.18s, 0 errors).
-- Independently verified all remediated bugs (BUG-001 through BUG-011).
+- Executed full automated test suite: 141 test cases executed, 141 passed (100% pass rate).
+- Verified production build via `npm run build` in `frontend` (Vite 6.4.5 built in 6.41s, 0 errors).
+- Independently verified all remediated bugs (BUG-001 through BUG-014).
 - Generated complete Master QA Test Matrix with every item marked `PASS`.
 - **Signoff Status:** **APPROVED (PASS)**
 
 ---
 
-## 3. Remediated Defects Summary (BUG-001 through BUG-011)
+## 3. Remediated Defects Summary (BUG-001 through BUG-014)
 
 | Bug ID | Component | Severity | Description & Root Cause | Resolution Summary | Status |
 |---|---|---|---|---|---|
@@ -102,6 +103,9 @@ All identified functional, logical, architectural, visual, security, and content
 | **BUG-009** | Common UI Components | Medium | 350+ residual legacy color classes across 17 files | Purged all legacy classes using automated AST scanner; zero remaining | **VERIFIED FIXED** |
 | **BUG-010** | `test_auth_rbac.py` | Medium | Loosened assertions (`in (200, 404)`) masked potential route failures | Enforced strict binary assertions (`assert resp.status_code == 200`) | **VERIFIED FIXED** |
 | **BUG-011** | Settings & University Pages | Medium | Modifiable institution name risked multi-university switching | Permanently locked institution to Jain University FET (`disabled readOnly`) | **VERIFIED FIXED** |
+| **BUG-012** | `exam_routes.py` & UI | High | Teaching classrooms inadvertently assigned to examinations without approval | Restricted halls to approved exam halls, added backend 422 validation | **VERIFIED FIXED** |
+| **BUG-013** | `ClassroomSeatingPage.tsx` | High | Static mock session and student roster instead of dynamic timetable resolution | Wired reactive resolution to `jain_timetable_lookup.json` & student API | **VERIFIED FIXED** |
+| **BUG-014** | Seating Engine & Solvers | Medium | Solver timeout conflated with unknown status | Added explicit `TIMEOUT` status with non-infeasibility explanation | **VERIFIED FIXED** |
 
 ---
 
@@ -109,15 +113,15 @@ All identified functional, logical, architectural, visual, security, and content
 
 | Acceptance Criterion | Verification Tool / Command | Evidence / Result | Status |
 |---|---|---|---|
-| Frontend Production Build | `npm run build` in `frontend` | Vite 6.4.5 built in 8.18s, 0 errors, 2122 modules | **PASS** |
+| Frontend Production Build | `npm run build` in `frontend` | Vite 6.4.5 built in 6.41s, 0 errors, 2122 modules | **PASS** |
 | TypeScript Type Checks | `tsc --noEmit` | Clean compilation, 0 type errors | **PASS** |
-| Backend Test Suite | `py -3.14 -m pytest` | 135 passed in 17.67s, 0 failures | **PASS** |
+| Backend Test Suite | `py -3.14 -m pytest` | 141 passed in 13.43s, 0 failures | **PASS** |
 | Critical Parity Rule | SHA-256 Hash Audit | 37 of 37 Python modules match 100% | **PASS** |
 | Authentication & RBAC | `tests/backend/test_auth_rbac.py` | 49 security tests passed (401/403 verified) | **PASS** |
 | Four-Role Workflows | Automated & Manual Runs | All 4 roles execute intended capabilities | **PASS** |
-| Classroom Seating Mode | `ClassroomSeatingPage` & API | Timetable lookup, seat generation, attendance save | **PASS** |
-| Examination Seating Mode | `ExamSeatingPage` & API | Multi-batch solve, checkerboard, CP-SAT, publishing | **PASS** |
-| Mathematical Correctness | `tests/algorithms/test_engine.py` | 33 mathematical tests passed (Pigeonhole, König, etc.) | **PASS** |
+| Classroom Seating Mode | `ClassroomSeatingPage` & API | Dynamic timetable slot retrieval, seat generation, attendance save | **PASS** |
+| Examination Seating Mode | `ExamSeatingPage` & API | Multi-batch solve, checkerboard, CP-SAT, publishing, approved hall check | **PASS** |
+| Mathematical Correctness | `tests/algorithms/test_engine.py` | 37 mathematical tests passed (Pigeonhole, König, irregular CP-SAT, timeout) | **PASS** |
 | Student Seat Lookup | `StudentSeatLookupPage` & API | USN query, desk locator display, IDOR protection | **PASS** |
 | Official Reports & Exports | `ReportsPage` & API | Hall seating charts, student locator PDF, CSV exports | **PASS** |
 | Institutional Dedication | AST Scanner & Manual Review | Locked exclusively to Jain University FET | **PASS** |

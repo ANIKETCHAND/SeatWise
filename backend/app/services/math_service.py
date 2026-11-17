@@ -175,7 +175,12 @@ def solve_grid_constraints(
         for g, n in groups.items()
         for i in range(n)
     )
-    result_status = {"solution": "valid", "infeasible": "infeasible", "unknown": "unknown"}[status]
+    result_status = {
+        "solution": "valid",
+        "infeasible": "infeasible",
+        "timeout": "timeout",
+        "unknown": "unknown",
+    }.get(status, "unknown")
     validation = None
     if solution:
         result = generate_seating(

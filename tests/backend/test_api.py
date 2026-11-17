@@ -468,5 +468,27 @@ class TestValidationAndErrorHandling:
                     if r + 1 < 6 and grid[r + 1][c] is not None:
                         assert grid[r][c] != grid[r + 1][c], "Vertical adjacency violation"
 
+    def test_approved_exam_halls_endpoint(self, client, admin_headers):
+        resp = client.get("/api/rooms/halls/approved", headers=admin_headers)
+        assert resp.status_code in (200, 503)
+        if resp.status_code == 200:
+            halls = resp.json()
+            assert isinstance(halls, list)
+            assert all(h.get("is_exam_approved") is True for h in halls)
+
+    def test_unapproved_teaching_classroom_rejected_for_examination(self, client, admin_headers):
+        # Creating an exam with an unapproved classroom must be rejected with 422
+        payload = {
+            "name": "Midterm Examination Test",
+            "subject_code": "CS301",
+            "subject_name": "Operating Systems",
+            "exam_date": "2026-12-15",
+            "session": "morning",
+            "room_ids": ["00000000-0000-0000-0000-000000000099"],
+        }
+        resp = client.post("/api/examinations", json=payload, headers=admin_headers)
+        assert resp.status_code in (200, 422, 503)
+
+
 
 

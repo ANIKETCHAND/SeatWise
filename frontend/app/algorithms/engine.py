@@ -20,7 +20,7 @@ import time
 from .checkerboard import solve_two_class_checkerboard, is_plain_rectangular
 from .independence import checkerboard_partitions, max_independent_set_size
 from .models import AllocationResult, Hall, Policy, SeatAssignment, SeatingRequest, Student
-from .solver import INFEASIBLE, SOLUTION, UNKNOWN, count_groups, solve_batch_assignment, students_to_seats
+from .solver import INFEASIBLE, SOLUTION, TIMEOUT, UNKNOWN, count_groups, solve_batch_assignment, students_to_seats
 from .validator import validate_allocation
 
 
@@ -154,16 +154,36 @@ def generate_seating(request: SeatingRequest) -> AllocationResult:
 
     if status == INFEASIBLE:
         return _proven_infeasible(students, halls, group_counts, usable_seats, solver_name, time.monotonic() - start, notes)
+    if status == TIMEOUT:
+        return AllocationResult(
+            status="timeout",
+            unallocated_students=tuple(s.student_id for s in students),
+            explanation=(
+                f"The solver timed out ({solver_name}) after {request.solver_time_limit_seconds:.1f}s "
+                "before exhausting the search space or finding a valid allocation. "
+                "This is NOT a proof of mathematical impossibility."
+            ),
+            math_notes=notes + [
+                f"Solver hit the {request.solver_time_limit_seconds:.1f}s time limit.",
+                "Result is inconclusive (timeout), not proven infeasible.",
+            ],
+            stats={
+                "students_total": total_students,
+                "usable_seats_total": usable_seats,
+                "timeout_seconds": request.solver_time_limit_seconds,
+            },
+            solver_name=solver_name,
+            solve_seconds=time.monotonic() - start,
+        )
     if status == UNKNOWN:
         return AllocationResult(
             status="unknown",
             unallocated_students=tuple(s.student_id for s in students),
             explanation=(
-                "The solver could not determine whether a valid allocation exists "
-                "within the configured time limit. This is NOT a proof of impossibility."
+                "The solver returned an inconclusive result without proving feasibility or infeasibility."
             ),
             math_notes=notes + [
-                "Ran out of time before exhausting the search space or finding a solution.",
+                "Search terminated with unknown result status.",
             ],
             stats={
                 "students_total": total_students,

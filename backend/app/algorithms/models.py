@@ -102,11 +102,12 @@ class AllocationResult:
     status semantics (the UI must surface these honestly):
     - valid:      an allocation was produced and passed independent validation
     - infeasible: mathematically proven impossible (e.g. pigeonhole)
-    - unknown:    the solver could not determine feasibility within limits
+    - timeout:    solver hit time limit before proving feasibility or infeasibility
+    - unknown:    the solver returned an inconclusive result
     - invalid:    an allocation was produced but failed validation (engine bug)
     """
 
-    status: str  # "valid" | "infeasible" | "unknown" | "invalid"
+    status: str  # "valid" | "infeasible" | "timeout" | "unknown" | "invalid"
     assignments: tuple[SeatAssignment, ...] = field(default_factory=tuple)
     unallocated_students: tuple[str, ...] = field(default_factory=tuple)
     explanation: str = ""

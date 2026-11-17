@@ -245,6 +245,22 @@ def create_exam(payload: ExamCreate, auth: AuthContext = Depends(require_staff))
         room_ids.extend(_resolve_room_ids(db, payload.halls))
     room_ids = list(dict.fromkeys(room_ids))
     if room_ids:
+        unapproved = (
+            db.table("rooms")
+            .select("id,name,code,is_exam_approved")
+            .in_("id", room_ids)
+            .eq("is_exam_approved", False)
+            .execute()
+            .data
+            or []
+        )
+        if unapproved:
+            names = ", ".join(r.get("code") or r.get("name") or str(r.get("id")) for r in unapproved)
+            raise ApiError(
+                422,
+                "unapproved_exam_hall",
+                f"Teaching classroom(s) cannot automatically be treated as approved examination halls: {names}. Only approved examination halls may be assigned.",
+            )
         db.table("examination_halls").insert(
             [{"examination_id": exam_id, "room_id": r} for r in room_ids]
         ).execute()
@@ -510,6 +526,24 @@ def set_halls(
                     f"Hall conflict: '{conflict_hall}' is already assigned to '{conflicting_exam}' "
                     f"on {exam['exam_date']} ({exam['session']} session). Cannot double-book examination halls.",
                 )
+
+    if payload.room_ids:
+        unapproved = (
+            db.table("rooms")
+            .select("id,name,code,is_exam_approved")
+            .in_("id", payload.room_ids)
+            .eq("is_exam_approved", False)
+            .execute()
+            .data
+            or []
+        )
+        if unapproved:
+            names = ", ".join(r.get("code") or r.get("name") or str(r.get("id")) for r in unapproved)
+            raise ApiError(
+                422,
+                "unapproved_exam_hall",
+                f"Teaching classroom(s) cannot automatically be treated as approved examination halls: {names}. Only approved examination halls may be assigned.",
+            )
 
     db.table("examination_halls").delete().eq("examination_id", real_exam_id).execute()
     db.table("examination_halls").insert(

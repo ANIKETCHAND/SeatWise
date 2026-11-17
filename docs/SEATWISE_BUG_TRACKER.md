@@ -22,6 +22,9 @@
 | **BUG-009** | 9 Pages & 8 Common Seating Components (350+ legacy `slate-`, `primary-`, `indigo-`, `blue-` tokens) | Medium | Visual / Theme | **FIXED** | Team 2 (Frontend) |
 | **BUG-010** | `test_auth_rbac.py` (Weakened `in (400, 404)` and `in (200, 404)` assertions) | Medium | Test Integrity | **FIXED** | Team 1 (QA) |
 | **BUG-011** | `SettingsPage.tsx`, `UniversityPage.tsx` (Institutional lockdown to Jain University FET) | Medium | Institution Policy | **FIXED** | Team 2 (Frontend) & Team 6 |
+| **BUG-012** | `exam_routes.py`, `ExamManagementPage.tsx` (Teaching classrooms inadvertently assigned to examinations without approval) | High | Examination Workflow / Integrity | **FIXED** | Team F & Team B |
+| **BUG-013** | `ClassroomSeatingPage.tsx` (Static mock session and student roster instead of dynamic timetable resolution) | High | Classroom Workflow | **FIXED** | Team F & Team B |
+| **BUG-014** | `solver.py`, `cpsat.py`, `engine.py` (Solver timeout conflated with unknown status) | Medium | Mathematical Rigor | **FIXED** | Team D & Team H |
 
 ---
 
@@ -196,5 +199,60 @@
   - Locked the institution field in `UniversityPage.tsx` modal and provided pre-populated FET engineering departments (Computer Science, Information Science, Electronics & Communication, Electrical & Electronics, Mechanical, Civil, Aerospace).
 - **Verification:**  
   `npm run build` passed with zero errors. All page contract tests and navigation tests passed. Verified UI in browser preview.
+
+---
+
+### BUG-012: Teaching Classrooms Inadvertently Assigned to Examinations Without Exam Approval
+- **Affected Files:** `backend/app/routes/exam_routes.py`, `frontend/src/pages/ExamManagementPage.tsx`, `frontend/app/routes/exam_routes.py`
+- **Severity:** High
+- **Assigned Team:** Team F (University Workflows) & Team B (Full-Stack)
+- **Description:**  
+  Teaching classrooms and departmental laboratories could be selected in the examination planner and attached to examinations via API without validation, violating the university regulation that regular teaching classrooms must not automatically be treated as approved examination halls.
+- **Root Cause:**  
+  1. `ExamManagementPage.tsx` called `api.getRooms()` (retrieving all rooms including classrooms and labs) and included non-approved rooms in `AVAILABLE_HALLS`.
+  2. `exam_routes.py` lacked server-side validation against `is_exam_approved` during examination creation (`POST /api/examinations`) and hall assignment (`PUT /api/examinations/{id}/halls`).
+- **Fix Applied:**  
+  1. Updated `ExamManagementPage.tsx` to call `api.getApprovedExamHalls()` and initialized fallback lists exclusively from approved exam halls (`getApprovedExamHalls()` from `campusFloorData.ts`).
+  2. Added server-side validation in `exam_routes.py` rejecting unapproved rooms with HTTP 422 (`unapproved_exam_hall`).
+  3. Maintained 100% SHA-256 parity with `frontend/app/routes/exam_routes.py`.
+- **Verification:**  
+  Added automated backend test `test_unapproved_teaching_classroom_rejected_for_examination` and `test_approved_exam_halls_endpoint` in `tests/backend/test_api.py`. Both pass.
+
+---
+
+### BUG-013: Classroom Seating Timetable & Student Roster Static Mock Instead of Dynamic Resolution
+- **Affected File:** `frontend/src/pages/ClassroomSeatingPage.tsx`
+- **Severity:** High
+- **Assigned Team:** Team F (University Workflows) & Team B (Full-Stack)
+- **Description:**  
+  Changing program, semester, section, date, or period dropdowns in classroom mode did not update the timetable entry, course title, faculty in-charge, or student roster; the UI remained bound to hardcoded static mock values (`Data Structures & Algorithms`, `21CS301`, `LH-201`, 32 static students).
+- **Root Cause:**  
+  Dropdown state changes were not connected to a reactive resolution effect querying timetable sessions and student records.
+- **Fix Applied:**  
+  1. Connected reactive `useEffect` parsing date day-of-week, querying `jain_timetable_lookup.json` and backend `api.getTimetable()`.
+  2. Dynamically resolved classroom layout and desk blocked patterns via `CAMPUS_ROOMS`.
+  3. Dynamically loaded active student rosters via `api.getStudents()`.
+  4. Auto-allocated students with classroom policy (peer adjacency allowed).
+  5. Cleaned up feedback strings to concise, professional wording.
+- **Verification:**  
+  `npm run build` compiled cleanly without TypeScript or React errors. Verified dynamic session switching across programs.
+
+---
+
+### BUG-014: Seating Engine Timeout Conflated with Unknown Status
+- **Affected Files:** `backend/app/algorithms/solver.py`, `backend/app/algorithms/cpsat.py`, `backend/app/algorithms/engine.py`, `backend/app/algorithms/models.py`, `backend/app/services/seating_service.py`, `backend/app/services/math_service.py`, `frontend/app/`
+- **Severity:** Medium
+- **Assigned Team:** Team D (Mathematics & Algorithms) & Team H (QA)
+- **Description:**  
+  When the solver hit its wall-clock time limit, it returned status `"unknown"`, conflating timeouts with general solver indecision, and failing the explicit mathematical requirement to distinguish "Solver timeout" from "Unknown result".
+- **Root Cause:**  
+  `solve_with_backtracking` and `solve_with_cpsat` returned `UNKNOWN` upon timeout instead of an explicit `TIMEOUT` status.
+- **Fix Applied:**  
+  1. Introduced explicit `TIMEOUT = "timeout"` status across `solver.py`, `cpsat.py`, `models.py`, `engine.py`, and service layers.
+  2. Engineered timeout explanation explicitly stating that timeout is NOT a proof of mathematical impossibility.
+  3. Maintained 100% SHA-256 parity between `backend/app/` and `frontend/app/`.
+- **Verification:**  
+  Added automated test `test_solver_timeout_distinguished_from_infeasible_and_unknown` in `tests/algorithms/test_engine.py`. Tests pass.
+
 
 
