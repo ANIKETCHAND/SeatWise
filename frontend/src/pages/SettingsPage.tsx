@@ -9,14 +9,15 @@ import {
   Cpu,
   Clock,
   Building,
+  Lock,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { isSupabaseConfigured } from '../services/supabase';
 
 export const SettingsPage: React.FC = () => {
   const { user, role } = useAuth();
-  const [institutionName, setInstitutionName] = useState('Jain (Deemed-to-be University)');
-  const [facultyDept, setFacultyDept] = useState('Faculty of Engineering and Technology (FET)');
+  const institutionName = 'Jain (Deemed-to-be University)';
+  const facultyDept = 'Faculty of Engineering and Technology (FET)';
   const [academicYear, setAcademicYear] = useState('2026-2027');
   const [solverTimeout, setSolverTimeout] = useState('20');
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -36,7 +37,7 @@ export const SettingsPage: React.FC = () => {
           Settings
         </h1>
         <p className="text-xs text-zinc-500 mt-0.5">
-          System parameters, optimization limits, and service connection status.
+          System parameters, optimization limits, and institutional configuration.
         </p>
       </div>
 
@@ -52,10 +53,15 @@ export const SettingsPage: React.FC = () => {
         {/* Institutional Identity */}
         <div className="bg-white rounded-xl border border-zinc-200 p-5 shadow-2xs space-y-4">
           <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-            <h2 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
-              <Building className="w-4 h-4 text-zinc-900" />
-              Institution Identity
-            </h2>
+            <div>
+              <h2 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+                <Building className="w-4 h-4 text-zinc-900" />
+                Institution Identity
+              </h2>
+              <p className="text-[11px] text-zinc-500 mt-0.5">
+                Permanently locked to Jain (Deemed-to-be University) • Multi-institution switching disabled
+              </p>
+            </div>
             <div className="bg-white px-2.5 py-1 rounded-lg border border-zinc-200 shadow-2xs flex items-center gap-2">
               <img
                 src="/jain-logo.png"
@@ -66,23 +72,46 @@ export const SettingsPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Locked Notice */}
+          <div className="p-3 rounded-lg bg-zinc-50 border border-zinc-200 text-xs text-zinc-600 flex items-start gap-2.5">
+            <Lock className="w-4 h-4 text-zinc-700 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-zinc-900">Institutional Lock Active</p>
+              <p className="text-[11px] text-zinc-500 mt-0.5">
+                SeatWise is exclusively dedicated to Jain (Deemed-to-be University) — Faculty of Engineering and Technology (FET). Selecting or switching to alternative universities is permanently restricted.
+              </p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-zinc-700">Institution Name</label>
+              <label className="text-xs font-semibold text-zinc-700 flex items-center justify-between">
+                <span>Institution Name</span>
+                <span className="text-[10px] font-mono text-zinc-400 flex items-center gap-1">
+                  <Lock className="w-2.5 h-2.5" /> Locked
+                </span>
+              </label>
               <input
                 type="text"
                 value={institutionName}
-                onChange={(e) => setInstitutionName(e.target.value)}
-                className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1"
+                disabled
+                readOnly
+                className="w-full text-xs p-2 border border-zinc-200 rounded-lg mt-1 bg-zinc-100/80 text-zinc-700 font-medium cursor-not-allowed select-none"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-zinc-700">Faculty / Department</label>
+              <label className="text-xs font-semibold text-zinc-700 flex items-center justify-between">
+                <span>Faculty / Department</span>
+                <span className="text-[10px] font-mono text-zinc-400 flex items-center gap-1">
+                  <Lock className="w-2.5 h-2.5" /> Locked
+                </span>
+              </label>
               <input
                 type="text"
                 value={facultyDept}
-                onChange={(e) => setFacultyDept(e.target.value)}
-                className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1"
+                disabled
+                readOnly
+                className="w-full text-xs p-2 border border-zinc-200 rounded-lg mt-1 bg-zinc-100/80 text-zinc-700 font-medium cursor-not-allowed select-none"
               />
             </div>
             <div>
@@ -91,15 +120,22 @@ export const SettingsPage: React.FC = () => {
                 type="text"
                 value={academicYear}
                 onChange={(e) => setAcademicYear(e.target.value)}
-                className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1"
+                className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 text-zinc-900 bg-white"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-zinc-700">Location</label>
+              <label className="text-xs font-semibold text-zinc-700 flex items-center justify-between">
+                <span>Campus Location</span>
+                <span className="text-[10px] font-mono text-zinc-400 flex items-center gap-1">
+                  <Lock className="w-2.5 h-2.5" /> Locked
+                </span>
+              </label>
               <input
                 type="text"
-                defaultValue="Bangalore, Karnataka, India"
-                className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1"
+                value="Bangalore, Karnataka, India"
+                disabled
+                readOnly
+                className="w-full text-xs p-2 border border-zinc-200 rounded-lg mt-1 bg-zinc-100/80 text-zinc-700 font-medium cursor-not-allowed select-none"
               />
             </div>
           </div>

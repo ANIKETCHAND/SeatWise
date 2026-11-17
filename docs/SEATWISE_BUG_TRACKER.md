@@ -21,6 +21,7 @@
 | **BUG-008** | `student_portal_routes.py` (Non-existent student lookup fabricated false allocation) | High | Functional / Logic | **FIXED** | Team 3 (Backend) |
 | **BUG-009** | 9 Pages & 8 Common Seating Components (350+ legacy `slate-`, `primary-`, `indigo-`, `blue-` tokens) | Medium | Visual / Theme | **FIXED** | Team 2 (Frontend) |
 | **BUG-010** | `test_auth_rbac.py` (Weakened `in (400, 404)` and `in (200, 404)` assertions) | Medium | Test Integrity | **FIXED** | Team 1 (QA) |
+| **BUG-011** | `SettingsPage.tsx`, `UniversityPage.tsx` (Institutional lockdown to Jain University FET) | Medium | Institution Policy | **FIXED** | Team 2 (Frontend) & Team 6 |
 
 ---
 
@@ -177,4 +178,23 @@
   - Added `assert resp.status_code == 200 and len(data["allocations"]) == 0` for non-existent students.
 - **Verification:**  
   Ran full pytest suite (`py -3.14 -m pytest`). All 130 tests passed with strict assertions.
+
+---
+
+### BUG-011: Multi-Institution Switching Prevention & Institutional Lock to Jain University FET
+- **Affected Files:** `frontend/src/pages/SettingsPage.tsx`, `frontend/src/pages/UniversityPage.tsx`
+- **Severity:** Medium
+- **Assigned Team:** Team 2 (Frontend) & Team 6 (UI/UX)
+- **Description:**  
+  Settings and Academic program registration allowed free-text modification of institutional affiliation, which posed a risk of multi-university switching or configuration drift in a platform dedicated exclusively to Jain (Deemed-to-be University) — Faculty of Engineering & Technology (FET).
+- **Root Cause:**  
+  Form inputs were standard editable text inputs without institutional locks or explicit constraints to Jain University FET.
+- **Fix Applied:**  
+  - Locked `institutionName` to `'Jain (Deemed-to-be University)'` and `facultyDept` to `'Faculty of Engineering and Technology (FET)'`.
+  - Locked campus location to `'Bangalore, Karnataka, India'`.
+  - Set inputs to `disabled readOnly` with distinct disabled styling, explicit lock badges, and an informative "Institutional Lock Active" notice banner.
+  - Locked the institution field in `UniversityPage.tsx` modal and provided pre-populated FET engineering departments (Computer Science, Information Science, Electronics & Communication, Electrical & Electronics, Mechanical, Civil, Aerospace).
+- **Verification:**  
+  `npm run build` passed with zero errors. All page contract tests and navigation tests passed. Verified UI in browser preview.
+
 

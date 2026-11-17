@@ -8,6 +8,7 @@ import {
   Database,
   Building2,
   Calendar,
+  Lock,
 } from 'lucide-react';
 import { INITIAL_PROGRAMS, TOTAL_BATCHES_COUNT, TOTAL_PROGRAMS_COUNT } from '../data/universityData';
 import { useAuth } from '../context/AuthContext';
@@ -25,6 +26,7 @@ export const UniversityPage: React.FC = () => {
 
   const [newProgCode, setNewProgCode] = useState('');
   const [newProgName, setNewProgName] = useState('');
+  const [newProgDept, setNewProgDept] = useState('Computer Science and Engineering');
   const [newBatchSem, setNewBatchSem] = useState(1);
   const [newBatchSec, setNewBatchSec] = useState('');
 
@@ -35,7 +37,7 @@ export const UniversityPage: React.FC = () => {
       id: `p-${newProgCode.toLowerCase()}`,
       code: newProgCode.toUpperCase(),
       name: newProgName,
-      department: 'Computer Science and Engineering',
+      department: newProgDept,
       durationYears: 4,
       totalSemesters: 8,
       batches: [],
@@ -45,7 +47,7 @@ export const UniversityPage: React.FC = () => {
     setShowAddProgram(false);
     setNewProgCode('');
     setNewProgName('');
-    setFeedback(`Program ${newProg.code} registered successfully.`);
+    setFeedback(`Program ${newProg.code} registered successfully under Jain University FET.`);
     setTimeout(() => setFeedback(null), 3000);
   };
 
@@ -116,6 +118,13 @@ export const UniversityPage: React.FC = () => {
             />
           </div>
           <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-zinc-950 text-white font-mono flex items-center gap-1">
+                <Lock className="w-2.5 h-2.5" />
+                Jain University Exclusive
+              </span>
+              <span className="text-[11px] text-zinc-500 font-medium">Faculty of Engineering and Technology (FET)</span>
+            </div>
             <h1 className="text-xl font-bold text-zinc-950 tracking-tight flex items-center gap-2">
               <GraduationCap className="w-5 h-5 text-zinc-900" />
               Curriculum & Batches
@@ -325,8 +334,23 @@ export const UniversityPage: React.FC = () => {
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-zinc-200 animate-scale-up">
             <h3 className="text-sm font-bold text-zinc-900 mb-1">Add Academic Program</h3>
-            <p className="text-xs text-zinc-500 mb-4">Register a new curriculum and degree pathway.</p>
+            <p className="text-xs text-zinc-500 mb-4">Register a new curriculum and degree pathway under Jain University FET.</p>
             <form onSubmit={handleAddProgramSubmit} className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold text-zinc-700 flex items-center justify-between">
+                  <span>Institution</span>
+                  <span className="text-[10px] text-zinc-400 font-mono flex items-center gap-1">
+                    <Lock className="w-2.5 h-2.5" /> Locked
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  disabled
+                  readOnly
+                  value="Jain (Deemed-to-be University) — FET"
+                  className="w-full text-xs p-2 border border-zinc-200 rounded-lg mt-1 bg-zinc-100/80 text-zinc-700 font-medium cursor-not-allowed select-none"
+                />
+              </div>
               <div>
                 <label className="text-xs font-semibold text-zinc-700">Program Code</label>
                 <input
@@ -348,12 +372,20 @@ export const UniversityPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-zinc-700">Department</label>
-                <input
-                  required
-                  defaultValue="Computer Science and Engineering"
+                <label className="text-xs font-semibold text-zinc-700">Department (FET)</label>
+                <select
+                  value={newProgDept}
+                  onChange={(e) => setNewProgDept(e.target.value)}
                   className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 text-zinc-900 bg-white"
-                />
+                >
+                  <option value="Computer Science and Engineering">Computer Science and Engineering</option>
+                  <option value="Information Science and Engineering">Information Science and Engineering</option>
+                  <option value="Electronics and Communication Engineering">Electronics and Communication Engineering</option>
+                  <option value="Electrical and Electronics Engineering">Electrical and Electronics Engineering</option>
+                  <option value="Mechanical Engineering">Mechanical Engineering</option>
+                  <option value="Civil Engineering">Civil Engineering</option>
+                  <option value="Aerospace Engineering">Aerospace Engineering</option>
+                </select>
               </div>
               <div className="flex justify-end gap-2 pt-3">
                 <button
