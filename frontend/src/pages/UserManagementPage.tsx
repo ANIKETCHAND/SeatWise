@@ -30,8 +30,7 @@ export const UserManagementPage: React.FC = () => {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'all' | 'admin' | 'exam_staff' | 'faculty' | 'student' | 'permissions'>('all');
-  const [rolePermissionsMatrix, setRolePermissionsMatrix] = useState<Record<string, string[]>>({});
+  const [activeTab, setActiveTab] = useState<'all' | 'admin' | 'exam_staff' | 'faculty' | 'student'>('all');
 
   // Feedback states
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
@@ -78,7 +77,7 @@ export const UserManagementPage: React.FC = () => {
     setActionError(null);
     try {
       const res = await api.getUsers({
-        role: activeTab === 'all' || activeTab === 'permissions' ? undefined : activeTab,
+        role: activeTab === 'all' ? undefined : activeTab,
         search: searchQuery || undefined,
       });
       setUsers(res.users || []);
@@ -90,23 +89,11 @@ export const UserManagementPage: React.FC = () => {
     }
   };
 
-  const fetchRoleMatrix = async () => {
-    try {
-      const res = await api.getRolePermissionsMatrix();
-      if (res?.roles) {
-        setRolePermissionsMatrix(res.roles);
-      }
-    } catch {}
-  };
-
   useEffect(() => {
     const roleParam = searchParams.get('role');
-    const tabParam = searchParams.get('tab');
     const actionParam = searchParams.get('action');
 
-    if (tabParam === 'permissions') {
-      setActiveTab('permissions');
-    } else if (roleParam && ['admin', 'exam_staff', 'faculty', 'student'].includes(roleParam)) {
+    if (roleParam && ['admin', 'exam_staff', 'faculty', 'student'].includes(roleParam)) {
       setActiveTab(roleParam as any);
     } else if (roleParam === 'all') {
       setActiveTab('all');
@@ -119,7 +106,6 @@ export const UserManagementPage: React.FC = () => {
 
   useEffect(() => {
     fetchUsers();
-    fetchRoleMatrix();
   }, [activeTab]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -326,7 +312,7 @@ export const UserManagementPage: React.FC = () => {
               User Management
             </h1>
             <p className="text-xs text-zinc-500">
-              Manage user accounts, roles, and permissions.
+              Manage user accounts, roles, and credentials.
             </p>
           </div>
         </div>
@@ -483,117 +469,31 @@ export const UserManagementPage: React.FC = () => {
             <span>Students</span>
             <span className="text-[10px] font-mono opacity-80">({counts.student ?? 0})</span>
           </button>
-
-          <button
-            onClick={() => setActiveTab('permissions')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === 'permissions' ? 'bg-black text-white' : 'text-zinc-600 hover:text-black hover:bg-zinc-100'
-            }`}
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>Permissions Matrix</span>
-          </button>
         </div>
 
         {/* Search */}
-        {activeTab !== 'permissions' && (
-          <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search name, email, dept..."
-                className="pl-8 pr-3 py-1.5 bg-zinc-50 border border-zinc-300 rounded-xl text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-hidden focus:ring-1 focus:ring-black w-56"
-              />
-            </div>
-            <button
-              type="submit"
-              className="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-black text-white text-xs font-semibold cursor-pointer"
-            >
-              Search
-            </button>
-          </form>
-        )}
+        <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search name, email, dept..."
+              className="pl-8 pr-3 py-1.5 bg-zinc-50 border border-zinc-300 rounded-xl text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-hidden focus:ring-1 focus:ring-black w-56"
+            />
+          </div>
+          <button
+            type="submit"
+            className="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-black text-white text-xs font-semibold cursor-pointer"
+          >
+            Search
+          </button>
+        </form>
       </div>
 
-      {/* TAB: ROLE & PERMISSION MATRIX */}
-      {activeTab === 'permissions' ? (
-        <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-xs space-y-4">
-          <div className="border-b border-zinc-100 pb-3">
-            <h3 className="text-sm font-bold text-zinc-950 flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-black" />
-              RBAC Role & Permission Matrix
-            </h3>
-            <p className="text-xs text-zinc-500">
-              Institutional default permissions assigned to each user role. Custom permissions may be granted per staff/faculty member.
-            </p>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-zinc-200 text-zinc-500 font-mono text-[10px] uppercase">
-                  <th className="py-2.5 px-3">Permission Key</th>
-                  <th className="py-2.5 px-3 text-center">Administrator</th>
-                  <th className="py-2.5 px-3 text-center">Exam Staff</th>
-                  <th className="py-2.5 px-3 text-center">Faculty</th>
-                  <th className="py-2.5 px-3 text-center">Student</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100 font-mono text-[11px]">
-                {ALL_POSSIBLE_PERMISSIONS.map((perm) => {
-                  const hasAdmin = true;
-                  const hasExamStaff = rolePermissionsMatrix.exam_staff?.includes(perm) ?? false;
-                  const hasFaculty = rolePermissionsMatrix.faculty?.includes(perm) ?? false;
-                  const hasStudent = rolePermissionsMatrix.student?.includes(perm) ?? false;
-
-                  return (
-                    <tr key={perm} className="hover:bg-zinc-50/80">
-                      <td className="py-2 px-3 font-semibold text-zinc-800">{perm}</td>
-                      <td className="py-2 px-3 text-center">
-                        <span className="inline-block w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 font-bold leading-4">
-                          ✓
-                        </span>
-                      </td>
-                      <td className="py-2 px-3 text-center">
-                        {hasExamStaff ? (
-                          <span className="inline-block w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 font-bold leading-4">
-                            ✓
-                          </span>
-                        ) : (
-                          <span className="text-zinc-300 font-bold">—</span>
-                        )}
-                      </td>
-                      <td className="py-2 px-3 text-center">
-                        {hasFaculty ? (
-                          <span className="inline-block w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 font-bold leading-4">
-                            ✓
-                          </span>
-                        ) : (
-                          <span className="text-zinc-300 font-bold">—</span>
-                        )}
-                      </td>
-                      <td className="py-2 px-3 text-center">
-                        {hasStudent ? (
-                          <span className="inline-block w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 font-bold leading-4">
-                            ✓
-                          </span>
-                        ) : (
-                          <span className="text-zinc-300 font-bold">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ) : (
-        /* TAB: USER DIRECTORY TABLE */
-        <div className="bg-white border border-zinc-200 rounded-2xl shadow-xs overflow-hidden">
+      {/* USER DIRECTORY TABLE */}
+      <div className="bg-white border border-zinc-200 rounded-2xl shadow-xs overflow-hidden">
           {loading ? (
             <div className="p-12 text-center">
               <LoadingSpinner size="md" />
@@ -710,7 +610,6 @@ export const UserManagementPage: React.FC = () => {
             </div>
           )}
         </div>
-      )}
 
       {/* MODAL: CREATE USER */}
       {showCreateModal && (

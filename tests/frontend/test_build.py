@@ -16,7 +16,7 @@ def test_frontend_dist_built():
     assert len(css_files) > 0, "No CSS bundle produced in frontend/dist/assets"
 
 
-def test_all_13_navigation_pages_exist():
+def test_all_12_navigation_pages_exist():
     pages_dir = Path(__file__).resolve().parents[2] / "frontend" / "src" / "pages"
     required_pages = [
         "DashboardPage.tsx",
@@ -28,7 +28,6 @@ def test_all_13_navigation_pages_exist():
         "ClassroomSeatingPage.tsx",
         "ExaminationsPage.tsx",
         "ExamSeatingPage.tsx",
-        "MathAnalysisPage.tsx",
         "ReportsPage.tsx",
         "HistoryPage.tsx",
         "SettingsPage.tsx",
@@ -97,9 +96,9 @@ def test_frontend_page_contracts():
         assert txt.count("{") == txt.count("}"), f"Unbalanced braces in {page.name}"
 
 
-def test_all_22_frontend_pages_exist():
+def test_all_21_frontend_pages_exist():
     pages_dir = Path(__file__).resolve().parents[2] / "frontend" / "src" / "pages"
-    all_22_pages = [
+    all_21_pages = [
         "LandingPage.tsx",
         "LoginPage.tsx",
         "DashboardPage.tsx",
@@ -117,12 +116,11 @@ def test_all_22_frontend_pages_exist():
         "ExaminationsPage.tsx",
         "ExamManagementPage.tsx",
         "ExamSeatingPage.tsx",
-        "MathAnalysisPage.tsx",
         "ReportsPage.tsx",
         "HistoryPage.tsx",
         "SettingsPage.tsx",
         "StudentSeatLookupPage.tsx",
     ]
-    for page_name in all_22_pages:
+    for page_name in all_21_pages:
         assert (pages_dir / page_name).exists(), f"Missing required application page: {page_name}"
 

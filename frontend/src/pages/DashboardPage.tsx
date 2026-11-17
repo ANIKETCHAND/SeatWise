@@ -142,13 +142,6 @@ export const DashboardPage: React.FC = () => {
             <Armchair className="w-4 h-4 text-black" />
             Generate Seating
           </Link>
-          <Link
-            to="/math-analysis"
-            className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded-lg text-xs font-semibold border border-zinc-700 transition-all flex items-center gap-2 cursor-pointer"
-          >
-            Algorithm Analysis
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
         </div>
       </div>
 

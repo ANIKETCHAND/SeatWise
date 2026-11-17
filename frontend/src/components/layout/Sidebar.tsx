@@ -9,7 +9,6 @@ import {
   Armchair,
   FileCheck2,
   Binary,
-  Sigma,
   FileSpreadsheet,
   History,
   Settings,
@@ -22,7 +21,6 @@ import {
   UserRound,
   UserPlus,
   KeyRound,
-  Sliders,
   Clock,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -61,7 +59,6 @@ export const Sidebar: React.FC = () => {
               { name: 'Students', path: '/admin/users?role=student', icon: UserRound },
               { name: 'Add User', path: '/admin/users?action=create', icon: UserPlus },
               { name: 'Passwords', path: '/admin/users?action=passwords', icon: KeyRound },
-              { name: 'Permissions', path: '/admin/users?tab=permissions', icon: Sliders },
               { name: 'Audit Logs', path: '/admin/audit-logs', icon: History },
             ],
           },
@@ -86,7 +83,6 @@ export const Sidebar: React.FC = () => {
           {
             sectionTitle: 'System',
             items: [
-              { name: 'Algorithm Analysis', path: '/math-analysis', icon: Sigma },
               { name: 'Seating History', path: '/history', icon: History },
               { name: 'Settings', path: '/settings', icon: Settings },
             ],

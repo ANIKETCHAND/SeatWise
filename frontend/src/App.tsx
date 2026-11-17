@@ -21,7 +21,6 @@ import { RoomsPage } from './pages/RoomsPage';
 import { ClassroomSeatingPage } from './pages/ClassroomSeatingPage';
 import { ExamManagementPage } from './pages/ExamManagementPage';
 import { ExamSeatingPage } from './pages/ExamSeatingPage';
-import { MathAnalysisPage } from './pages/MathAnalysisPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -100,11 +99,7 @@ export const App: React.FC = () => {
                 />
                 <Route
                   path="math-analysis"
-                  element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <MathAnalysisPage />
-                    </ProtectedRoute>
-                  }
+                  element={<Navigate to="/dashboard" replace />}
                 />
 
                 {/* Exam Staff Routes */}
