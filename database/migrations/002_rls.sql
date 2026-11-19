@@ -107,8 +107,8 @@ create policy exams_read on public.examinations
 drop policy if exists exams_admin_write on public.examinations;
 create policy exams_admin_write on public.examinations
   for all to authenticated
-  using (public.is_admin() or public.my_role() = 'exam_staff')
-  with check (public.is_admin() or public.my_role() = 'exam_staff');
+  using (public.is_admin() or public.my_role() in ('exam_staff', 'faculty'))
+  with check (public.is_admin() or public.my_role() in ('exam_staff', 'faculty'));
 
 do $$
 declare t text;
@@ -119,8 +119,8 @@ begin
     execute format('drop policy if exists %I_write on public.%I;', t, t);
     execute format(
       'create policy %I_write on public.%I for all to authenticated
-         using (public.is_admin() or public.my_role() = ''exam_staff'')
-         with check (public.is_admin() or public.my_role() = ''exam_staff'');', t, t);
+         using (public.is_admin() or public.my_role() in (''exam_staff'', ''faculty''))
+         with check (public.is_admin() or public.my_role() in (''exam_staff'', ''faculty''));', t, t);
   end loop;
 end $$;
 
@@ -128,7 +128,7 @@ end $$;
 -- Published plans are readable by everyone logged in (students look up their seats).
 drop policy if exists plans_read on public.seating_plans;
 create policy plans_read on public.seating_plans
-  for select to authenticated using (status = 'published' or public.is_admin() or public.my_role() = 'exam_staff');
+  for select to authenticated using (status = 'published' or public.is_admin() or public.my_role() in ('exam_staff', 'faculty'));
 
 drop policy if exists plans_write on public.seating_plans;
 create policy plans_write on public.seating_plans

@@ -158,7 +158,13 @@ export const api = {
   getPlanCsvUrl: reportsApi.getPlanCsvUrl,
   getPlanPdfUrl: reportsApi.getPlanPdfUrl,
   getExamLocatorPdfUrl: reportsApi.getExamLocatorPdfUrl,
+  getExamAttendancePdfUrl: reportsApi.getExamAttendancePdfUrl,
+  getHallChartPdfUrl: reportsApi.getHallChartPdfUrl,
   getExamCsvUrl: reportsApi.getExamCsvUrl,
+  downloadExamLocatorPdf: reportsApi.downloadExamLocatorPdf,
+  downloadExamAttendancePdf: reportsApi.downloadExamAttendancePdf,
+  downloadHallChartPdf: reportsApi.downloadHallChartPdf,
+  downloadPlanPdf: reportsApi.downloadPlanPdf,
 };
 
 export default api;

@@ -65,6 +65,7 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, set[str]] = {
         "examinations.view",
         "examinations.create",
         "examinations.update",
+        "examinations.archive",
         "rooms.view",
         "seating.generate",
         "seating.modify",
@@ -83,9 +84,14 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, set[str]] = {
         "timetable.create",
         "timetable.update",
         "examinations.view",
+        "examinations.create",
+        "examinations.update",
+        "examinations.archive",
+        "rooms.view",
         "seating.generate",
         "seating.modify",
         "seating.validate",
+        "seating.publish",
         "attendance.manage",
         "reports.view",
         "reports.export",
@@ -232,9 +238,14 @@ def verify_token(token: str) -> dict:
 def get_auth(request: Request) -> AuthContext:
     """FastAPI dependency: verify the bearer token and load authoritative role from database."""
     header = request.headers.get("authorization", "")
-    if not header.lower().startswith("bearer "):
+    raw_token = None
+    if header.lower().startswith("bearer "):
+        raw_token = header[7:].strip()
+    elif "token" in request.query_params and request.query_params["token"].strip():
+        raw_token = request.query_params["token"].strip()
+
+    if not raw_token:
         raise HTTPException(status_code=401, detail="Missing bearer token.")
-    raw_token = header[7:].strip()
 
     if raw_token.startswith("demo-token-"):
         if not is_demo_mode_allowed():

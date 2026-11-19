@@ -21,7 +21,7 @@ export const StudentSeatLookupPage: React.FC = () => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [exams, setExams] = useState<{ id: string; name: string; exam_date?: string; session?: string }[]>([]);
-  const [selectedExamId, setSelectedExamId] = useState<string>(() => searchParams.get('exam') || '');
+  const [selectedExamId, setSelectedExamId] = useState<string>(() => searchParams.get('exam') || searchParams.get('exam_id') || '');
   const [searchQuery, setSearchQuery] = useState<string>(() => searchParams.get('q') || user?.roll_number || '');
   const [loading, setLoading] = useState<boolean>(false);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
@@ -38,7 +38,7 @@ export const StudentSeatLookupPage: React.FC = () => {
             exam_date: e.exam_date,
             session: e.session,
           })));
-          const qExam = searchParams.get('exam');
+          const qExam = searchParams.get('exam') || searchParams.get('exam_id');
           if (qExam && data.some((e: any) => e.id === qExam)) {
             setSelectedExamId(qExam);
           } else {

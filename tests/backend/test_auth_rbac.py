@@ -160,6 +160,7 @@ class TestExamStaffRole:
         data = resp.json()
         assert data["role"] == "exam_staff"
         assert "examinations.create" in data["permissions"]
+        assert "examinations.archive" in data["permissions"]
         assert "seating.generate" in data["permissions"]
         assert "users.create" not in data["permissions"]
 
@@ -197,8 +198,101 @@ class TestFacultyRole:
         data = resp.json()
         assert data["role"] == "faculty"
         assert "timetable.view" in data["permissions"]
+        assert "examinations.create" in data["permissions"]
+        assert "examinations.update" in data["permissions"]
+        assert "seating.generate" in data["permissions"]
+        assert "seating.publish" in data["permissions"]
         assert "users.create" not in data["permissions"]
         assert "settings.manage" not in data["permissions"]
+
+    def test_faculty_can_create_and_manage_examinations(self, client, faculty_headers):
+        # 1. Faculty can list examinations
+        list_resp = client.get("/api/examinations", headers=faculty_headers)
+        assert list_resp.status_code == 200
+
+        # 2. Faculty can create an examination
+        payload = {
+            "name": "Faculty Automated Assessment 2026",
+            "exam_date": "2026-12-10",
+            "session": "morning",
+            "status": "draft",
+        }
+        create_resp = client.post("/api/examinations", json=payload, headers=faculty_headers)
+        assert create_resp.status_code == 200
+        exam_id = create_resp.json()["examination"]["id"]
+
+        try:
+            # 3. Faculty can update examination details
+            update_resp = client.patch(
+                f"/api/examinations/{exam_id}",
+                json={"name": "Faculty Automated Assessment 2026 - Updated"},
+                headers=faculty_headers,
+            )
+            assert update_resp.status_code == 200
+
+            # 4. Faculty can attach subjects
+            subj_resp = client.post(
+                f"/api/examinations/{exam_id}/subjects",
+                json={"subjects": [{"code": "FAC101", "name": "Faculty Engineering Math", "count": 25}]},
+                headers=faculty_headers,
+            )
+            assert subj_resp.status_code == 200
+
+            # 5. Faculty can set batches, policy, and inspect details
+            batches_res = client.get("/api/university/batches", headers=faculty_headers)
+            b_list = batches_res.json().get("batches", [])
+            test_batch_id = b_list[0]["id"] if b_list else "00000000-0000-0000-0000-000000000001"
+            batch_resp = client.put(
+                f"/api/examinations/{exam_id}/batches",
+                json={"batch_ids": [test_batch_id]},
+                headers=faculty_headers,
+            )
+            assert batch_resp.status_code == 200
+
+            policy_resp = client.put(
+                f"/api/examinations/{exam_id}/policy",
+                json={"policy_id": None},
+                headers=faculty_headers,
+            )
+            assert policy_resp.status_code == 200
+
+            get_resp = client.get(f"/api/examinations/{exam_id}", headers=faculty_headers)
+            assert get_resp.status_code == 200
+
+            plans_resp = client.get(f"/api/seating/examination/plans?examination_id={exam_id}", headers=faculty_headers)
+            assert plans_resp.status_code == 200
+
+            # 6. Faculty can archive the examination
+            arch_resp = client.post(f"/api/examinations/{exam_id}/archive", headers=faculty_headers)
+            assert arch_resp.status_code == 200
+            assert arch_resp.json()["examination"]["status"] == "archived"
+        finally:
+            # Clean up test exam
+            client.delete(f"/api/examinations/{exam_id}?force=true", headers=faculty_headers)
+
+    def test_faculty_can_access_exam_seating_planner_endpoints(self, client, faculty_headers):
+        # Test generate endpoint authorization (invalid dummy exam triggers 404 ApiError, not 403 Forbidden)
+        dummy_id = "00000000-0000-0000-0000-000000000001"
+        gen_payload = {
+            "examination_id": dummy_id,
+            "policy": {"separation_mode": "checkerboard"},
+        }
+        gen_resp = client.post("/api/seating/examination/generate", json=gen_payload, headers=faculty_headers)
+        assert gen_resp.status_code != 403
+        assert gen_resp.status_code in (404, 200, 422)
+
+        # Test save endpoint authorization (validation error / 400 / 200, not 403 Forbidden)
+        save_payload = {
+            "examination_id": dummy_id,
+            "policy": {"separation_mode": "checkerboard"},
+            "assignments": [],
+        }
+        save_resp = client.post("/api/seating/examination/save", json=save_payload, headers=faculty_headers)
+        assert save_resp.status_code != 403
+
+        # Test validate endpoint authorization
+        val_resp = client.post("/api/seating/examination/validate", json={"plan_id": dummy_id}, headers=faculty_headers)
+        assert val_resp.status_code != 403
 
     def test_faculty_cannot_access_admin_users(self, client, faculty_headers):
         resp = client.get("/api/admin/users", headers=faculty_headers)
@@ -251,6 +345,39 @@ class TestStudentRole:
     def test_student_cannot_access_audit_logs(self, client, student_headers):
         resp = client.get("/api/admin/audit-logs", headers=student_headers)
         assert resp.status_code == 403
+
+    def test_student_cannot_create_or_manage_examinations(self, client, student_headers):
+        dummy_id = "00000000-0000-0000-0000-000000000001"
+        payload = {
+            "name": "Unauthorized Student Exam",
+            "exam_date": "2026-12-10",
+            "session": "morning",
+            "status": "draft",
+        }
+        # Student cannot create exam
+        assert client.post("/api/examinations", json=payload, headers=student_headers).status_code == 403
+        # Student cannot list examinations endpoint directly
+        assert client.get("/api/examinations", headers=student_headers).status_code == 403
+        # Student cannot update, archive, or delete exams
+        assert client.patch(f"/api/examinations/{dummy_id}", json={"name": "hacked"}, headers=student_headers).status_code == 403
+        assert client.post(f"/api/examinations/{dummy_id}/archive", headers=student_headers).status_code == 403
+        assert client.delete(f"/api/examinations/{dummy_id}", headers=student_headers).status_code == 403
+        assert client.put(f"/api/examinations/{dummy_id}/batches", json={"batch_ids": []}, headers=student_headers).status_code == 403
+        assert client.put(f"/api/examinations/{dummy_id}/halls", json={"room_ids": []}, headers=student_headers).status_code == 403
+        assert client.put(f"/api/examinations/{dummy_id}/policy", json={"policy_id": dummy_id}, headers=student_headers).status_code == 403
+
+    def test_student_cannot_access_exam_seating_planner_endpoints(self, client, student_headers):
+        dummy_id = "00000000-0000-0000-0000-000000000001"
+        gen_payload = {"examination_id": dummy_id, "policy": {}}
+        save_payload = {"examination_id": dummy_id, "assignments": []}
+
+        assert client.post("/api/seating/examination/generate", json=gen_payload, headers=student_headers).status_code == 403
+        assert client.post("/api/seating/examination/save", json=save_payload, headers=student_headers).status_code == 403
+        assert client.post("/api/seating/examination/validate", json={"plan_id": dummy_id}, headers=student_headers).status_code == 403
+        assert client.post(f"/api/seating/examination/{dummy_id}/publish", headers=student_headers).status_code == 403
+        assert client.get("/api/seating/examination/plans", headers=student_headers).status_code == 403
+        assert client.get(f"/api/seating/examination/{dummy_id}", headers=student_headers).status_code == 403
+        assert client.post(f"/api/seating/examination/{dummy_id}/attendance", json={"absences": []}, headers=student_headers).status_code == 403
 
     def test_staff_can_lookup_student_seat(self, client, staff_headers):
         resp = client.get("/api/student/seat-lookup?roll_number=23JU0101", headers=staff_headers)

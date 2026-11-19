@@ -28,7 +28,7 @@ router = APIRouter(prefix="/seating/examination", tags=["examination-seating"])
 
 @router.post("/generate")
 def generate(
-    payload: ExamSeatingGenerateRequest, auth: AuthContext = Depends(require_staff)
+    payload: ExamSeatingGenerateRequest, auth: AuthContext = Depends(require_staff_or_faculty)
 ) -> dict:
     db = require_db()
     real_exam_id = resolve_exam_id(db, payload.examination_id) or payload.examination_id
@@ -123,7 +123,7 @@ def generate(
 
 
 @router.post("/validate")
-def validate_plan(payload: dict, auth: AuthContext = Depends(require_staff)) -> dict:
+def validate_plan(payload: dict, auth: AuthContext = Depends(require_staff_or_faculty)) -> dict:
     """Validate a saved plan (or an edited assignment set) mathematically."""
     db = require_db()
     plan_id = payload.get("plan_id")
@@ -216,7 +216,7 @@ def list_plans(
 
 @router.post("/save")
 def save_exam_plan(
-    payload: dict, auth: AuthContext = Depends(require_staff)
+    payload: dict, auth: AuthContext = Depends(require_staff_or_faculty)
 ) -> dict:
     import datetime
     import uuid
@@ -295,8 +295,9 @@ def save_exam_plan(
         if r.get("name"):
             rooms_cache[str(r["name"]).strip().upper()] = r_id
 
-    # Fallback program for auto-created candidate students
-    prog_rows = db.table("programs").select("id").limit(1).execute().data or []
+    # Fallback program and program lookup for auto-created candidate students
+    prog_rows = db.table("programs").select("id,code,name").execute().data or []
+    prog_by_code = {str(p["code"]).strip().lower(): str(p["id"]) for p in prog_rows if p.get("code")}
     default_prog_id = prog_rows[0]["id"] if prog_rows else None
 
     # Load existing students cache
@@ -340,11 +341,19 @@ def save_exam_plan(
             # Check if this uuid is in DB
             if cand_uuid.lower() not in by_id:
                 try:
+                    cand_prog_id = default_prog_id
+                    batch_str = str(a.get("batch") or "").strip().lower()
+                    roll_str = str(cand_roll).strip().lower()
+                    for pcode, pid in prog_by_code.items():
+                        if pcode in batch_str or pcode in roll_str:
+                            cand_prog_id = pid
+                            break
+
                     new_student_data = {
                         "id": cand_uuid,
                         "roll_number": cand_roll,
                         "full_name": name_raw or f"Candidate {cand_roll}",
-                        "program_id": default_prog_id,
+                        "program_id": cand_prog_id,
                         "semester": 3,
                         "section": "A",
                         "status": "active",
@@ -576,7 +585,7 @@ def get_plan(plan_id: str, auth: AuthContext = Depends(require_staff_or_faculty)
 @router.post("/{plan_id}/moves")
 @router.post("/plans/{plan_id}/moves")
 def manual_moves(
-    plan_id: str, payload: ManualMoveRequest, auth: AuthContext = Depends(require_staff)
+    plan_id: str, payload: ManualMoveRequest, auth: AuthContext = Depends(require_staff_or_faculty)
 ) -> dict:
     if not _is_uuid(plan_id):
         raise ApiError(404, "not_found", "Seating plan not found.")
@@ -616,7 +625,7 @@ def manual_moves(
 
 @router.post("/{plan_id}/publish")
 @router.post("/plans/{plan_id}/publish")
-def publish(plan_id: str, auth: AuthContext = Depends(require_staff)) -> dict:
+def publish(plan_id: str, auth: AuthContext = Depends(require_staff_or_faculty)) -> dict:
     if not _is_uuid(plan_id):
         raise ApiError(404, "not_found", "Seating plan not found.")
     db = require_db()

@@ -27,6 +27,7 @@ import {
   HelpCircle,
   Armchair,
   Layers,
+  Search,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { SeatingPolicy } from '../types';
@@ -247,8 +248,8 @@ const generateEmptyHallGrid = (
 export const ExamSeatingPage: React.FC = () => {
   const { showNotification } = useNotification();
   const [searchParams] = useSearchParams();
-  const examIdFromQuery = searchParams.get('exam_id');
-  const planIdFromQuery = searchParams.get('plan_id');
+  const examIdFromQuery = searchParams.get('exam_id') || searchParams.get('exam');
+  const planIdFromQuery = searchParams.get('plan_id') || searchParams.get('plan');
 
   // Examination Selection State
   const [availableExams, setAvailableExams] = useState<ExamOption[]>(() => {
@@ -268,6 +269,12 @@ export const ExamSeatingPage: React.FC = () => {
     const local = getStoredDrafts();
     return local.length > 0 ? local[0].id : 'EXAM-2026-1101';
   });
+
+  useEffect(() => {
+    if (examIdFromQuery) {
+      setSelectedExamId(examIdFromQuery);
+    }
+  }, [examIdFromQuery]);
 
   const lastExamIdRef = useRef<string | null>(null);
   const generatedExamIdsRef = useRef<Set<string>>(new Set());
@@ -789,6 +796,12 @@ export const ExamSeatingPage: React.FC = () => {
     setStatusMessage('Solving multi-venue constraint satisfaction model via Google OR-Tools CP-SAT...');
 
     try {
+      const hasAdjacencyPolicy = Boolean(
+        policy.block_same_batch_horizontal ||
+        policy.block_same_batch_vertical ||
+        policy.block_same_batch_diagonal
+      );
+
       const examHalls = (selectedHalls && selectedHalls.length > 0)
         ? selectedHalls
         : ((activeExam?.halls && activeExam.halls.length > 0) ? activeExam.halls : ['A-101']);
@@ -961,12 +974,14 @@ export const ExamSeatingPage: React.FC = () => {
               let assignedBatch: string | null = null;
 
               if (activeBatches.length === 1) {
-                // Single batch: checkerboard alternating seats to guarantee ZERO adjacent same-batch conflicts
-                const isEvenCell = (r + c) % 2 === 0;
-                if (isEvenCell) {
-                  const b = activeBatches[0];
-                  const roster = currentRoster[b] || [];
-                  if (candidatePointers[b] < roster.length) {
+                const b = activeBatches[0];
+                const roster = currentRoster[b] || [];
+                if (candidatePointers[b] < roster.length) {
+                  if (!hasAdjacencyPolicy) {
+                    // Single batch with no adjacency restrictions (e.g. classroom assessment): full capacity
+                    assignedBatch = b;
+                  } else if (isValidBatch(b)) {
+                    // Single batch with adjacency restrictions: strictly enforce isValidBatch (no H, V, or diagonal violations)
                     assignedBatch = b;
                   }
                 }
@@ -1063,10 +1078,23 @@ export const ExamSeatingPage: React.FC = () => {
         (sum, grid) => sum + Object.values(grid).filter((c) => Boolean(c.student_name)).length,
         0
       );
-      const msg = `Seating plan successfully generated across ${Object.keys(finalGrid).length} venue(s) (${Object.keys(finalGrid).join(', ')}) for ${assignedCount} candidates! 0 conflicts.`;
-      setStatusMessage(msg);
-      showNotification('success', msg);
-      setTimeout(() => setStatusMessage(null), 5000);
+      const totalCandidatesExpected = Object.values(batchCounts).reduce((a, b) => a + b, 0);
+      const unallocatedCount = Math.max(0, totalCandidatesExpected - assignedCount);
+
+      if (unallocatedCount > 0 && activeBatches.length === 1 && hasAdjacencyPolicy) {
+        const msg = `Seated ${assignedCount} candidates in ${Object.keys(finalGrid).join(', ')} with 0 conflicts. Note: ${unallocatedCount} candidates remain unallocated due to same-batch adjacency constraints. To seat all ${totalCandidatesExpected} candidates in one venue, use "Fill All Desks (Single Batch Assessment)" or select an additional hall.`;
+        setStatusMessage(msg);
+        showNotification('info', msg);
+      } else if (unallocatedCount > 0) {
+        const msg = `Seated ${assignedCount} of ${totalCandidatesExpected} candidates across ${Object.keys(finalGrid).length} venue(s) with 0 conflicts (${unallocatedCount} unallocated due to hall capacity).`;
+        setStatusMessage(msg);
+        showNotification('warning', msg);
+      } else {
+        const msg = `Seating plan successfully generated across ${Object.keys(finalGrid).length} venue(s) (${Object.keys(finalGrid).join(', ')}) for ${assignedCount} candidates! 0 conflicts.`;
+        setStatusMessage(msg);
+        showNotification('success', msg);
+      }
+      setTimeout(() => setStatusMessage(null), 6000);
     } catch (err: any) {
       showNotification('error', `Allocation failed: ${err.message || 'Unknown error'}`);
     } finally {
@@ -1083,7 +1111,35 @@ export const ExamSeatingPage: React.FC = () => {
       const config = currentHallConfig;
       const updatedHallGrid: Record<string, DeskCell> = { ...currentGrid };
       const activeBatches = Object.keys(batchCounts).length > 0 ? Object.keys(batchCounts) : (activeExam.batches || ['AIML-S3A']);
+      const hasAdjacencyPolicy = Boolean(
+        policy.block_same_batch_horizontal ||
+        policy.block_same_batch_vertical ||
+        policy.block_same_batch_diagonal
+      );
       let counter = 1;
+
+      const isCellValidInHall = (r: number, c: number, bName: string): boolean => {
+        if (!hasAdjacencyPolicy) return true;
+        if (policy.block_same_batch_horizontal && c > 0) {
+          const left = updatedHallGrid[`${r}-${c - 1}`];
+          if (left && !left.is_blocked && left.student_name && left.batch === bName) return false;
+        }
+        if (policy.block_same_batch_vertical && r > 0) {
+          const up = updatedHallGrid[`${r - 1}-${c}`];
+          if (up && !up.is_blocked && up.student_name && up.batch === bName) return false;
+        }
+        if (policy.block_same_batch_diagonal) {
+          if (r > 0 && c > 0) {
+            const dl = updatedHallGrid[`${r - 1}-${c - 1}`];
+            if (dl && !dl.is_blocked && dl.student_name && dl.batch === bName) return false;
+          }
+          if (r > 0 && c + 1 < config.cols) {
+            const dr = updatedHallGrid[`${r - 1}-${c + 1}`];
+            if (dr && !dr.is_blocked && dr.student_name && dr.batch === bName) return false;
+          }
+        }
+        return true;
+      };
 
       for (let r = 0; r < config.rows; r++) {
         for (let c = 0; c < config.cols; c++) {
@@ -1093,16 +1149,47 @@ export const ExamSeatingPage: React.FC = () => {
             continue;
           }
 
+          let assignedB: string | null = null;
+          if (activeBatches.length === 1) {
+            const b = activeBatches[0];
+            if (isCellValidInHall(r, c, b)) {
+              assignedB = b;
+            }
+          } else {
+            const bIdx = (r + c + 1) % activeBatches.length;
+            const prefB = activeBatches[bIdx];
+            if (isCellValidInHall(r, c, prefB)) {
+              assignedB = prefB;
+            } else {
+              for (let i = 1; i < activeBatches.length; i++) {
+                const altB = activeBatches[(bIdx + i) % activeBatches.length];
+                if (isCellValidInHall(r, c, altB)) {
+                  assignedB = altB;
+                  break;
+                }
+              }
+            }
+          }
+
+          if (!assignedB) {
+            updatedHallGrid[key] = {
+              ...currentCell,
+              batch: undefined,
+              roll_number: undefined,
+              student_name: undefined,
+              student_id: undefined,
+            };
+            continue;
+          }
+
           const rowLetter = String.fromCharCode(65 + r);
           const seatLabel = `${rowLetter}${c + 1}`;
-          const batchIdx = (r + c + 1) % Math.max(1, activeBatches.length);
-          const b = activeBatches[batchIdx];
-          const roster = studentsRoster[b] || [];
+          const roster = studentsRoster[assignedB] || [];
           const candidate = roster[counter % Math.max(1, roster.length)] || {
-            id: `cand-${b}-${counter}`,
-            full_name: `Candidate ${b} #${counter}`,
-            roll_number: `23JU-${b.slice(0, 4)}-${counter.toString().padStart(2, '0')}`,
-            batch: b,
+            id: `cand-${assignedB}-${counter}`,
+            full_name: `Candidate ${assignedB} #${counter}`,
+            roll_number: `23JU-${assignedB.slice(0, 4)}-${counter.toString().padStart(2, '0')}`,
+            batch: assignedB,
           };
           counter++;
 
@@ -1113,7 +1200,7 @@ export const ExamSeatingPage: React.FC = () => {
             col: c,
             is_blocked: false,
             is_locked: false,
-            batch: b,
+            batch: assignedB,
             roll_number: candidate.roll_number,
             student_name: candidate.full_name,
             student_id: candidate.id,
@@ -1397,12 +1484,26 @@ export const ExamSeatingPage: React.FC = () => {
   };
 
   const exportCsv = () => {
-    const headers = ['Hall', 'Seat Label', 'Roll Number', 'Candidate Name', 'Batch', 'Attendance Status'];
+    const headers = [
+      'Institution',
+      'Campus',
+      'Examination',
+      'Hall',
+      'Desk Label',
+      'Roll Number',
+      'Candidate Name',
+      'Batch',
+      'Attendance Status',
+    ];
     const rows: string[][] = [];
+    const examName = activeExam?.name || selectedExamId;
     Object.entries(allocationGrid).forEach(([hallName, grid]) => {
       Object.entries(grid).forEach(([_, cell]) => {
         if (cell && !cell.is_blocked && cell.seat_label) {
           rows.push([
+            'Jain (Deemed-to-be University)',
+            'Faculty of Engineering and Technology (FET)',
+            `"${examName}"`,
             hallName,
             cell.seat_label,
             cell.roll_number || '',
@@ -1417,13 +1518,14 @@ export const ExamSeatingPage: React.FC = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `exam_seating_${selectedExamId}_${new Date().toISOString().split('T')[0]}.csv`);
+    const cleanExam = examName.replace(/[^a-zA-Z0-9_-]/g, '_');
+    link.setAttribute('download', `JAIN_FET_Master_Seating_${cleanExam}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  const handleSaveDraftPlan = () => {
+  const handleSaveDraftPlan = async () => {
     const assignments: any[] = [];
     Object.entries(allocationGrid).forEach(([hallName, grid]) => {
       Object.entries(grid).forEach(([key, cell]) => {
@@ -1444,20 +1546,64 @@ export const ExamSeatingPage: React.FC = () => {
     });
 
     if (assignments.length > 0) {
-      api.saveExamSeating({
-        examination_id: selectedExamId || 'EXAM-2026-1101',
-        plan: { kind: 'examination', status: 'allocated' },
-        assignments,
-      }).then((res) => {
+      try {
+        const res = await api.saveExamSeating({
+          examination_id: selectedExamId || 'EXAM-2026-1101',
+          plan: { kind: 'examination', status: 'allocated' },
+          assignments,
+        });
         if (res && res.plan_id) setSavedPlanId(res.plan_id);
         broadcastSync('SEATING_SAVED', { examId: selectedExamId, planId: res?.plan_id });
         showNotification('success', 'Examination seating allocation saved to database as draft.');
-      }).catch((err) => {
+        return res;
+      } catch (err) {
         console.error('Failed to save exam seating plan', err);
         showNotification('warning', 'Saved locally; remote sync encountered an issue.');
-      });
+      }
     } else {
       showNotification('warning', 'No seat assignments to save.');
+    }
+    return null;
+  };
+
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [activeReportExport, setActiveReportExport] = useState<string | null>(null);
+
+  const handleExportPdf = async (type: 'locator' | 'attendance' | 'hall-chart' = 'locator') => {
+    if (!selectedExamId) {
+      showNotification('warning', 'Please select an examination first.');
+      return;
+    }
+    setIsExportingPdf(true);
+    setActiveReportExport(type);
+    try {
+      const hasAssignments = Object.values(allocationGrid).some((grid) =>
+        Object.values(grid).some((cell) => cell && cell.seat_label && cell.student_name)
+      );
+      if (hasAssignments && !savedPlanId) {
+        await handleSaveDraftPlan();
+      }
+
+      const examTitle = activeExam?.name || selectedExamId;
+      if (type === 'attendance') {
+        await api.downloadExamAttendancePdf(selectedExamId, activeHall, examTitle);
+        showNotification('success', `Candidate Attendance Register PDF downloaded for Hall ${activeHall}.`);
+      } else if (type === 'hall-chart') {
+        await api.downloadHallChartPdf(selectedExamId, activeHall, examTitle);
+        showNotification('success', `Hall Seating Door Notice PDF downloaded for Hall ${activeHall}.`);
+      } else {
+        await api.downloadExamLocatorPdf(selectedExamId, examTitle);
+        showNotification('success', 'Student Examination Seat Locator PDF downloaded successfully.');
+      }
+    } catch (err: any) {
+      console.warn('Direct PDF download error, opening URL:', err);
+      let url = api.getExamLocatorPdfUrl(selectedExamId);
+      if (type === 'attendance') url = api.getExamAttendancePdfUrl(selectedExamId, activeHall);
+      else if (type === 'hall-chart') url = api.getHallChartPdfUrl(selectedExamId, activeHall);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } finally {
+      setIsExportingPdf(false);
+      setActiveReportExport(null);
     }
   };
 
@@ -1549,22 +1695,63 @@ export const ExamSeatingPage: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={exportCsv}
-            className="px-3 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold rounded-lg border border-zinc-300 transition-colors flex items-center gap-1.5 cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5" />
-            Export CSV
-          </button>
-          <a
-            href={api.getExamLocatorPdfUrl(selectedExamId)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold rounded-lg border border-zinc-300 transition-colors flex items-center gap-1.5 cursor-pointer"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5" />
-            PDF Report
-          </a>
+          {/* Official University Reports Dropdown & Quick Actions */}
+          <div className="relative group">
+            <button
+              disabled={isExportingPdf}
+              className="px-3 py-2 bg-zinc-100 hover:bg-zinc-200 disabled:opacity-50 text-zinc-800 text-xs font-semibold rounded-lg border border-zinc-300 transition-colors flex items-center gap-1.5 cursor-pointer"
+              title="Official university examination reports and filing system"
+            >
+              <FileSpreadsheet className={`w-3.5 h-3.5 ${isExportingPdf ? 'animate-spin' : ''}`} />
+              {isExportingPdf ? `Exporting ${activeReportExport || 'Report'}...` : 'Official Reports ▾'}
+            </button>
+            <div className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1 w-64 bg-white border border-zinc-200 rounded-xl shadow-lg p-1.5 z-50 hidden group-hover:block hover:block">
+              <button
+                onClick={() => handleExportPdf('locator')}
+                disabled={isExportingPdf}
+                className="w-full text-left px-3 py-2 text-xs font-medium text-zinc-800 hover:bg-zinc-100 rounded-lg flex items-center gap-2.5 transition-colors cursor-pointer"
+              >
+                <Search className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                <div>
+                  <div className="font-semibold text-zinc-900">Student Seat Locator</div>
+                  <div className="text-[10px] text-zinc-500">Notice board lookup chart (PDF)</div>
+                </div>
+              </button>
+              <button
+                onClick={() => handleExportPdf('attendance')}
+                disabled={isExportingPdf}
+                className="w-full text-left px-3 py-2 text-xs font-medium text-zinc-800 hover:bg-zinc-100 rounded-lg flex items-center gap-2.5 transition-colors cursor-pointer"
+              >
+                <UserCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <div>
+                  <div className="font-semibold text-zinc-900">Hall Attendance Register</div>
+                  <div className="text-[10px] text-zinc-500">Signatures & verification sheet (PDF)</div>
+                </div>
+              </button>
+              <button
+                onClick={() => handleExportPdf('hall-chart')}
+                disabled={isExportingPdf}
+                className="w-full text-left px-3 py-2 text-xs font-medium text-zinc-800 hover:bg-zinc-100 rounded-lg flex items-center gap-2.5 transition-colors cursor-pointer"
+              >
+                <DoorClosed className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <div>
+                  <div className="font-semibold text-zinc-900">Hall Door Display Notice</div>
+                  <div className="text-[10px] text-zinc-500">Entrance seating notice (PDF)</div>
+                </div>
+              </button>
+              <div className="my-1 border-t border-zinc-100" />
+              <button
+                onClick={exportCsv}
+                className="w-full text-left px-3 py-2 text-xs font-medium text-zinc-800 hover:bg-zinc-100 rounded-lg flex items-center gap-2.5 transition-colors cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+                <div>
+                  <div className="font-semibold text-zinc-900">Master Dataset Export</div>
+                  <div className="text-[10px] text-zinc-500">Institutional archival format (CSV)</div>
+                </div>
+              </button>
+            </div>
+          </div>
           <button
             onClick={runAllocation}
             disabled={isGenerating}
@@ -1790,6 +1977,35 @@ export const ExamSeatingPage: React.FC = () => {
           >
             Cancel
           </button>
+        </div>
+      )}
+
+      {/* Single-Batch Capacity Notice & Quick Action */}
+      {unallocatedStudentsCount > 0 && (activeExam.batches?.length === 1 || Object.keys(batchCounts).length === 1) && (policy.block_same_batch_horizontal || policy.block_same_batch_vertical || policy.block_same_batch_diagonal) && (
+        <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>
+              <strong>Single-Batch Adjacency Notice:</strong> With adjacency constraints active, <strong>{totalAllocatedAcrossAllHalls}</strong> of <strong>{totalStudentsCount}</strong> candidates are seated in {activeHall} with 0 conflicts. <strong>{unallocatedStudentsCount}</strong> candidates remain pending because a single batch cannot fill all desks without sitting adjacent.
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setPolicy({
+                  ...policy,
+                  block_same_batch_horizontal: false,
+                  block_same_batch_vertical: false,
+                  block_same_batch_diagonal: false,
+                });
+                setTimeout(() => runAllocation(), 50);
+              }}
+              className="px-3 py-1.5 bg-black hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold cursor-pointer shadow-2xs transition"
+            >
+              Fill All Desks (Single Batch Assessment)
+            </button>
+          </div>
         </div>
       )}
 

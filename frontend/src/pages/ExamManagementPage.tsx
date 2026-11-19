@@ -110,7 +110,7 @@ const saveStoredDrafts = (drafts: ExamRecord[]) => {
 export const ExamManagementPage: React.FC = () => {
   const { role } = useAuth();
   const { showNotification } = useNotification();
-  const isStaff = role === 'admin' || role === 'exam_staff';
+  const isStaff = role === 'admin' || role === 'exam_staff' || role === 'faculty';
 
   const [exams, setExams] = useState<ExamRecord[]>(() => {
     const drafts = getStoredDrafts();
@@ -247,8 +247,8 @@ export const ExamManagementPage: React.FC = () => {
       subject_code: '',
       exam_date: '2026-11-20',
       session: 'morning',
-      batches: ['AIML-S3A', 'CSE-GEN-S3B'],
-      halls: ['A-101'],
+      batches: [],
+      halls: [],
       status: 'draft',
     });
     setErrorMessage(null);
@@ -274,28 +274,26 @@ export const ExamManagementPage: React.FC = () => {
 
   // Toggle Batch Selection in Form
   const toggleBatch = (bName: string) => {
-    if (formData.batches.includes(bName)) {
-      if (formData.batches.length === 1) {
-        setErrorMessage('An examination requires at least one participating batch.');
-        return;
-      }
-      setFormData({ ...formData, batches: formData.batches.filter((b) => b !== bName) });
-    } else {
-      setFormData({ ...formData, batches: [...formData.batches, bName] });
-    }
+    setErrorMessage(null);
+    setFormData((prev) => {
+      const exists = prev.batches.includes(bName);
+      return {
+        ...prev,
+        batches: exists ? prev.batches.filter((b) => b !== bName) : [...prev.batches, bName],
+      };
+    });
   };
 
   // Toggle Hall Selection in Form
   const toggleHall = (hName: string) => {
-    if (formData.halls.includes(hName)) {
-      if (formData.halls.length === 1) {
-        setErrorMessage('An examination requires at least one venue hall.');
-        return;
-      }
-      setFormData({ ...formData, halls: formData.halls.filter((h) => h !== hName) });
-    } else {
-      setFormData({ ...formData, halls: [...formData.halls, hName] });
-    }
+    setErrorMessage(null);
+    setFormData((prev) => {
+      const exists = prev.halls.includes(hName);
+      return {
+        ...prev,
+        halls: exists ? prev.halls.filter((h) => h !== hName) : [...prev.halls, hName],
+      };
+    });
   };
 
   // Submit Create or Edit
@@ -305,8 +303,16 @@ export const ExamManagementPage: React.FC = () => {
       setErrorMessage('Examination title is required.');
       return;
     }
+    if (formData.batches.length === 0) {
+      setErrorMessage('An examination requires at least one participating batch.');
+      return;
+    }
+    if (formData.halls.length === 0) {
+      setErrorMessage('An examination requires at least one venue hall.');
+      return;
+    }
     if (hallConflicts.length > 0) {
-      setErrorMessage(`Cannot save: Hall conflict detected with ${hallConflicts[0].examName} in hall ${hallConflicts[0].hall}.`);
+      setErrorMessage(`Cannot save: Hall conflict detected with "${hallConflicts[0].examName}" in hall ${hallConflicts[0].hall}.`);
       return;
     }
 
@@ -660,7 +666,10 @@ export const ExamManagementPage: React.FC = () => {
                   required
                   placeholder="e.g. End Semester Theory Exams - December 2026"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => {
+                    setErrorMessage(null);
+                    setFormData({ ...formData, name: e.target.value });
+                  }}
                   className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 text-zinc-900 bg-white"
                 />
               </div>
@@ -671,7 +680,10 @@ export const ExamManagementPage: React.FC = () => {
                   <input
                     placeholder="e.g. Data Structures & Algorithms"
                     value={formData.subject_name}
-                    onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
+                    onChange={(e) => {
+                      setErrorMessage(null);
+                      setFormData({ ...formData, subject_name: e.target.value });
+                    }}
                     className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 text-zinc-900 bg-white"
                   />
                 </div>
@@ -680,7 +692,10 @@ export const ExamManagementPage: React.FC = () => {
                   <input
                     placeholder="e.g. CS201"
                     value={formData.subject_code}
-                    onChange={(e) => setFormData({ ...formData, subject_code: e.target.value })}
+                    onChange={(e) => {
+                      setErrorMessage(null);
+                      setFormData({ ...formData, subject_code: e.target.value });
+                    }}
                     className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 font-mono uppercase text-zinc-900 bg-white"
                   />
                 </div>
@@ -693,7 +708,10 @@ export const ExamManagementPage: React.FC = () => {
                     type="date"
                     required
                     value={formData.exam_date}
-                    onChange={(e) => setFormData({ ...formData, exam_date: e.target.value })}
+                    onChange={(e) => {
+                      setErrorMessage(null);
+                      setFormData({ ...formData, exam_date: e.target.value });
+                    }}
                     className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 text-zinc-900 bg-white"
                   />
                 </div>
@@ -701,7 +719,10 @@ export const ExamManagementPage: React.FC = () => {
                   <label className="text-xs font-semibold text-zinc-700">Session *</label>
                   <select
                     value={formData.session}
-                    onChange={(e) => setFormData({ ...formData, session: e.target.value as any })}
+                    onChange={(e) => {
+                      setErrorMessage(null);
+                      setFormData({ ...formData, session: e.target.value as any });
+                    }}
                     className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 bg-white text-zinc-900"
                   >
                     <option value="morning">Morning (09:30 AM – 12:30 PM)</option>
@@ -712,9 +733,28 @@ export const ExamManagementPage: React.FC = () => {
 
               {/* Participating Batches Picker */}
               <div>
-                <label className="text-xs font-semibold text-zinc-700 block mb-1">
-                  Participating Batches ({formData.batches.length} selected)
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-zinc-700">
+                    Participating Batches
+                    {formData.batches.length > 0 ? (
+                      <span className="text-zinc-600 font-normal ml-1">({formData.batches.length} selected)</span>
+                    ) : (
+                      <span className="text-amber-600 font-normal ml-1">(Select at least 1 batch)</span>
+                    )}
+                  </label>
+                  {formData.batches.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setErrorMessage(null);
+                        setFormData((prev) => ({ ...prev, batches: [] }));
+                      }}
+                      className="text-[10px] text-zinc-500 hover:text-zinc-800 cursor-pointer"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
                 <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-2 border border-zinc-200 rounded-lg bg-zinc-50">
                   {batchesList.map((batch) => {
                     const isSelected = formData.batches.includes(batch);
@@ -723,7 +763,7 @@ export const ExamManagementPage: React.FC = () => {
                         type="button"
                         key={batch}
                         onClick={() => toggleBatch(batch)}
-                        className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all font-mono ${
+                        className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all font-mono cursor-pointer ${
                           isSelected
                             ? 'bg-black text-white shadow-2xs'
                             : 'bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100'
@@ -739,9 +779,28 @@ export const ExamManagementPage: React.FC = () => {
 
               {/* Examination Halls Picker */}
               <div>
-                <label className="text-xs font-semibold text-zinc-700 block mb-1">
-                  Examination Venue Halls ({formData.halls.length} selected)
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-zinc-700">
+                    Examination Venue Halls
+                    {formData.halls.length > 0 ? (
+                      <span className="text-zinc-600 font-normal ml-1">({formData.halls.length} selected)</span>
+                    ) : (
+                      <span className="text-amber-600 font-normal ml-1">(Select at least 1 hall)</span>
+                    )}
+                  </label>
+                  {formData.halls.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setErrorMessage(null);
+                        setFormData((prev) => ({ ...prev, halls: [] }));
+                      }}
+                      className="text-[10px] text-zinc-500 hover:text-zinc-800 cursor-pointer"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
                 <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 border border-zinc-200 rounded-lg bg-zinc-50">
                   {hallsList.map((hall) => {
                     const isSelected = formData.halls.includes(hall);
@@ -751,7 +810,7 @@ export const ExamManagementPage: React.FC = () => {
                         type="button"
                         key={hall}
                         onClick={() => toggleHall(hall)}
-                        className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all font-mono ${
+                        className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all font-mono cursor-pointer ${
                           isSelected
                             ? 'bg-black text-white shadow-2xs'
                             : isExamCenter
@@ -773,7 +832,10 @@ export const ExamManagementPage: React.FC = () => {
                   <label className="text-xs font-semibold text-zinc-700">Status</label>
                   <select
                     value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                    onChange={(e) => {
+                      setErrorMessage(null);
+                      setFormData({ ...formData, status: e.target.value as any });
+                    }}
                     className="w-full text-xs p-2 border border-zinc-300 rounded-lg mt-1 bg-white uppercase font-semibold"
                   >
                     <option value="draft">Draft</option>
@@ -794,8 +856,8 @@ export const ExamManagementPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={hallConflicts.length > 0}
-                  className="px-4 py-1.5 text-xs bg-black hover:bg-zinc-800 disabled:opacity-50 text-white font-semibold rounded-lg shadow-xs cursor-pointer"
+                  disabled={hallConflicts.length > 0 || formData.batches.length === 0 || formData.halls.length === 0 || !formData.name.trim()}
+                  className="px-4 py-1.5 text-xs bg-black hover:bg-zinc-800 disabled:opacity-50 text-white font-semibold rounded-lg shadow-xs cursor-pointer disabled:cursor-not-allowed"
                 >
                   {editingExamId ? 'Save Changes' : 'Add Examination'}
                 </button>

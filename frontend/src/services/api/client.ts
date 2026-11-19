@@ -23,10 +23,38 @@ let authToken: string | null = null;
 
 export const setAuthToken = (token: string | null) => {
   authToken = token;
+  try {
+    if (token) {
+      localStorage.setItem('seatwise_auth_token', token);
+    } else {
+      localStorage.removeItem('seatwise_auth_token');
+    }
+  } catch {}
 };
 
 export const getAuthToken = (): string | null => {
-  return authToken;
+  if (authToken) return authToken;
+  try {
+    const direct = localStorage.getItem('seatwise_auth_token');
+    if (direct) {
+      authToken = direct;
+      return direct;
+    }
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('sb-') || key.includes('supabase')) && (key.endsWith('-auth-token') || key.includes('auth-token'))) {
+        const item = localStorage.getItem(key);
+        if (item) {
+          const parsed = JSON.parse(item);
+          if (parsed?.access_token) {
+            authToken = parsed.access_token;
+            return parsed.access_token;
+          }
+        }
+      }
+    }
+  } catch {}
+  return null;
 };
 
 export const getApiBase = () => env.apiBaseUrl;

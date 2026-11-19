@@ -112,10 +112,20 @@ export const Sidebar: React.FC = () => {
             sectionTitle: 'Faculty Portal',
             items: [
               { name: 'Dashboard', path: '/faculty-dashboard', icon: LayoutDashboard },
-              { name: 'Timetable', path: '/timetable', icon: CalendarDays },
               { name: 'Classroom Seating', path: '/classroom-seating', icon: Armchair },
+              { name: 'Timetable', path: '/timetable', icon: CalendarDays },
               { name: 'Seat Lookup', path: '/seat-lookup', icon: Search },
               { name: 'Reports', path: '/reports', icon: FileSpreadsheet },
+            ],
+          },
+          {
+            sectionTitle: 'Examinations',
+            items: [
+              { name: 'Examinations', path: '/examinations', icon: FileCheck2 },
+              { name: 'Seating Planner', path: '/seating-planner', icon: Binary },
+              { name: 'Halls & Rooms', path: '/rooms', icon: DoorClosed },
+              { name: 'Students', path: '/students', icon: Users },
+              { name: 'Seating History', path: '/history', icon: History },
             ],
           },
         ];

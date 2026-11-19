@@ -28,14 +28,28 @@ export const ExamDashboardPage: React.FC = () => {
     Promise.allSettled([api.getExams(), api.getRooms(), api.getDashboardStats()])
       .then(([examRes, roomRes, dashRes]) => {
         if (examRes.status === 'fulfilled' && examRes.value) {
-          setExams(examRes.value);
+          const val = examRes.value;
+          setExams(Array.isArray(val) ? val : val?.examinations || val?.exams || []);
+        } else {
+          setExams([]);
         }
+
         if (roomRes.status === 'fulfilled' && roomRes.value) {
-          setRooms(roomRes.value);
+          const val = roomRes.value;
+          setRooms(Array.isArray(val) ? val : val?.rooms || []);
+        } else {
+          setRooms([]);
         }
+
         if (dashRes.status === 'fulfilled' && dashRes.value) {
-          setPlans(dashRes.value.recent_plans || []);
+          const val = dashRes.value;
+          setPlans(Array.isArray(val?.recent_plans) ? val.recent_plans : []);
+        } else {
+          setPlans([]);
         }
+      })
+      .catch((err) => {
+        console.error('Error refreshing exam dashboard:', err);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -47,6 +61,10 @@ export const ExamDashboardPage: React.FC = () => {
     refreshDashboard();
   }, [refreshDashboard]);
 
+  const safeExams = Array.isArray(exams) ? exams : [];
+  const safeRooms = Array.isArray(rooms) ? rooms : [];
+  const safePlans = Array.isArray(plans) ? plans : [];
+
   if (loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
@@ -56,8 +74,8 @@ export const ExamDashboardPage: React.FC = () => {
     );
   }
 
-  const examApprovedRooms = rooms.filter((r) => r.is_exam_approved);
-  const pendingValidationPlans = plans.filter((p) => p.status === 'draft' || p.validation_status === 'pending');
+  const examApprovedRooms = safeRooms.filter((r) => r.is_exam_approved);
+  const pendingValidationPlans = safePlans.filter((p) => p.status === 'draft' || p.validation_status === 'pending');
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12 font-sans">
@@ -107,7 +125,7 @@ export const ExamDashboardPage: React.FC = () => {
           <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider block">
             Active Examinations
           </span>
-          <div className="text-2xl font-bold font-mono text-zinc-950">{exams.length}</div>
+          <div className="text-2xl font-bold font-mono text-zinc-950">{safeExams.length}</div>
           <span className="text-[10px] text-zinc-400">Scheduled in current cycle</span>
         </div>
 
@@ -131,7 +149,7 @@ export const ExamDashboardPage: React.FC = () => {
           <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider block">
             Generated Plans
           </span>
-          <div className="text-2xl font-bold font-mono text-zinc-950">{plans.length}</div>
+          <div className="text-2xl font-bold font-mono text-zinc-950">{safePlans.length}</div>
           <span className="text-[10px] text-zinc-400">Saved seating arrangements</span>
         </div>
       </div>
@@ -156,11 +174,11 @@ export const ExamDashboardPage: React.FC = () => {
             </Link>
           </div>
 
-          {exams.length === 0 ? (
+          {safeExams.length === 0 ? (
             <div className="py-8 text-center text-xs text-zinc-500">No scheduled examinations found.</div>
           ) : (
             <div className="divide-y divide-zinc-100">
-              {exams.slice(0, 5).map((ex) => (
+              {safeExams.slice(0, 5).map((ex) => (
                 <div key={ex.id} className="py-3 flex items-center justify-between">
                   <div className="space-y-0.5">
                     <h4 className="text-xs font-bold text-zinc-900">{ex.name}</h4>

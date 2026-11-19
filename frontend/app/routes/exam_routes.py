@@ -213,7 +213,7 @@ def list_examinations(
 
 
 @router.post("")
-def create_exam(payload: ExamCreate, auth: AuthContext = Depends(require_staff)) -> dict:
+def create_exam(payload: ExamCreate, auth: AuthContext = Depends(require_staff_or_faculty)) -> dict:
     db = require_db()
     default_policy = (
         db.table("seating_policies").select("id").eq("is_default", True).maybe_single().execute().data
@@ -276,7 +276,7 @@ def create_exam(payload: ExamCreate, auth: AuthContext = Depends(require_staff))
 
 
 @router.patch("/{exam_id}")
-def update_exam(exam_id: str, payload: ExamUpdate, auth: AuthContext = Depends(require_staff)) -> dict:
+def update_exam(exam_id: str, payload: ExamUpdate, auth: AuthContext = Depends(require_staff_or_faculty)) -> dict:
     db = require_db()
     real_exam_id = resolve_exam_id(db, exam_id) or exam_id
     if not _is_uuid(real_exam_id):
@@ -337,7 +337,7 @@ def update_exam(exam_id: str, payload: ExamUpdate, auth: AuthContext = Depends(r
 
 @router.delete("/{exam_id}")
 def delete_exam(
-    exam_id: str, force: bool = False, auth: AuthContext = Depends(require_staff)
+    exam_id: str, force: bool = False, auth: AuthContext = Depends(require_staff_or_faculty)
 ) -> dict:
     """Delete draft exam or safely archive if published plans exist."""
     db = require_db()
@@ -375,7 +375,7 @@ def delete_exam(
 
 
 @router.post("/{exam_id}/archive")
-def archive_exam(exam_id: str, auth: AuthContext = Depends(require_staff)) -> dict:
+def archive_exam(exam_id: str, auth: AuthContext = Depends(require_staff_or_faculty)) -> dict:
     """Safely archive an examination."""
     db = require_db()
     real_exam_id = resolve_exam_id(db, exam_id) or exam_id
@@ -442,7 +442,7 @@ def get_exam(exam_id: str, auth: AuthContext = Depends(require_staff_or_faculty)
 
 @router.put("/{exam_id}/batches")
 def set_batches(
-    exam_id: str, payload: ExamBatchesRequest, auth: AuthContext = Depends(require_staff)
+    exam_id: str, payload: ExamBatchesRequest, auth: AuthContext = Depends(require_staff_or_faculty)
 ) -> dict:
     db = require_db()
     real_exam_id = resolve_exam_id(db, exam_id) or exam_id
@@ -461,7 +461,7 @@ def set_batches(
 
 @router.put("/{exam_id}/halls")
 def set_halls(
-    exam_id: str, payload: ExamHallsRequest, auth: AuthContext = Depends(require_staff)
+    exam_id: str, payload: ExamHallsRequest, auth: AuthContext = Depends(require_staff_or_faculty)
 ) -> dict:
     db = require_db()
     real_exam_id = resolve_exam_id(db, exam_id) or exam_id
@@ -553,7 +553,7 @@ def set_halls(
 
 
 @router.put("/{exam_id}/policy")
-def set_policy(exam_id: str, payload: dict, auth: AuthContext = Depends(require_staff)) -> dict:
+def set_policy(exam_id: str, payload: dict, auth: AuthContext = Depends(require_staff_or_faculty)) -> dict:
     db = require_db()
     real_exam_id = resolve_exam_id(db, exam_id) or exam_id
     if not _is_uuid(real_exam_id):
@@ -582,7 +582,7 @@ def set_policy(exam_id: str, payload: dict, auth: AuthContext = Depends(require_
 @router.put("/{exam_id}/subjects")
 @router.post("/{exam_id}/subjects")
 def set_exam_subjects(
-    exam_id: str, payload: ExamSubjectsRequest, auth: AuthContext = Depends(require_staff)
+    exam_id: str, payload: ExamSubjectsRequest, auth: AuthContext = Depends(require_staff_or_faculty)
 ) -> dict:
     db = require_db()
     real_exam_id = resolve_exam_id(db, exam_id) or exam_id
