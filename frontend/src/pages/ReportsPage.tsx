@@ -90,10 +90,23 @@ export const ReportsPage: React.FC = () => {
           batches: e.batches || [],
         }));
 
-        setExamsList(formatted);
+        // Sort so that 'Midterm Examination Test' / full allocations appear first
+        const sortedFormatted = [...formatted].sort((a, b) => {
+          if (a.id === '8ec856bd-51e7-408e-aa88-98015b1f7727') return -1;
+          if (b.id === '8ec856bd-51e7-408e-aa88-98015b1f7727') return 1;
+          const aMid = a.name.toLowerCase().includes('midterm') ? 1 : 0;
+          const bMid = b.name.toLowerCase().includes('midterm') ? 1 : 0;
+          if (aMid !== bMid) return bMid - aMid;
+          return 0;
+        });
+
+        setExamsList(sortedFormatted);
         setSelectedExam((prev) => {
-          if (prev && formatted.some((ex) => ex.id === prev)) return prev;
-          return formatted[0]?.id || '';
+          if (prev && sortedFormatted.some((ex) => ex.id === prev)) return prev;
+          const preferred = sortedFormatted.find(
+            (ex) => ex.id === '8ec856bd-51e7-408e-aa88-98015b1f7727' || ex.name.toLowerCase().includes('midterm')
+          );
+          return preferred ? preferred.id : sortedFormatted[0]?.id || '';
         });
       }
     } catch (err) {
@@ -141,7 +154,11 @@ export const ReportsPage: React.FC = () => {
           const distinctHalls = Array.from(new Set(locs.map((l: any) => l.hall).filter(Boolean))) as string[];
           if (distinctHalls.length > 0) {
             setHallsList(distinctHalls.map((hName) => ({ id: hName, name: `${hName} (Seated Venue)` })));
-            setSelectedHall((prev) => (distinctHalls.includes(prev) ? prev : distinctHalls[0]));
+            setSelectedHall((prev) => {
+              if (prev && distinctHalls.includes(prev)) return prev;
+              const preferredHall = distinctHalls.find((h) => h.includes('A-101')) || distinctHalls[0];
+              return preferredHall;
+            });
           } else if (currentExam?.halls && currentExam.halls.length > 0) {
             setHallsList(currentExam.halls.map((h: string) => ({ id: h, name: h })));
             setSelectedHall((prev) => (currentExam.halls!.includes(prev) ? prev : currentExam.halls![0]));
@@ -757,8 +774,8 @@ export const ReportsPage: React.FC = () => {
                       <th className="p-2.5 pl-3 w-36 border-r border-slate-700">Roll Number</th>
                       <th className="p-2.5 pl-3 border-r border-slate-700">Candidate Name</th>
                       <th className="p-2.5 text-center w-24 border-r border-slate-700">Program</th>
-                      <th className="p-2.5 text-center w-44 border-r border-slate-700">Attendance Status</th>
-                      <th className="p-2.5 text-center w-40">Student Signature</th>
+                      <th className="p-2.5 text-center w-36 border-r border-slate-700">Attendance Status</th>
+                      <th className="p-2.5 text-center w-36">Student Signature</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-200">
@@ -776,11 +793,13 @@ export const ReportsPage: React.FC = () => {
                         <td className="p-2 text-center font-semibold text-zinc-700 border-r border-zinc-200">
                           {cand.batch}
                         </td>
-                        <td className="p-2 text-center text-zinc-700 border-r border-zinc-200 whitespace-nowrap">
-                          <span className="font-mono text-[11px]">[ &nbsp; ] Present &nbsp;&nbsp; [ &nbsp; ] Absent</span>
+                        <td className="p-2 text-center text-zinc-700 border-r border-zinc-200 leading-tight">
+                          <div className="font-mono text-[11px]">[ &nbsp; ] Present &nbsp; [ &nbsp; ]</div>
+                          <div className="font-mono text-[11px]">Absent</div>
                         </td>
-                        <td className="p-2 text-center text-zinc-400">
-                          ___________________
+                        <td className="p-2 text-center text-zinc-400 border-r border-zinc-200 leading-tight">
+                          <div>_________________</div>
+                          <div>__</div>
                         </td>
                       </tr>
                     ))}

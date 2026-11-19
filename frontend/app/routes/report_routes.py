@@ -668,12 +668,12 @@ def export_attendance_pdf(
                     Paragraph(st.get("roll_number", ""), st_styles["cell_bold"]),
                     Paragraph(st.get("full_name", ""), st_styles["cell_style"]),
                     Paragraph(prog, st_styles["cell_center"]),
-                    Paragraph("[ &nbsp; ] Present &nbsp;&nbsp; [ &nbsp; ] Absent", st_styles["cell_center"]),
-                    Paragraph("___________________", st_styles["cell_center"]),
+                    Paragraph("[ &nbsp; ] Present &nbsp; [ &nbsp; ]<br/>Absent", st_styles["cell_center"]),
+                    Paragraph("_________________<br/>__", st_styles["cell_center"]),
                 ])
 
-            # Widths: 38 + 96 + 136 + 56 + 104 + 110 = 540 pt
-            att_tbl = Table(att_rows, colWidths=[38, 96, 136, 56, 104, 110], repeatRows=1)
+            # Widths: 45 + 115 + 130 + 80 + 85 + 85 = 540 pt
+            att_tbl = Table(att_rows, colWidths=[45, 115, 130, 80, 85, 85], repeatRows=1)
             att_tbl.setStyle(TableStyle([
                 ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f172a")),
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
